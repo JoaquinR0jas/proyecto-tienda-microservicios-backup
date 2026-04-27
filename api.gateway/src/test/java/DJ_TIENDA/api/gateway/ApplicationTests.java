@@ -1,10 +1,10 @@
-package DJ_TIENDA.api_gateway;
+package DJ_TIENDA.api.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiGatewayApplicationTests {
+class ApplicationTests {
 
 	@Test
 	void contextLoads() {

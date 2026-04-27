@@ -1,8 +1,3 @@
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'DJ_TIENDA.api-gateway' is invalid and this project uses 'DJ_TIENDA.api_gateway' instead.
-
 # Getting Started
 
 ### Reference Documentation
