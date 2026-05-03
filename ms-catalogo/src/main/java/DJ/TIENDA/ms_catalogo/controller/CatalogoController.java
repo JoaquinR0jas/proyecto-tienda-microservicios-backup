@@ -43,7 +43,7 @@ public class CatalogoController {
         
         // C. Preparamos la respuesta final combinando ambos mundos
         Integer stockActual = (inventario != null) ? inventario.getCantidad() : 0;
-        
+        // este RETURN NOS MOSTRAR LAS COSAS TIPO PHYTON
         return "--- FICHA DEL PRODUCTO ---\n" +
                "Nombre: " + producto.getNombre() + "\n" +
                "Descripción: " + producto.getDescripcion() + "\n" +
