@@ -1,8 +1,18 @@
 spring:
+  application:
+    name: api-gateway  # <--- ESTO QUITA EL "UNKNOWN"
+  
   cloud:
     gateway:
-      routes:
-        - id: ms-catalogo
-          uri: lb://MS-CATALOGO
-          predicates:
-            - Path=/api/catalogo/**
+      server:
+        webflux: # <--- ESTO QUITA LOS WARNINGS DE MIGRACIÓN
+          routes:
+            - id: ms-catalogo
+              uri: lb://MS-CATALOGO
+              predicates:
+                - Path=/api/catalogo/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
