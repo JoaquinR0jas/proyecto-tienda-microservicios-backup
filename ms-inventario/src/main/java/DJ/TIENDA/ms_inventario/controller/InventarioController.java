@@ -22,7 +22,7 @@ public class InventarioController {
         return inventarioRepository.findAll();
     }
 
-    // 2. Ver el stock de UN SOLO producto en específico
+    // 2. Ver el stock de UN SOLO producto en específico y esto se hace a partir del id de este producto
     // GET http://localhost:8080/api/inventario/producto/1
     @GetMapping("/producto/{productoId}")
     public Optional<Inventario> verStockPorProducto(@PathVariable Long productoId) {
@@ -30,8 +30,8 @@ public class InventarioController {
         return inventarioRepository.findByProductoId(productoId);
     }
 
-    // 3. Guardar o actualizar stock
-    // POST http://localhost:8080/api/inventario/guardar
+    // 3. Guardar o actualizar stock 
+    // POST http://localhost:8080/api/inventario/guardar 
     @PostMapping("/guardar")
     public Inventario guardarStock(@RequestBody Inventario inventario) {
         return inventarioRepository.save(inventario);
