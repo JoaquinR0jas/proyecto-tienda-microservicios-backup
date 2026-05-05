@@ -1,5 +1,6 @@
 package DJ.TIENDA.ms_usuarios.service;
 // ESTE MS CUBRE EL DE 👤 user-service (Usuarios): Responsable del registro de nuevos usuarios y gestión de sus datos personales.
+// y tambien el security service, ya que dimos un rol y el profe pidio eso, ya tenemos gestion de roles
 
 import DJ.TIENDA.ms_usuarios.model.Usuario;
 import DJ.TIENDA.ms_usuarios.repository.UsuarioRepository;
