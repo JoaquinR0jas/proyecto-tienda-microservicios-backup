@@ -1,10 +1,12 @@
 package DJ.TIENDA.ms_catalogo.controller;
 
-import DJ.TIENDA.ms_catalogo.client.InventarioClient; // <-- IMPORTANTE
-import DJ.TIENDA.ms_catalogo.dto.InventarioDTO;     // <-- IMPORTANTE
+import DJ.TIENDA.ms_catalogo.dto.ProductoDetalleDTO;
 import DJ.TIENDA.ms_catalogo.model.Producto;
-import DJ.TIENDA.ms_catalogo.repository.ProductoRepository;
+import DJ.TIENDA.ms_catalogo.service.CatalogoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,40 +16,37 @@ import java.util.List;
 public class CatalogoController {
 
     @Autowired
-    private ProductoRepository productoRepository;
+    private CatalogoService catalogoService; // Ahora habla con el Service, no directo al Repository
 
-    // Inyectamos nuestro "teléfono interno" para hablar con el microservicio de inventario
-    @Autowired
-    private InventarioClient inventarioClient;
-
-    // 1. Endpoint clásico: Solo devuelve datos del catálogo
+    // GET /api/catalogo/productos → Lista todos los productos
     @GetMapping("/productos")
-    public List<Producto> listar() {
-        return productoRepository.findAll();
+    public ResponseEntity<List<Producto>> listar() {
+        return ResponseEntity.ok(catalogoService.obtenerTodos());
     }
 
-    // 2. EL PASO FINAL: Endpoint que combina datos de dos microservicios
-    // GET http://localhost:8080/api/catalogo/productos/{id}/detalles
+    // GET /api/catalogo/productos/{id}/detalles → Producto + stock en JSON
     @GetMapping("/productos/{id}/detalles")
-    public String verDetallesConStock(@PathVariable Long id) {
-        // A. Buscamos el producto en nuestra propia base de datos (Catálogo)
-        Producto producto = productoRepository.findById(id).orElse(null);
-        
-        if (producto == null) {
-            return "Error: El producto con ID " + id + " no existe en el catálogo.";
+    public ResponseEntity<?> verDetallesConStock(@PathVariable Long id) {
+        return catalogoService.obtenerDetalleConStock(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Producto no encontrado con ID: " + id));
+    }
+
+    // POST /api/catalogo/productos → Crea un producto nuevo
+    @PostMapping("/productos")
+    public ResponseEntity<Producto> crear(@Valid @RequestBody Producto producto) {
+        // @Valid activa las validaciones de @NotBlank y @NotNull definidas en la entidad
+        return ResponseEntity.status(HttpStatus.CREATED).body(catalogoService.crear(producto));
+    }
+
+    // DELETE /api/catalogo/productos/{id} → Elimina un producto
+    @DeleteMapping("/productos/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        if (catalogoService.eliminar(id)) {
+            return ResponseEntity.ok("Producto eliminado correctamente.");
         }
-        
-        // B. LLAMADA MÁGICA: Le preguntamos a la bodega cuánto stock hay por el ID del producto
-        // OpenFeign hará todo el trabajo de buscar a 'ms-inventario' en Eureka y traer el dato
-        InventarioDTO inventario = inventarioClient.obtenerStock(id);
-        
-        // C. Preparamos la respuesta final combinando ambos mundos
-        Integer stockActual = (inventario != null) ? inventario.getCantidad() : 0;
-        // este RETURN NOS MOSTRAR LAS COSAS TIPO PHYTON
-        return "--- FICHA DEL PRODUCTO ---\n" +
-               "Nombre: " + producto.getNombre() + "\n" +
-               "Descripción: " + producto.getDescripcion() + "\n" +
-               "Precio: $" + producto.getPrecio() + "\n" +
-               "STOCK DISPONIBLE EN BODEGA: " + stockActual + " unidades.";
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Producto no encontrado con ID: " + id);
     }
 }
