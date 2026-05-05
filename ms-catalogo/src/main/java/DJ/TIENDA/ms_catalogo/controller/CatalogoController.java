@@ -1,7 +1,7 @@
 package DJ.TIENDA.ms_catalogo.controller;
 
-import DJ.TIENDA.ms_catalogo.dto.ProductoDetalleDTO;
-import DJ.TIENDA.ms_catalogo.model.Producto;
+import DJ.TIENDA.ms_catalogo.dto.ProductoDetalleDTO; // no lo usamos explicitamente
+import DJ.TIENDA.ms_catalogo.model.Producto;         // pero esta bien no da error dejar ahi
 import DJ.TIENDA.ms_catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
