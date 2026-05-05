@@ -1,39 +1,50 @@
 package DJ.TIENDA.ms_inventario.controller;
 
 import DJ.TIENDA.ms_inventario.model.Inventario;
-import DJ.TIENDA.ms_inventario.repository.InventarioRepository;
+import DJ.TIENDA.ms_inventario.service.InventarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/inventario") // link o ruta base pa este ms
+@RequestMapping("/api/inventario")
 public class InventarioController {
 
     @Autowired
-    private InventarioRepository inventarioRepository;
+    private InventarioService inventarioService; // Ahora habla con el Service, no directo al Repository
 
-    // 1. Ver todo el inventario de todas las bodegas
-    // GET http://localhost:8080/api/inventario/stock
+    // GET /api/inventario/stock → Lista todo el inventario
     @GetMapping("/stock")
-    public List<Inventario> listarTodoElStock() {
-        return inventarioRepository.findAll();
+    public ResponseEntity<List<Inventario>> listarTodoElStock() {
+        return ResponseEntity.ok(inventarioService.obtenerTodo());
     }
 
-    // 2. Ver el stock de UN SOLO producto en específico y esto se hace a partir del id de este producto
-    // GET http://localhost:8080/api/inventario/producto/1
+    // GET /api/inventario/producto/{productoId} → Stock de un producto específico
+    // Esta ruta es la que usa ms-catalogo via Feign, no la cambies
     @GetMapping("/producto/{productoId}")
-    public Optional<Inventario> verStockPorProducto(@PathVariable Long productoId) {
-        // Aquí uso el metodo que cree en el repo
-        return inventarioRepository.findByProductoId(productoId);
+    public ResponseEntity<?> verStockPorProducto(@PathVariable Long productoId) {
+        return inventarioService.obtenerPorProductoId(productoId)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No hay stock registrado para el producto con ID: " + productoId));
     }
 
-    // 3. Guardar o actualizar stock 
-    // POST http://localhost:8080/api/inventario/guardar 
+    // POST /api/inventario/guardar → Guarda o actualiza stock de un producto
     @PostMapping("/guardar")
-    public Inventario guardarStock(@RequestBody Inventario inventario) {
-        return inventarioRepository.save(inventario);
+    public ResponseEntity<Inventario> guardarStock(@RequestBody Inventario inventario) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(inventarioService.guardar(inventario));
+    }
+
+    // DELETE /api/inventario/{id} → Elimina un registro de inventario
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        if (inventarioService.eliminar(id)) {
+            return ResponseEntity.ok("Registro de inventario eliminado correctamente.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Registro no encontrado con ID: " + id);
     }
 }
