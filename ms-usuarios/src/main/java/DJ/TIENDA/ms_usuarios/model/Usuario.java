@@ -1,4 +1,5 @@
 package DJ.TIENDA.ms_usuarios.model;
+// ESTE MS CUBRE EL DE 👤 user-service (Usuarios): Responsable del registro de nuevos usuarios y gestión de sus datos personales.
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

@@ -1,4 +1,5 @@
 package DJ.TIENDA.ms_usuarios.repository;
+// ESTE MS CUBRE EL DE 👤 user-service (Usuarios): Responsable del registro de nuevos usuarios y gestión de sus datos personales.
 
 import DJ.TIENDA.ms_usuarios.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
