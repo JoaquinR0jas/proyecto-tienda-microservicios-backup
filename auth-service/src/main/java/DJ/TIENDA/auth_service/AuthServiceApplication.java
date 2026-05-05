@@ -1,5 +1,4 @@
 package DJ.TIENDA.auth_service;
-package DJ.TIENDA.auth_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
