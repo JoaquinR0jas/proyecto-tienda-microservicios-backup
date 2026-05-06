@@ -13,5 +13,8 @@
         { "path": "ms-pedidos" },
         { "path": "ms-resenas" },
         { "path": "auth-service" }
-    ]
+    ],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "interactive"
+    }
 }
