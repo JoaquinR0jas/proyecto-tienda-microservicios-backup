@@ -144,4 +144,10 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
 
         return respuesta;
     }
+    // Ver carrito por su ID directamente (usado por ms-pedidos via Feign)
+public CarritoResponseDTO verCarritoPorId(Long carritoId) {
+    carritoRepository.findById(carritoId)
+            .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
+    return construirRespuesta(carritoId);
+}
 }

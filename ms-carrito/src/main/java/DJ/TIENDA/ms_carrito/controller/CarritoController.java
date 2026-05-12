@@ -23,8 +23,18 @@ public class CarritoController {
         return ResponseEntity.ok(carritoService.verCarrito(usuarioId));
     }
 
+    // GET /api/carrito/detalle/{carritoId} → Ver carrito por ID (usado por ms-pedidos via Feign)
+    @GetMapping("/detalle/{carritoId}")
+    public ResponseEntity<?> verCarritoPorId(@PathVariable Long carritoId) {
+        try {
+            return ResponseEntity.ok(carritoService.verCarritoPorId(carritoId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Carrito no encontrado con ID: " + carritoId);
+        }
+    }
+
     // POST /api/carrito/{usuarioId}/agregar → Agregar producto al carrito
-    // Body: { "productoId": 1, "cantidad": 2 }
     @PostMapping("/{usuarioId}/agregar")
     public ResponseEntity<?> agregarProducto(@PathVariable Long usuarioId,
                                               @RequestBody Map<String, Integer> body) {
@@ -51,7 +61,6 @@ public class CarritoController {
     }
 
     // PATCH /api/carrito/{carritoId}/estado → Cambiar estado del carrito
-    // Body: { "estado": "CONFIRMADO" }
     @PatchMapping("/{carritoId}/estado")
     public ResponseEntity<?> cambiarEstado(@PathVariable Long carritoId,
                                             @RequestBody Map<String, String> body) {
