@@ -9,6 +9,8 @@ import DJ.TIENDA.ms_carrito.model.Carrito;
 import DJ.TIENDA.ms_carrito.model.CarritoItem;
 import DJ.TIENDA.ms_carrito.repository.CarritoItemRepository;
 import DJ.TIENDA.ms_carrito.repository.CarritoRepository;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,15 +80,17 @@ public class CarritoService {
         return construirRespuesta(carrito.getId());
     }
 
-    // Elimina un item del carrito por su itemId
-    public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
-        carritoItemRepository.findById(itemId).ifPresent(item -> {
-            if (item.getCarrito().getId().equals(carritoId)) {
-                carritoItemRepository.delete(item);
-            }
-        });
-        return construirRespuesta(carritoId);
-    }
+    @Transactional // Garantiza que todos los cambios se guardan en la misma transaccion
+public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
+    Carrito carrito = carritoRepository.findById(carritoId)
+            .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
+    
+    // Elimina el item desde la lista del carrito, no directo al repository
+    carrito.getItems().removeIf(item -> item.getId().equals(itemId));
+    carritoRepository.save(carrito);
+    
+    return construirRespuesta(carritoId);
+}
 
     // Vacia todos los items del carrito sin eliminarlo
     public CarritoResponseDTO vaciarCarrito(Long usuarioId) {

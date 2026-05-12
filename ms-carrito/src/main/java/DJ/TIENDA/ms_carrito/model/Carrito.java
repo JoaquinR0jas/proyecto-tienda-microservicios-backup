@@ -22,7 +22,7 @@ public class Carrito {
     private Estado estado = Estado.ACTIVO; // Por defecto todo carrito nuevo es ACTIVO
 
     // Un carrito tiene muchos items, si se borra el carrito se borran sus items
-    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CarritoItem> items = new ArrayList<>();
 
     public enum Estado {
