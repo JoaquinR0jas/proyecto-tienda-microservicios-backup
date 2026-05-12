@@ -58,4 +58,9 @@ public class CatalogoService {
         }
         return false;
     }
+
+    // Busca un producto por ID
+public Optional<Producto> obtenerPorId(Long id) {
+    return productoRepository.findById(id);
+}
 }

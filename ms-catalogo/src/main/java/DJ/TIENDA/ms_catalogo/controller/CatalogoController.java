@@ -49,4 +49,14 @@ public class CatalogoController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Producto no encontrado con ID: " + id);
     }
+    // GET /api/catalogo/productos/{id} → Busca un producto por ID (usado por ms-carrito via Feign)
+@GetMapping("/productos/{id}")
+public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+    return catalogoService.obtenerTodos().stream()
+            .filter(p -> p.getId().equals(id))
+            .findFirst()
+            .<ResponseEntity<?>>map(ResponseEntity::ok)
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Producto no encontrado con ID: " + id));
+}
 }
