@@ -37,6 +37,11 @@ spring:
               predicates:
                 - Path=/api/pedidos/**
 
+            - id: ms-pagos
+              uri: lb://MS-PAGOS
+              predicates:
+                - Path=/api/pagos/**    
+
 eureka:
   client:
     service-url:
