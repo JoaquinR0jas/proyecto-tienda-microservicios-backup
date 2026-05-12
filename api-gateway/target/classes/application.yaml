@@ -42,6 +42,20 @@ spring:
               predicates:
                 - Path=/api/pagos/**    
 
+            - id: ms-envios
+              uri: lb://MS-ENVIOS
+              predicates:
+                  - Path=/api/envios/**
+            - id: ms-notificaciones
+              uri: lb://MS-NOTIFICACIONES
+              predicates:
+                  - Path=/api/notificaciones/**
+
+            - id: ms-marketing
+              uri: lb://MS-MARKETING
+              predicates:
+                - Path=/api/marketing/**
+
 eureka:
   client:
     service-url:
