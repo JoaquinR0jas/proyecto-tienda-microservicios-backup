@@ -1,9 +1,7 @@
 package DJ.TIENDA.ms_catalogo;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class MsCatalogoApplicationTests {
 
 	@Test
