@@ -4,61 +4,109 @@ spring:
   
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: ms-catalogo
-              uri: lb://MS-CATALOGO
-              predicates:
-                - Path=/api/catalogo/**
+      routes:
+        - id: ms-catalogo
+          uri: lb://MS-CATALOGO
+          predicates:
+            - Path=/api/catalogo/**
+          filters:
+            - RewritePath=/api/catalogo/v3/api-docs, /v3/api-docs
 
-            - id: ms-inventario
-              uri: lb://MS-INVENTARIO
-              predicates:
-                - Path=/api/inventario/**
+        - id: ms-inventario
+          uri: lb://MS-INVENTARIO
+          predicates:
+            - Path=/api/inventario/**
+          filters:
+            - RewritePath=/api/inventario/v3/api-docs, /v3/api-docs
 
-            - id: ms-usuarios
-              uri: lb://MS-USUARIOS
-              predicates:
-                - Path=/api/usuarios/**
+        - id: ms-usuarios
+          uri: lb://MS-USUARIOS
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - RewritePath=/api/usuarios/v3/api-docs, /v3/api-docs
 
-            - id: ms-carrito
-              uri: lb://MS-CARRITO
-              predicates:
-                - Path=/api/carrito/**
+        - id: ms-carrito
+          uri: lb://MS-CARRITO
+          predicates:
+            - Path=/api/carrito/**
+          filters:
+            - RewritePath=/api/carrito/v3/api-docs, /v3/api-docs
 
-            - id: auth-service
-              uri: lb://AUTH-SERVICE
-              predicates:
-                - Path=/auth/**
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/v3/api-docs, /v3/api-docs
 
-            - id: ms-pedidos
-              uri: lb://MS-PEDIDOS
-              predicates:
-                - Path=/api/pedidos/**
+        - id: ms-pedidos
+          uri: lb://MS-PEDIDOS
+          predicates:
+            - Path=/api/pedidos/**
+          filters:
+            - RewritePath=/api/pedidos/v3/api-docs, /v3/api-docs
 
-            - id: ms-pagos
-              uri: lb://MS-PAGOS
-              predicates:
-                - Path=/api/pagos/**    
+        - id: ms-pagos
+          uri: lb://MS-PAGOS
+          predicates:
+            - Path=/api/pagos/**
+          filters:
+            - RewritePath=/api/pagos/v3/api-docs, /v3/api-docs
 
-            - id: ms-envios
-              uri: lb://MS-ENVIOS
-              predicates:
-                  - Path=/api/envios/**
-            - id: ms-notificaciones
-              uri: lb://MS-NOTIFICACIONES
-              predicates:
-                  - Path=/api/notificaciones/**
+        - id: ms-envios
+          uri: lb://MS-ENVIOS
+          predicates:
+            - Path=/api/envios/**
+          filters:
+            - RewritePath=/api/envios/v3/api-docs, /v3/api-docs
 
-            - id: ms-marketing
-              uri: lb://MS-MARKETING
-              predicates:
-                - Path=/api/marketing/**
-            - id: ms-resenas
-              uri: lb://MS-RESENAS
-              predicates:
-                - Path=/api/resenas/**
+        - id: ms-notificaciones
+          uri: lb://MS-NOTIFICACIONES
+          predicates:
+            - Path=/api/notificaciones/**
+          filters:
+            - RewritePath=/api/notificaciones/v3/api-docs, /v3/api-docs
+
+        - id: ms-marketing
+          uri: lb://MS-MARKETING
+          predicates:
+            - Path=/api/marketing/**
+          filters:
+            - RewritePath=/api/marketing/v3/api-docs, /v3/api-docs
+
+        - id: ms-resenas
+          uri: lb://MS-RESENAS
+          predicates:
+            - Path=/api/resenas/**
+          filters:
+            - RewritePath=/api/resenas/v3/api-docs, /v3/api-docs
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth-service
+        url: /auth/v3/api-docs
+      - name: ms-usuarios
+        url: /api/usuarios/v3/api-docs
+      - name: ms-catalogo
+        url: /api/catalogo/v3/api-docs
+      - name: ms-inventario
+        url: /api/inventario/v3/api-docs
+      - name: ms-carrito
+        url: /api/carrito/v3/api-docs
+      - name: ms-pedidos
+        url: /api/pedidos/v3/api-docs
+      - name: ms-pagos
+        url: /api/pagos/v3/api-docs
+      - name: ms-envios
+        url: /api/envios/v3/api-docs
+      - name: ms-notificaciones
+        url: /api/notificaciones/v3/api-docs
+      - name: ms-marketing
+        url: /api/marketing/v3/api-docs
+      - name: ms-resenas
+        url: /api/resenas/v3/api-docs
 
 eureka:
   client:
