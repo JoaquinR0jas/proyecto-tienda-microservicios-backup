@@ -10,3 +10,6 @@ target/
 .classpath
 .vscode/
 .DS_Store
+HELP.md
+*.pdf
+.mvn/wrapper/

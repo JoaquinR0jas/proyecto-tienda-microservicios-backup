@@ -18,7 +18,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sin sesiones, cada request trae su token
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login", "/auth/validate").permitAll() // Estas rutas son públicas
+                .requestMatchers("/auth/login", "/auth/validate").permitAll() // Rutas públicas
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger/OpenAPI
                 .anyRequest().authenticated()); // Todo lo demás requiere autenticación
         return http.build();
     }
