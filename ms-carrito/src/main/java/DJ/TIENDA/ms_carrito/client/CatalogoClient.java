@@ -12,4 +12,5 @@ public interface CatalogoClient {
     // Llama al endpoint GET /api/catalogo/productos/{id} de ms-catalogo
     @GetMapping("/api/catalogo/productos/{id}")
     ProductoDTO obtenerProducto(@PathVariable("id") Long id);
+    
 }
