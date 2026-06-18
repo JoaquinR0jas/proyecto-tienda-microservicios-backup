@@ -35,6 +35,7 @@ public class InventarioController {
     // POST /api/inventario/guardar → Guarda o actualiza stock de un producto
     @PostMapping("/guardar")
     public ResponseEntity<Inventario> guardarStock(@RequestBody Inventario inventario) {
+        inventario.setId(null);
         return ResponseEntity.status(HttpStatus.CREATED).body(inventarioService.guardar(inventario));
     }
 

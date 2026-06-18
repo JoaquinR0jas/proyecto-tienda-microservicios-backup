@@ -44,7 +44,7 @@ public class UsuarioController {
     // POST /api/usuarios → Crea usuario; 409 si el email ya existe
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody Usuario usuario) {
-        // @Valid activa las validaciones definidas en la entidad (@NotBlank, @Email, etc.)
+        usuario.setId(null);
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(usuario));
         } catch (IllegalArgumentException e) {

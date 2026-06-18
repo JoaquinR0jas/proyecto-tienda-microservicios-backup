@@ -22,6 +22,7 @@ public class MarketingController {
     // POST /api/marketing/promociones → Crea una nueva promocion
     @PostMapping("/promociones")
     public ResponseEntity<?> crearPromocion(@Valid @RequestBody Promocion promocion) {
+        promocion.setId(null);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(marketingService.crearPromocion(promocion));
     }

@@ -36,7 +36,7 @@ public class CatalogoController {
     // POST /api/catalogo/productos → Crea un producto nuevo
     @PostMapping("/productos")
     public ResponseEntity<Producto> crear(@Valid @RequestBody Producto producto) {
-        // @Valid activa las validaciones de @NotBlank y @NotNull definidas en la entidad
+        producto.setId(null);
         return ResponseEntity.status(HttpStatus.CREATED).body(catalogoService.crear(producto));
     }
 

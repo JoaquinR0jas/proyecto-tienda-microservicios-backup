@@ -22,6 +22,7 @@ public class ResenaController {
     // POST /api/resenas → Crea una nueva resena
     @PostMapping
     public ResponseEntity<?> crearResena(@Valid @RequestBody Resena resena) {
+        resena.setId(null);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(resenaService.crearResena(resena));
     }
