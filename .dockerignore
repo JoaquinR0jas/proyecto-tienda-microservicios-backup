@@ -1,0 +1,15 @@
+target/
+*.bat
+*.mp4
+*.docx
+*.doc
+.git/
+.gitignore
+para-drive/
+mysql-init/
+docker-compose.yml
+arrancar-docker.bat
+README.md
+.vscode/
+.idea/
+*.iml

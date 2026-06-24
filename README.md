@@ -71,6 +71,21 @@ Ver guía completa → [`docs/GUIA_USO.md`](docs/GUIA_USO.md)
 .\mvnw.cmd clean install -DskipTests  # Solo compilación
 ```
 
+## Docker
+
+Levantar todo con un solo comando (requiere Docker Desktop):
+
+```bash
+docker compose up -d
+```
+
+El build compila los 13 módulos con Maven y crea imágenes individuales para cada servicio. El inicio completo tarda ~2 minutos.
+
+| URL | Servicio |
+|-----|----------|
+| http://localhost:8761 | Eureka Server |
+| http://localhost:8080/swagger-ui/index.html | Swagger Gateway |
+
 ## Documentación
 
 - Guía de uso completa → [`docs/GUIA_USO.md`](docs/GUIA_USO.md)
