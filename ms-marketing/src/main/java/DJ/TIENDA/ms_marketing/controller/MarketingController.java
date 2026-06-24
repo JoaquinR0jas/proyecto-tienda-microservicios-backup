@@ -3,6 +3,10 @@ package DJ.TIENDA.ms_marketing.controller;
 import DJ.TIENDA.ms_marketing.dto.PromocionResponseDTO;
 import DJ.TIENDA.ms_marketing.model.Promocion;
 import DJ.TIENDA.ms_marketing.service.MarketingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Marketing", description = "Gestion de promociones y campañas de marketing")
 @RestController
 @RequestMapping("/api/marketing")
 public class MarketingController {
@@ -19,7 +24,8 @@ public class MarketingController {
     @Autowired
     private MarketingService marketingService;
 
-    // POST /api/marketing/promociones → Crea una nueva promocion
+    @Operation(summary = "Crear promocion", description = "Crea una nueva promocion o campana de marketing")
+    @ApiResponse(responseCode = "201", description = "Promocion creada exitosamente")
     @PostMapping("/promociones")
     public ResponseEntity<?> crearPromocion(@Valid @RequestBody Promocion promocion) {
         promocion.setId(null);
@@ -27,19 +33,25 @@ public class MarketingController {
                 .body(marketingService.crearPromocion(promocion));
     }
 
-    // GET /api/marketing/promociones → Lista todas las promociones
+    @Operation(summary = "Listar promociones", description = "Obtiene todas las promociones registradas")
+    @ApiResponse(responseCode = "200", description = "Lista de promociones obtenida")
     @GetMapping("/promociones")
     public ResponseEntity<List<PromocionResponseDTO>> obtenerTodas() {
         return ResponseEntity.ok(marketingService.obtenerTodas());
     }
 
-    // GET /api/marketing/promociones/activas → Lista solo las promociones activas
+    @Operation(summary = "Promociones activas", description = "Obtiene solo las promociones con estado ACTIVO")
+    @ApiResponse(responseCode = "200", description = "Lista de promociones activas obtenida")
     @GetMapping("/promociones/activas")
     public ResponseEntity<List<PromocionResponseDTO>> obtenerActivas() {
         return ResponseEntity.ok(marketingService.obtenerActivas());
     }
 
-    // GET /api/marketing/promociones/{id} → Ver detalle de una promocion
+    @Operation(summary = "Obtener promocion por ID", description = "Obtiene el detalle de una promocion especifica")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Promocion encontrada"),
+        @ApiResponse(responseCode = "404", description = "Promocion no encontrada")
+    })
     @GetMapping("/promociones/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
         return marketingService.obtenerPorId(id)
@@ -48,8 +60,11 @@ public class MarketingController {
                         .body("Promocion no encontrada con ID: " + id));
     }
 
-    // PATCH /api/marketing/promociones/{id}/estado → Cambia estado de la promocion
-    // Body: { "estado": "INACTIVO" }
+    @Operation(summary = "Cambiar estado de promocion", description = "Cambia el estado de una promocion a ACTIVO o INACTIVO")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Estado actualizado correctamente"),
+        @ApiResponse(responseCode = "400", description = "Estado invalido")
+    })
     @PatchMapping("/promociones/{id}/estado")
     public ResponseEntity<?> cambiarEstado(@PathVariable Long id,
                                             @RequestBody Map<String, String> body) {
@@ -62,7 +77,11 @@ public class MarketingController {
         }
     }
 
-    // DELETE /api/marketing/promociones/{id} → Elimina una promocion
+    @Operation(summary = "Eliminar promocion", description = "Elimina una promocion del sistema por su ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Promocion eliminada correctamente"),
+        @ApiResponse(responseCode = "404", description = "Promocion no encontrada")
+    })
     @DeleteMapping("/promociones/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         if (marketingService.eliminar(id)) {

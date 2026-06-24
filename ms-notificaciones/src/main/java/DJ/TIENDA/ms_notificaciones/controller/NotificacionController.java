@@ -3,6 +3,10 @@ package DJ.TIENDA.ms_notificaciones.controller;
 import DJ.TIENDA.ms_notificaciones.dto.NotificacionResponseDTO;
 import DJ.TIENDA.ms_notificaciones.model.Notificacion;
 import DJ.TIENDA.ms_notificaciones.service.NotificacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Notificaciones", description = "Gestion de notificaciones a usuarios")
 @RestController
 @RequestMapping("/api/notificaciones")
 public class NotificacionController {
@@ -18,8 +23,11 @@ public class NotificacionController {
     @Autowired
     private NotificacionService notificacionService;
 
-    // POST /api/notificaciones/enviar → Crea y simula el envio de una notificacion
-    // Body: { "usuarioId": 1, "tipo": "PEDIDO_CREADO", "mensaje": "Tu pedido fue creado." }
+    @Operation(summary = "Enviar notificacion", description = "Crea y envia una notificacion a un usuario. Tipos: PEDIDO_CREADO, PAGO_COMPLETADO, ENVIO_ENTREGADO")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Notificacion enviada correctamente"),
+        @ApiResponse(responseCode = "400", description = "Tipo de notificacion invalido")
+    })
     @PostMapping("/enviar")
     public ResponseEntity<?> enviarNotificacion(@RequestBody Map<String, String> body) {
         try {
@@ -34,19 +42,25 @@ public class NotificacionController {
         }
     }
 
-    // GET /api/notificaciones/usuario/{usuarioId} → Ver todas las notificaciones
+    @Operation(summary = "Notificaciones por usuario", description = "Obtiene todas las notificaciones de un usuario")
+    @ApiResponse(responseCode = "200", description = "Lista de notificaciones obtenida")
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<NotificacionResponseDTO>> obtenerPorUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(notificacionService.obtenerPorUsuario(usuarioId));
     }
 
-    // GET /api/notificaciones/usuario/{usuarioId}/no-leidas → Ver solo no leidas
+    @Operation(summary = "Notificaciones no leidas", description = "Obtiene las notificaciones no leidas de un usuario")
+    @ApiResponse(responseCode = "200", description = "Lista de notificaciones no leidas obtenida")
     @GetMapping("/usuario/{usuarioId}/no-leidas")
     public ResponseEntity<List<NotificacionResponseDTO>> obtenerNoLeidas(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(notificacionService.obtenerNoLeidas(usuarioId));
     }
 
-    // PATCH /api/notificaciones/{id}/leer → Marcar notificacion como leida
+    @Operation(summary = "Marcar notificacion como leida", description = "Marca una notificacion como leida por su ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Notificacion marcada como leida"),
+        @ApiResponse(responseCode = "404", description = "Notificacion no encontrada")
+    })
     @PatchMapping("/{id}/leer")
     public ResponseEntity<?> marcarComoLeida(@PathVariable Long id) {
         try {
