@@ -76,3 +76,12 @@ Ver guía completa → [`docs/GUIA_USO.md`](docs/GUIA_USO.md)
 - Guía de uso completa → [`docs/GUIA_USO.md`](docs/GUIA_USO.md)
 - Endpoints → [`docs/endpoints.md`](docs/endpoints.md)
 - Script SQL → [`docs/bd-general.sql`](docs/bd-general.sql)
+
+## Enlaces Externos (EV3)
+
+| Recurso | Link |
+|---------|------|
+| 📁 Carpeta Drive (scripts .bat) | [Google Drive](https://drive.google.com/drive/folders/1drz2OO1u3pfqv2FxR1YncUu3SGA6coZU?usp=sharing) |
+| 📦 ZIP Nativo (proyecto compilado) | _(pendiente por subir)_ |
+| 🐳 ZIP Docker (docker-compose) | _(pendiente por subir)_ |
+| 🎥 Video defensa EV3 | _(pendiente por subir)_ |
