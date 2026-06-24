@@ -14,3 +14,9 @@ HELP.md
 *.pdf
 *.code-workspace
 .mvn/wrapper/
+
+# Ejecutables / binarios (se suben a Drive)
+*.bat
+*.mp4
+*.docx
+*.doc
