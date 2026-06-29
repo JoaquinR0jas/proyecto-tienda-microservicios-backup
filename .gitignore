@@ -15,8 +15,15 @@ HELP.md
 *.code-workspace
 .mvn/wrapper/
 
+# Carpetas de documentación externa (se sube a Drive)
+FULLSTACK/
+
 # Ejecutables / binarios (se suben a Drive)
 *.bat
 *.mp4
 *.docx
 *.doc
+
+# Maven Wrapper redundante en submódulos (solo raíz es necesaria)
+*/mvnw
+*/mvnw.cmd
