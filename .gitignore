@@ -13,7 +13,7 @@ target/
 HELP.md
 *.pdf
 *.code-workspace
-.mvn/wrapper/
+.mvn/wrapper/maven-wrapper.jar
 
 # Carpetas de documentación externa (se sube a Drive)
 FULLSTACK/
