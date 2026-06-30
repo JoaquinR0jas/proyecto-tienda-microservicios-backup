@@ -21,11 +21,21 @@ public class InventarioService {
 
     // Busca el stock de un producto específico por su productoId
     public Optional<Inventario> obtenerPorProductoId(Long productoId) {
-        return inventarioRepository.findByProductoId(productoId);
+        List<Inventario> resultados = inventarioRepository.findByProductoId(productoId);
+        return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
     }
 
     // Guarda o actualiza el stock de un producto
     public Inventario guardar(Inventario inventario) {
+        if (inventario.getProductoId() != null) {
+            List<Inventario> existentes = inventarioRepository.findByProductoId(inventario.getProductoId());
+            if (!existentes.isEmpty()) {
+                Inventario existente = existentes.get(0);
+                existente.setCantidad(inventario.getCantidad());
+                return inventarioRepository.save(existente);
+            }
+        }
+        inventario.setId(null);
         return inventarioRepository.save(inventario);
     }
 

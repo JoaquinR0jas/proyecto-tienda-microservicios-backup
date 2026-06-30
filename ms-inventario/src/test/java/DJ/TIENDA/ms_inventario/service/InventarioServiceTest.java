@@ -46,7 +46,7 @@ class InventarioServiceTest {
 
     @Test
     void obtenerPorProductoId_whenExists_returnsStock() {
-        when(inventarioRepository.findByProductoId(10L)).thenReturn(Optional.of(inventario));
+        when(inventarioRepository.findByProductoId(10L)).thenReturn(List.of(inventario));
 
         Optional<Inventario> resultado = inventarioService.obtenerPorProductoId(10L);
 
@@ -56,7 +56,7 @@ class InventarioServiceTest {
 
     @Test
     void obtenerPorProductoId_whenNotExists_returnsEmpty() {
-        when(inventarioRepository.findByProductoId(99L)).thenReturn(Optional.empty());
+        when(inventarioRepository.findByProductoId(99L)).thenReturn(List.of());
 
         Optional<Inventario> resultado = inventarioService.obtenerPorProductoId(99L);
 
@@ -65,12 +65,14 @@ class InventarioServiceTest {
 
     @Test
     void guardar_savesAndReturnsInventario() {
+        when(inventarioRepository.findByProductoId(inventario.getProductoId())).thenReturn(List.of());
         when(inventarioRepository.save(inventario)).thenReturn(inventario);
 
         Inventario resultado = inventarioService.guardar(inventario);
 
         assertNotNull(resultado);
         assertEquals(100, resultado.getCantidad());
+        verify(inventarioRepository).findByProductoId(inventario.getProductoId());
         verify(inventarioRepository).save(inventario);
     }
 

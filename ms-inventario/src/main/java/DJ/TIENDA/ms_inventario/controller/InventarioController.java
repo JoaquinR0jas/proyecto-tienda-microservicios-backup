@@ -45,7 +45,6 @@ public class InventarioController {
     @ApiResponse(responseCode = "201", description = "Stock guardado correctamente")
     @PostMapping("/guardar")
     public ResponseEntity<Inventario> guardarStock(@RequestBody Inventario inventario) {
-        inventario.setId(null);
         return ResponseEntity.status(HttpStatus.CREATED).body(inventarioService.guardar(inventario));
     }
 
