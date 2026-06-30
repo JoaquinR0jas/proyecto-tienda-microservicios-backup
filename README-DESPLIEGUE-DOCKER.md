@@ -1,10 +1,10 @@
-# 🐳 Puesta en Marcha con Docker — Tienda Microservicios
+# Puesta en Marcha con Docker — Tienda Microservicios
 
 **DSY1103 — Desarrollo FullStack I**
 
 Este documento explica cómo ejecutar el ecosistema completo de **Tienda Microservicios** utilizando **Docker** y **Docker Compose**.
 
-Con Docker, todos los componentes (MySQL, Eureka, 11 microservicios de negocio y API Gateway) se ejecutan en contenedores independientes y se comunican mediante una red interna, sin necesidad de instalar XAMPP, Java ni Maven localmente.
+Con Docker, todos los componentes (MySQL, Eureka, 13 microservicios y API Gateway) se ejecutan en contenedores independientes y se comunican mediante una red interna, sin necesidad de instalar XAMPP, Java ni Maven localmente.
 
 ---
 
@@ -40,7 +40,7 @@ Si aparece `Cannot connect to the Docker daemon`, abrir Docker Desktop y esperar
 
 | Componente | Descripción | Puerto Externo |
 |------------|-------------|---------------:|
-| **mysql-db** | Base de datos MySQL 8.0 | 3307 |
+| **mysql** | Base de datos MySQL 8.0 | 3307 |
 | **eureka-server** | Servidor de descubrimiento Eureka | 8761 |
 | **api-gateway** | API Gateway centralizado + Swagger | 8080 |
 | **auth-service** | Autenticación JWT | 8091 |
@@ -60,7 +60,7 @@ Si aparece `Cannot connect to the Docker daemon`, abrir Docker Desktop y esperar
 ## 4. Orden Lógico de Arranque
 
 ```
-1. mysql-db              ← Inicia primero (salud verificada con healthcheck)
+1. mysql                 ← Inicia primero (salud verificada con healthcheck)
 2. eureka-server         ← Inicia después (servicios necesitan registrarse)
 3. auth-service
 4. ms-usuarios
@@ -172,7 +172,7 @@ El sistema usa un volumen Docker para MySQL:
 
 ```yaml
 volumes:
-  mysql_data:
+  mysql-data:
 ```
 
 Los datos persisten aunque se reinicien los contenedores o el computador.
@@ -274,14 +274,15 @@ deploy:
 ```yaml
 healthcheck:
   test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-  interval: 10s
+  interval: 15s
   timeout: 5s
-  retries: 5
+  retries: 10
+  start_period: 30s
 ```
 
 ### Red interna
 
-Todos los servicios se comunican por la red `tienda-network` y usan el nombre del contenedor (ej: `mysql-db:3306`) en lugar de `localhost`.
+Todos los servicios se comunican por la red interna de Docker Compose (`tienda-parent_default`) y usan el nombre del servicio (ej: `mysql:3306`) en lugar de `localhost`.
 
 ---
 
@@ -304,12 +305,13 @@ Todos los servicios se comunican por la red `tienda-network` y usan el nombre de
 
 ```
 ► Docker Desktop DEBE estar abierto para que docker compose funcione
-► mysql-db debe estar healthy antes de que los microservicios se registren
-► API Gateway se inicia último
+► mysql debe estar healthy antes de que los microservicios se inicien
+► eureka-server se inicia automáticamente antes que los microservicios (dependencia en docker-compose)
+► API Gateway se inicia al final (depende de eureka-server)
 ► Los microservicios usan eureka-server (no localhost) para registrarse en Eureka
-► Los microservicios usan mysql-db (no localhost:3307) para conectar a BD
-► Volumen mysql_data persiste datos aunque los contenedores se detengan
-► docker compose down -v ELIMINA datos; usar solo para reset total
+► Los microservicios usan mysql (no localhost:3307) para conectar a BD
+► Volumen mysql-data persiste datos aunque los contenedores se detengan
+► docker compose down -v elimina datos; usar solo para reset total
 ► Límites de memoria evitan OOM en PCs con poca RAM
 ► El ZIP de Drive contiene los JARs pre-compilados para usar con Docker
 ```
