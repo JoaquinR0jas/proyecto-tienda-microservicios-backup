@@ -17,10 +17,9 @@ public class Inventario {
     private Long id;
 
     /**
-     * IMPORTANTE: Este campo NO es una relación @ManyToOne real en la base de datos.
-     * En microservicios, guardamos solo el ID del producto que vive en 'ms-catalogo'.
-     * Esto se llama "Loose Coupling" (Acoplamiento débil).
-     * ESTO ME LO DIJO GEMINI
+     * Ojo: este campo no es un @ManyToOne de verdad, porque el producto vive en
+     * otro microservicio (ms-catalogo). Asi que guardamos nomás su id, cada servicio
+     * maneja su propia base y no se enganchan relaciones entre bases.
      */
     private Long productoId;
 

@@ -15,12 +15,10 @@ public class MarketingService {
     @Autowired
     private PromocionRepository promocionRepository;
 
-    // Crea una nueva promocion
     public PromocionResponseDTO crearPromocion(Promocion promocion) {
         return construirRespuesta(promocionRepository.save(promocion));
     }
 
-    // Obtiene todas las promociones
     public List<PromocionResponseDTO> obtenerTodas() {
         return promocionRepository.findAll()
                 .stream()
@@ -28,7 +26,7 @@ public class MarketingService {
                 .toList();
     }
 
-    // Obtiene solo las promociones activas
+    // Solo las que estan vigentes, el resto no interesan
     public List<PromocionResponseDTO> obtenerActivas() {
         return promocionRepository.findByEstado(Promocion.Estado.ACTIVO)
                 .stream()
@@ -36,12 +34,11 @@ public class MarketingService {
                 .toList();
     }
 
-    // Obtiene una promocion por ID
     public Optional<PromocionResponseDTO> obtenerPorId(Long id) {
         return promocionRepository.findById(id).map(this::construirRespuesta);
     }
 
-    // Cambia el estado de una promocion
+    // Cambia el estado sin tocar el resto de la promocion
     public PromocionResponseDTO cambiarEstado(Long id, Promocion.Estado nuevoEstado) {
         Promocion promocion = promocionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Promocion no encontrada con ID: " + id));
@@ -49,7 +46,6 @@ public class MarketingService {
         return construirRespuesta(promocionRepository.save(promocion));
     }
 
-    // Elimina una promocion
     public boolean eliminar(Long id) {
         if (promocionRepository.existsById(id)) {
             promocionRepository.deleteById(id);
@@ -58,7 +54,7 @@ public class MarketingService {
         return false;
     }
 
-    // Construye el DTO de respuesta
+    // Mapea la entidad a lo que el frontend necesita
     private PromocionResponseDTO construirRespuesta(Promocion promocion) {
         PromocionResponseDTO respuesta = new PromocionResponseDTO();
         respuesta.setPromocionId(promocion.getId());

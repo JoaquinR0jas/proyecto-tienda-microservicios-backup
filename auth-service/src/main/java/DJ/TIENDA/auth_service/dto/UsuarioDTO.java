@@ -3,7 +3,6 @@ package DJ.TIENDA.auth_service.dto;
 import lombok.Data;
 
 // Representa los datos que nos devuelve ms-usuarios via Feign
-// Solo necesitamos los campos relevantes para autenticación
 @Data
 public class UsuarioDTO {
     private Long id;

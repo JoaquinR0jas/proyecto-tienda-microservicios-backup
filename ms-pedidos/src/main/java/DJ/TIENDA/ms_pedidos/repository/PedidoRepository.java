@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // Trae todos los pedidos de un usuario especifico
     List<Pedido> findByUsuarioId(Long usuarioId);
 }

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "ms-carrito")
 public interface CarritoClient {
 
-    // Obtiene un carrito especifico por su ID
     @GetMapping("/api/carrito/detalle/{carritoId}")
     CarritoDTO obtenerCarritoPorId(@PathVariable("carritoId") Long carritoId);
 }

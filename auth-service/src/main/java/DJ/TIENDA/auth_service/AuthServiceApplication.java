@@ -9,8 +9,8 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@EnableDiscoveryClient // Se registra en Eureka
-@EnableFeignClients    // Habilita Feign para consultar ms-usuarios
+@EnableDiscoveryClient // se registra en Eureka
+@EnableFeignClients    // habilita Feign para consultar ms-usuarios
 public class AuthServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(AuthServiceApplication.class, args);

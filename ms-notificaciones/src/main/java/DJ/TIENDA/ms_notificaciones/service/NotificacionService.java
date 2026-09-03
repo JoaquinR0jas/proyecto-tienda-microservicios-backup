@@ -14,7 +14,7 @@ public class NotificacionService {
     @Autowired
     private NotificacionRepository notificacionRepository;
 
-    // Crea y guarda una notificacion simulando el envio
+    // Al final no mandamos nada real, solo guardamos para que quede el registro
     public NotificacionResponseDTO enviarNotificacion(Long usuarioId, Notificacion.Tipo tipo, String mensaje) {
         Notificacion notificacion = new Notificacion();
         notificacion.setUsuarioId(usuarioId);
@@ -25,7 +25,6 @@ public class NotificacionService {
         return construirRespuesta(notificacion);
     }
 
-    // Obtiene todas las notificaciones de un usuario
     public List<NotificacionResponseDTO> obtenerPorUsuario(Long usuarioId) {
         return notificacionRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -33,7 +32,7 @@ public class NotificacionService {
                 .toList();
     }
 
-    // Obtiene solo las notificaciones no leidas de un usuario
+    // Filtra las que el usuario aun no ha visto
     public List<NotificacionResponseDTO> obtenerNoLeidas(Long usuarioId) {
         return notificacionRepository.findByUsuarioIdAndLeida(usuarioId, false)
                 .stream()
@@ -41,7 +40,6 @@ public class NotificacionService {
                 .toList();
     }
 
-    // Marca una notificacion como leida
     public NotificacionResponseDTO marcarComoLeida(Long notificacionId) {
         Notificacion notificacion = notificacionRepository.findById(notificacionId)
                 .orElseThrow(() -> new IllegalArgumentException("Notificacion no encontrada con ID: " + notificacionId));
@@ -50,7 +48,7 @@ public class NotificacionService {
         return construirRespuesta(notificacion);
     }
 
-    // Construye el DTO de respuesta
+    // Arma el DTO con lo que necesita el frontend
     private NotificacionResponseDTO construirRespuesta(Notificacion notificacion) {
         NotificacionResponseDTO respuesta = new NotificacionResponseDTO();
         respuesta.setNotificacionId(notificacion.getId());

@@ -21,14 +21,12 @@ public class EnvioService {
     @Autowired
     private UsuarioClient usuarioClient; // Para obtener direccion del usuario
 
-    // Crea un envio para un pedido pagado
     public EnvioResponseDTO crearEnvio(Long pedidoId, Long usuarioId) {
-        // Verifica que no exista ya un envio para este pedido
+        // Evita que se cree un segundo envio para el mismo pedido
         if (envioRepository.findByPedidoId(pedidoId).isPresent()) {
             throw new IllegalArgumentException("Ya existe un envio para el pedido ID: " + pedidoId);
         }
 
-        // Obtiene la direccion del usuario via Feign
         UsuarioDTO usuario = usuarioClient.obtenerUsuario(usuarioId);
         if (usuario == null || usuario.getDireccion() == null) {
             throw new IllegalArgumentException("El usuario no tiene direccion registrada.");
@@ -43,14 +41,13 @@ public class EnvioService {
         return construirRespuesta(envio);
     }
 
-    // Actualiza el estado del envio
     public EnvioResponseDTO actualizarEstado(Long envioId, Envio.Estado nuevoEstado) {
         Envio envio = envioRepository.findById(envioId)
                 .orElseThrow(() -> new IllegalArgumentException("Envio no encontrado con ID: " + envioId));
 
         envio.setEstado(nuevoEstado);
 
-        // Si el estado es ENTREGADO registra la fecha de entrega
+        // Si se marca ENTREGADO guardamos la fecha, sino queda null
         if (nuevoEstado == Envio.Estado.ENTREGADO) {
             envio.setFechaEntrega(LocalDateTime.now());
         }
@@ -59,12 +56,10 @@ public class EnvioService {
         return construirRespuesta(envio);
     }
 
-    // Ver envio de un pedido especifico
     public Optional<EnvioResponseDTO> obtenerPorPedido(Long pedidoId) {
         return envioRepository.findByPedidoId(pedidoId).map(this::construirRespuesta);
     }
 
-    // Ver todos los envios de un usuario
     public List<EnvioResponseDTO> obtenerPorUsuario(Long usuarioId) {
         return envioRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -72,7 +67,7 @@ public class EnvioService {
                 .toList();
     }
 
-    // Construye el DTO de respuesta
+    // Arma el DTO con los campos que va a usar el frontend
     private EnvioResponseDTO construirRespuesta(Envio envio) {
         EnvioResponseDTO respuesta = new EnvioResponseDTO();
         respuesta.setEnvioId(envio.getId());

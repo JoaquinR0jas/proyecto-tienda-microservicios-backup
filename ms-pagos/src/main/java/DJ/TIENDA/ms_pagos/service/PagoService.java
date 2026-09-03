@@ -15,14 +15,13 @@ public class PagoService {
     @Autowired
     private PagoRepository pagoRepository;
 
-    // Procesa el pago simulando una pasarela real con 80% exito y 20% fallo
+    // Simula la pasarela de pago: 80% pasa, 20% se rechaza
     public PagoResponseDTO procesarPago(Long pedidoId, Long usuarioId, Double monto) {
         Pago pago = new Pago();
         pago.setPedidoId(pedidoId);
         pago.setUsuarioId(usuarioId);
         pago.setMonto(monto);
 
-        // Simulacion: 80% probabilidad de exito
         boolean exitoso = new Random().nextInt(10) < 8;
 
         if (exitoso) {
@@ -37,7 +36,6 @@ public class PagoService {
         return construirRespuesta(pago);
     }
 
-    // Obtiene todos los pagos de un pedido
     public List<PagoResponseDTO> obtenerPagosPorPedido(Long pedidoId) {
         return pagoRepository.findByPedidoId(pedidoId)
                 .stream()
@@ -45,7 +43,6 @@ public class PagoService {
                 .toList();
     }
 
-    // Obtiene todos los pagos de un usuario
     public List<PagoResponseDTO> obtenerPagosPorUsuario(Long usuarioId) {
         return pagoRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -53,7 +50,7 @@ public class PagoService {
                 .toList();
     }
 
-    // Construye el DTO de respuesta
+    // Arma el DTO tal cual lo espera el frontend
     private PagoResponseDTO construirRespuesta(Pago pago) {
         PagoResponseDTO respuesta = new PagoResponseDTO();
         respuesta.setPagoId(pago.getId());

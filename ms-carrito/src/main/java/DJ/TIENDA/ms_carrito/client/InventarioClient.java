@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "ms-inventario")
 public interface InventarioClient {
 
-    // Llama al endpoint GET /api/inventario/producto/{productoId} de ms-inventario
     @GetMapping("/api/inventario/producto/{productoId}")
     StockDTO obtenerStock(@PathVariable("productoId") Long productoId);
 }

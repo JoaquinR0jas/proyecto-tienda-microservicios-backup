@@ -17,16 +17,13 @@ public class AuthService {
 
     // Lógica del login: verifica credenciales y genera el JWT
     public String login(String email, String password) {
-        // 1. Busca el usuario en ms-usuarios via Feign
         UsuarioDTO usuario = usuarioClient.buscarPorEmail(email);
 
-        // 2. Verifica que el usuario exista y la contraseña coincida
         // ⚠️ Por ahora comparamos en texto plano, cuando agreguemos BCrypt esto cambia
         if (usuario == null || !usuario.getPassword().equals(password)) {
             throw new RuntimeException("Credenciales inválidas");
         }
 
-        // 3. Genera y retorna el JWT con email y rol del usuario
         return jwtUtil.generarToken(usuario.getEmail(), usuario.getRol());
     }
 

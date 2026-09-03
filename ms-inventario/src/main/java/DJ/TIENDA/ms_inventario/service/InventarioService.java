@@ -8,24 +8,22 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@Service // Capa de lógica de negocio entre Controller y Repository
+@Service
 public class InventarioService {
 
     @Autowired
     private InventarioRepository inventarioRepository;
 
-    // Retorna todo el stock de todos los productos
     public List<Inventario> obtenerTodo() {
         return inventarioRepository.findAll();
     }
 
-    // Busca el stock de un producto específico por su productoId
     public Optional<Inventario> obtenerPorProductoId(Long productoId) {
         List<Inventario> resultados = inventarioRepository.findByProductoId(productoId);
         return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
     }
 
-    // Guarda o actualiza el stock de un producto
+    // si ya existe stock de ese producto, lo actualizo en vez de duplicar
     public Inventario guardar(Inventario inventario) {
         if (inventario.getProductoId() != null) {
             List<Inventario> existentes = inventarioRepository.findByProductoId(inventario.getProductoId());
@@ -39,7 +37,6 @@ public class InventarioService {
         return inventarioRepository.save(inventario);
     }
 
-    // Elimina un registro de inventario por su ID
     public boolean eliminar(Long id) {
         if (inventarioRepository.existsById(id)) {
             inventarioRepository.deleteById(id);

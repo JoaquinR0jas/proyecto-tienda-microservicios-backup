@@ -15,12 +15,10 @@ public class ResenaService {
     @Autowired
     private ResenaRepository resenaRepository;
 
-    // Crea una nueva resena
     public ResenaResponseDTO crearResena(Resena resena) {
         return construirRespuesta(resenaRepository.save(resena));
     }
 
-    // Obtiene todas las resenas de un producto
     public List<ResenaResponseDTO> obtenerPorProducto(Long productoId) {
         return resenaRepository.findByProductoId(productoId)
                 .stream()
@@ -28,7 +26,6 @@ public class ResenaService {
                 .toList();
     }
 
-    // Obtiene todas las resenas de un usuario
     public List<ResenaResponseDTO> obtenerPorUsuario(Long usuarioId) {
         return resenaRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -36,13 +33,11 @@ public class ResenaService {
                 .toList();
     }
 
-    // Obtiene el promedio de puntuacion de un producto
     public Double obtenerPromedio(Long productoId) {
         Double promedio = resenaRepository.promedioByProductoId(productoId);
         return promedio != null ? Math.round(promedio * 10.0) / 10.0 : 0.0; // Redondea a 1 decimal
     }
 
-    // Elimina una resena por ID
     public boolean eliminar(Long id) {
         if (resenaRepository.existsById(id)) {
             resenaRepository.deleteById(id);
@@ -51,12 +46,11 @@ public class ResenaService {
         return false;
     }
 
-    // Obtiene una resena por ID
     public Optional<ResenaResponseDTO> obtenerPorId(Long id) {
         return resenaRepository.findById(id).map(this::construirRespuesta);
     }
 
-    // Construye el DTO de respuesta
+    // arma la respuesta sin exponer el objeto completo de la BD
     private ResenaResponseDTO construirRespuesta(Resena resena) {
         ResenaResponseDTO respuesta = new ResenaResponseDTO();
         respuesta.setResenaId(resena.getId());

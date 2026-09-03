@@ -13,5 +13,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     // findById() -> Para buscar por ID
     // deleteById() -> Para borrar
     // y muchos mas que tengo en los apuntes de esta clase 
-    // y tambein en codigos anteriores asi que revisar drive si hay dudas
+    // y tambien en codigos anteriores asi que revisar drive si hay dudas
 }

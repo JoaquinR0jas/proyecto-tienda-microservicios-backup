@@ -20,20 +20,17 @@ public class CatalogoService {
     @Autowired
     private InventarioClient inventarioClient; // Se mueve aquí desde el Controller
 
-    // Retorna todos los productos
     public List<Producto> obtenerTodos() {
         return productoRepository.findAll();
     }
 
-    // Busca producto por ID y combina con stock de ms-inventario via Feign
+    // Combina el producto con el stock que llega desde ms-inventario via Feign
     public Optional<ProductoDetalleDTO> obtenerDetalleConStock(Long id) {
         return productoRepository.findById(id).map(producto -> {
-            // Consulta a ms-inventario via Feign
             InventarioDTO inventario = inventarioClient.obtenerStock(id);
             Integer stock = (inventario != null && inventario.getCantidad() != null)
                     ? inventario.getCantidad() : 0;
 
-            // Construye el DTO combinando datos de ambos microservicios
             ProductoDetalleDTO detalle = new ProductoDetalleDTO();
             detalle.setId(producto.getId());
             detalle.setNombre(producto.getNombre());
@@ -45,12 +42,10 @@ public class CatalogoService {
         });
     }
 
-    // Crea un producto nuevo
     public Producto crear(Producto producto) {
         return productoRepository.save(producto);
     }
 
-    // Elimina un producto por ID, retorna true si existía
     public boolean eliminar(Long id) {
         if (productoRepository.existsById(id)) {
             productoRepository.deleteById(id);
@@ -59,8 +54,7 @@ public class CatalogoService {
         return false;
     }
 
-    // Busca un producto por ID
-public Optional<Producto> obtenerPorId(Long id) {
+    public Optional<Producto> obtenerPorId(Long id) {
     return productoRepository.findById(id);
 }
 }

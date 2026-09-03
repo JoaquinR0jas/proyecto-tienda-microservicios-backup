@@ -19,11 +19,10 @@ public class PedidoService {
     private PedidoRepository pedidoRepository;
 
     @Autowired
-    private CarritoClient carritoClient; // Para obtener el carrito confirmado via Feign
+    private CarritoClient carritoClient;
 
-    // Crea un pedido a partir de un carritoId especifico
     public PedidoResponseDTO crearPedido(Long usuarioId, Long carritoId) {
-        // 1. Obtiene el carrito especifico via Feign
+        // armo el pedido con lo que trajo el carrito confirmado
         CarritoDTO carrito = carritoClient.obtenerCarritoPorId(carritoId);
 
         if (carrito == null || carrito.getItems().isEmpty()) {
@@ -34,13 +33,11 @@ public class PedidoService {
             throw new IllegalArgumentException("El carrito debe estar CONFIRMADO para crear un pedido.");
         }
 
-        // 2. Crea el pedido con los datos del carrito
         Pedido pedido = new Pedido();
         pedido.setUsuarioId(usuarioId);
         pedido.setCarritoId(carritoId);
         pedido.setTotal(carrito.getTotal());
 
-        // 3. Copia los items del carrito al pedido
         List<PedidoItem> items = carrito.getItems().stream().map(itemCarrito -> {
             PedidoItem item = new PedidoItem();
             item.setPedido(pedido);
@@ -56,7 +53,6 @@ public class PedidoService {
         return construirRespuesta(pedido);
     }
 
-    // Obtiene todos los pedidos de un usuario
     public List<PedidoResponseDTO> obtenerPedidosPorUsuario(Long usuarioId) {
         return pedidoRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -64,12 +60,10 @@ public class PedidoService {
                 .toList();
     }
 
-    // Obtiene el detalle de un pedido especifico
     public Optional<PedidoResponseDTO> obtenerPorId(Long pedidoId) {
         return pedidoRepository.findById(pedidoId).map(this::construirRespuesta);
     }
 
-    // Construye el DTO de respuesta
     private PedidoResponseDTO construirRespuesta(Pedido pedido) {
         PedidoResponseDTO respuesta = new PedidoResponseDTO();
         respuesta.setPedidoId(pedido.getId());

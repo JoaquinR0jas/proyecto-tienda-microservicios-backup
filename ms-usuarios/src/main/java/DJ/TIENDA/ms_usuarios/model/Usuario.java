@@ -1,7 +1,5 @@
 package DJ.TIENDA.ms_usuarios.model;
 
-// ESTE MS CUBRE EL DE 👤 user-service (Usuarios): Responsable del registro de nuevos usuarios y gestión de sus datos personales.
-// y tambien el security service, ya que dimos un rol y el profe pidio eso, ya tenemos gestion de roles
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -35,11 +33,10 @@ public class Usuario {
     @Column
     private String direccion;
 
-    @Enumerated(EnumType.STRING)  // Guarda el rol como texto en la BD (ej: "ADMIN", "CLIENTE")
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Rol rol = Rol.CLIENTE; // Por defecto todo usuario nuevo es CLIENTE
+    private Rol rol = Rol.CLIENTE;
 
-    // Enum interno: define los roles posibles del sistema
     public enum Rol {
         ADMIN,
         CLIENTE

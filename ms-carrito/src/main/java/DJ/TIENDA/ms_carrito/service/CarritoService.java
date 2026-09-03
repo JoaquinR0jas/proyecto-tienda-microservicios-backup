@@ -27,12 +27,11 @@ public class CarritoService {
     private CarritoItemRepository carritoItemRepository;
 
     @Autowired
-    private CatalogoClient catalogoClient; // Para obtener precio del producto
+    private CatalogoClient catalogoClient;
 
     @Autowired
-    private InventarioClient inventarioClient; // Para verificar stock disponible
+    private InventarioClient inventarioClient;
 
-    // Obtiene o crea el carrito ACTIVO de un usuario
     private Carrito obtenerOCrearCarrito(Long usuarioId) {
         return carritoRepository.findByUsuarioIdAndEstado(usuarioId, Carrito.Estado.ACTIVO)
                 .orElseGet(() -> {
@@ -42,24 +41,20 @@ public class CarritoService {
                 });
     }
 
-    // Agrega un producto al carrito verificando stock y obteniendo precio de ms-catalogo
     public CarritoResponseDTO agregarProducto(Long usuarioId, Long productoId, Integer cantidad) {
-        // 1. Verifica stock en ms-inventario via Feign
+        // primero verifico stock y precio de los otros microservicios
         StockDTO stock = inventarioClient.obtenerStock(productoId);
         if (stock == null || stock.getCantidad() < cantidad) {
             throw new IllegalArgumentException("Stock insuficiente para el producto ID: " + productoId);
         }
 
-        // 2. Obtiene precio del producto en ms-catalogo via Feign
         ProductoDTO producto = catalogoClient.obtenerProducto(productoId);
         if (producto == null) {
             throw new IllegalArgumentException("Producto no encontrado con ID: " + productoId);
         }
 
-        // 3. Obtiene o crea el carrito activo del usuario
         Carrito carrito = obtenerOCrearCarrito(usuarioId);
 
-        // 4. Si el producto ya esta en el carrito, suma la cantidad
         Optional<CarritoItem> itemExistente = carritoItemRepository
                 .findByCarritoIdAndProductoId(carrito.getId(), productoId);
 
@@ -68,7 +63,6 @@ public class CarritoService {
             item.setCantidad(item.getCantidad() + cantidad);
             carritoItemRepository.save(item);
         } else {
-            // Si no existe, crea un item nuevo
             CarritoItem nuevoItem = new CarritoItem();
             nuevoItem.setCarrito(carrito);
             nuevoItem.setProductoId(productoId);
@@ -80,7 +74,7 @@ public class CarritoService {
         return construirRespuesta(carrito.getId());
     }
 
-    @Transactional // Garantiza que todos los cambios se guardan en la misma transaccion
+    @Transactional
 public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
     Carrito carrito = carritoRepository.findById(carritoId)
             .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
@@ -92,7 +86,6 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
     return construirRespuesta(carritoId);
 }
 
-    // Vacia todos los items del carrito sin eliminarlo
     public CarritoResponseDTO vaciarCarrito(Long usuarioId) {
         Carrito carrito = obtenerOCrearCarrito(usuarioId);
         carrito.getItems().clear();
@@ -100,7 +93,6 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
         return construirRespuesta(carrito.getId());
     }
 
-    // Cambia el estado del carrito (CONFIRMADO o CANCELADO)
     public CarritoResponseDTO cambiarEstado(Long carritoId, Carrito.Estado nuevoEstado) {
         Carrito carrito = carritoRepository.findById(carritoId)
                 .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
@@ -109,13 +101,11 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
         return construirRespuesta(carritoId);
     }
 
-    // Ver el carrito activo de un usuario
     public CarritoResponseDTO verCarrito(Long usuarioId) {
         Carrito carrito = obtenerOCrearCarrito(usuarioId);
         return construirRespuesta(carrito.getId());
     }
 
-    // Construye el DTO de respuesta con el total calculado
     private CarritoResponseDTO construirRespuesta(Long carritoId) {
         Carrito carrito = carritoRepository.findById(carritoId).orElseThrow();
 
@@ -124,12 +114,11 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
         respuesta.setUsuarioId(carrito.getUsuarioId());
         respuesta.setEstado(carrito.getEstado().name());
 
-        // Construye la lista de items con subtotal por item
         List<CarritoResponseDTO.ItemResponseDTO> itemsDTO = carrito.getItems().stream().map(item -> {
             CarritoResponseDTO.ItemResponseDTO itemDTO = new CarritoResponseDTO.ItemResponseDTO();
             itemDTO.setItemId(item.getId());
             itemDTO.setProductoId(item.getProductoId());
-            itemDTO.setNombreProducto("Producto " + item.getProductoId()); // Nombre basico por ahora
+            itemDTO.setNombreProducto("Producto " + item.getProductoId());
             itemDTO.setCantidad(item.getCantidad());
             itemDTO.setPrecioUnitario(item.getPrecioUnitario());
             itemDTO.setSubtotal(item.getPrecioUnitario() * item.getCantidad());
@@ -138,14 +127,13 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
 
         respuesta.setItems(itemsDTO);
 
-        // Calcula el total sumando todos los subtotales
         Double total = itemsDTO.stream().mapToDouble(CarritoResponseDTO.ItemResponseDTO::getSubtotal).sum();
         respuesta.setTotal(total);
 
         return respuesta;
     }
-    // Ver carrito por su ID directamente (usado por ms-pedidos via Feign)
-public CarritoResponseDTO verCarritoPorId(Long carritoId) {
+    // lo usa ms-pedidos cuando pide el carrito por id
+    public CarritoResponseDTO verCarritoPorId(Long carritoId) {
     carritoRepository.findById(carritoId)
             .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
     return construirRespuesta(carritoId);

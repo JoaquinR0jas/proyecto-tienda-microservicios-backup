@@ -9,28 +9,28 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-@Component // Spring lo gestiona como un componente reutilizable
+@Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")       // Lee la clave secreta del application.properties
+    @Value("${jwt.secret}")       // clave secreta del application.properties
     private String secret;
 
-    @Value("${jwt.expiration}")   // Lee el tiempo de expiración del application.properties
+    @Value("${jwt.expiration}")   // expiracion del application.properties
     private Long expiration;
 
-    // Convierte el String secret en una clave criptográfica válida para HS256
+    // Convierte el String secret en una clave criptografica valida para HS256
     private SecretKey getKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // Genera un JWT con el email y rol del usuario como datos dentro del token
+    // Genera un JWT con el email y rol del usuario dentro del token
     public String generarToken(String email, String rol) {
         return Jwts.builder()
-                .subject(email)                                        // Quién es el usuario
-                .claim("rol", rol)                                     // Su rol dentro del token
-                .issuedAt(new Date())                                  // Cuándo se generó
-                .expiration(new Date(System.currentTimeMillis() + expiration)) // Cuándo expira
-                .signWith(getKey())                                    // Firma con nuestra clave secreta
+                .subject(email)                                        // quien es el usuario
+                .claim("rol", rol)                                     // su rol dentro del token
+                .issuedAt(new Date())                                  // cuando se genero
+                .expiration(new Date(System.currentTimeMillis() + expiration)) // cuando expira
+                .signWith(getKey())                                    // firma con nuestra clave secreta
                 .compact();
     }
 
@@ -38,12 +38,12 @@ public class JwtUtil {
     public boolean validarToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(getKey()) // Verifica la firma
+                    .verifyWith(getKey())
                     .build()
                     .parseSignedClaims(token);
-            return true; // Si no lanza excepción, el token es válido
+            return true;
         } catch (Exception e) {
-            return false; // Token inválido o expirado
+            return false;
         }
     }
 

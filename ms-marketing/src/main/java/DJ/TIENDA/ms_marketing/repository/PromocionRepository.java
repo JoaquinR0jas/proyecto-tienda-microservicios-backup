@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface PromocionRepository extends JpaRepository<Promocion, Long> {
 
-    // Trae todas las promociones activas
+    // Filtrar por estado, igual que lo vimos en clase
     List<Promocion> findByEstado(Promocion.Estado estado);
 }
