@@ -4,116 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ModaViva - Tienda de Ropa</title>
-    <!-- hojas de estilo -->
     <link rel="stylesheet" href="css/estilos.css">
-    <!-- fuentes de google, las tipicas que usa todo el mundo -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <header class="nav">
         <div class="logo">
-            <h1>Moda<span>Viva</span></h1>
+            <h1>ModaViva</h1>
         </div>
         <nav>
-            <ul class="menu">
-                <li><a href="#inicio">Inicio</a></li>
+            <ul>
                 <li><a href="#productos">Productos</a></li>
                 <li><a href="#ofertas">Ofertas</a></li>
+                <li><a href="#equipo">Equipo</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
-        <button id="btnCarrito" class="btn-carrito">&#128722; Carrito (<span id="contador">0</span>)</button>
     </header>
 
-    <section id="inicio" class="hero">
-        <div class="hero-texto">
-            <h2>Renueva tu estilo con las mejores prendas</h2>
-            <p>Ropa moderna y comoda para todos los gustos, al mejor precio.</p>
-            <a href="#productos" class="btn">Ver productos</a>
-        </div>
-        <div class="hero-img">
-            <img src="https://img.freepik.com/fotos-premium/ropa-colorida-cuelga-perchero-moderna-tienda-boutique_662214-112190.jpg" alt="Ropa en una tienda">
+    <section class="bienvenida">
+        <h2>Bienvenidos a ModaViva</h2>
+        <p>Somos una tienda de ropa creada como proyecto de la asignatura. Aca vendemos ropa moderna y comoda.</p>
+    </section>
+
+    <section id="productos">
+        <h2>Nuestros productos</h2>
+        <div class="productos">
+            <div class="producto">
+                <h3>Polera Unisex</h3>
+                <p>Polera de algodon, varios colores</p>
+                <p class="precio">$9.990</p>
+                <button class="comprar">Agregar al carrito</button>
+            </div>
+            <div class="producto">
+                <h3>Jeans Clasico</h3>
+                <p>Jeans corte clasico, tela elastizada</p>
+                <p class="precio">$18.990</p>
+                <button class="comprar">Agregar al carrito</button>
+            </div>
+            <div class="producto">
+                <h3>Zapatillas Urbanas</h3>
+                <p>Zapatillas comodas para el dia a dia</p>
+                <p class="precio">$24.990</p>
+                <button class="comprar">Agregar al carrito</button>
+            </div>
+            <div class="producto">
+                <h3>Parka Invierno</h3>
+                <p>Parka con capucha y forro termico</p>
+                <p class="precio">$32.990</p>
+                <button class="comprar">Agregar al carrito</button>
+            </div>
         </div>
     </section>
 
-    <section id="ofertas" class="ofertas">
-        <h2 class="titulo-seccion">Ofertas de la semana</h2>
-        <p class="sub-titulo">Descuentos especiales que tenemos activos en la tienda</p>
-        <div id="listaOfertas" class="grid-ofertas">
-            <!-- aca van las promociones cargadas con js -->
-            <p class="cargando">Cargando ofertas...</p>
+    <section id="ofertas">
+        <h2>Ofertas de la semana</h2>
+        <div class="ofertas">
+            <div class="oferta">
+                <h3>Black Friday</h3>
+                <p>-30% en todo</p>
+            </div>
+            <div class="oferta">
+                <h3>Cyber Monday</h3>
+                <p>-20% solo por 24 horas</p>
+            </div>
+            <div class="oferta">
+                <h3>Liquidacion</h3>
+                <p>-50% ultimas unidades</p>
+            </div>
         </div>
     </section>
 
-    <section id="productos" class="productos">
-        <h2 class="titulo-seccion">Nuestros productos</h2>
-        <p class="sub-titulo">Todo lo que tenemos disponible en el catalogo</p>
-        <div id="listaProductos" class="grid-productos">
-            <!-- aca van los productos cargados con js -->
-            <p class="cargando">Cargando productos...</p>
-        </div>
-    </section>
-
-    <section id="equipo" class="equipo">
-        <h2 class="titulo-seccion">Nuestro equipo</h2>
-        <p class="sub-titulo">Somos estudiantes de Analista Programador que creamos esta tienda</p>
-        <div class="grid-equipo">
-            <div class="integrante">
+    <section id="equipo">
+        <h2>Nuestro equipo</h2>
+        <p>Estudiantes de Analista Programador de Duoc UC</p>
+        <div class="equipo">
+            <div>
                 <h3>Joaquin Rojas</h3>
-                <p>Desarrollo de microservicios y la pagina</p>
+                <p>Microservicios y pagina</p>
             </div>
-            <div class="integrante">
+            <div>
                 <h3>Diego Rivera</h3>
-                <p>Apoyo en integracion y testing</p>
+                <p>Integracion y testing</p>
             </div>
-            <div class="integrante">
+            <div>
                 <h3>Andres Cereno</h3>
-                <p>Colaboracion en el frontend</p>
+                <p>Frontend</p>
             </div>
-            <div class="integrante">
+            <div>
                 <h3>Julian Silva</h3>
                 <p>Documentacion y base de datos</p>
             </div>
         </div>
     </section>
 
-    <section id="contacto" class="contacto">
-        <h2 class="titulo-seccion">Contacto</h2>
-        <p>¿Tienes dudas? Escribenos y te respondemos a la brevedad.</p>
+    <section id="contacto">
+        <h2>Contacto</h2>
         <form id="formContacto">
-            <label for="nombreContacto">Nombre:</label>
-            <input type="text" id="nombreContacto" placeholder="Tu nombre" required>
-            <label for="emailContacto">Email:</label>
-            <input type="email" id="emailContacto" placeholder="tu@correo.com" required>
-            <label for="mensajeContacto">Mensaje:</label>
-            <textarea id="mensajeContacto" rows="4" placeholder="Escribe tu mensaje..." required></textarea>
-            <button type="submit" class="btn">Enviar</button>
+            <label>Nombre</label>
+            <input type="text" placeholder="Tu nombre">
+            <label>Email</label>
+            <input type="email" placeholder="tu@correo.com">
+            <label>Mensaje</label>
+            <textarea rows="4" placeholder="Escribe tu mensaje..."></textarea>
+            <button type="submit">Enviar</button>
         </form>
     </section>
 
-    <footer class="footer">
+    <footer>
         <p>&copy; 2026 ModaViva - Proyecto Desarrollo FullStack II - Duoc UC</p>
-        <p>Hecho por: Joaquin Rojas, Diego Rivera, Andres Cereno, Julian Silva</p>
+        <p>Joaquin Rojas, Diego Rivera, Andres Cereno, Julian Silva</p>
     </footer>
 
-    <!-- panel lateral del carrito -->
-    <div id="panelCarrito" class="panel-carrito">
-        <div class="panel-head">
-            <h3>Tu carrito</h3>
-            <button id="cerrarCarrito" class="cerrar">&times;</button>
-        </div>
-        <div id="itemsCarrito" class="items-carrito">
-            <p>Tu carrito esta vacio</p>
-        </div>
-        <div class="panel-foot">
-            <p>Total: <span id="totalCarrito">$0</span></p>
-            <button id="vaciarCarrito" class="btn btn-secundario">Vaciar carrito</button>
-        </div>
-    </div>
-    <div id="capaOscura" class="capa-oscura"></div>
-
-    <!-- scripts -->
     <script src="js/app.js"></script>
 </body>
 </html>
