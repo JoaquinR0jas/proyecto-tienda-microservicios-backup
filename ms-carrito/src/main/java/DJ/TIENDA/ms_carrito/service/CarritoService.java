@@ -42,7 +42,7 @@ public class CarritoService {
     }
 
     public CarritoResponseDTO agregarProducto(Long usuarioId, Long productoId, Integer cantidad) {
-        // primero verifico stock y precio de los otros microservicios
+        // primero verifico stock y precio de los otros microservicios para ver que onda
         StockDTO stock = inventarioClient.obtenerStock(productoId);
         if (stock == null || stock.getCantidad() < cantidad) {
             throw new IllegalArgumentException("Stock insuficiente para el producto ID: " + productoId);
@@ -79,7 +79,7 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
     Carrito carrito = carritoRepository.findById(carritoId)
             .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));
     
-    // Elimina el item desde la lista del carrito, no directo al repository
+    // Elimina el item desde la lista del carrito, no directo al repository (asi se actualiza solo)
     carrito.getItems().removeIf(item -> item.getId().equals(itemId));
     carritoRepository.save(carrito);
     
@@ -132,7 +132,7 @@ public CarritoResponseDTO eliminarItem(Long carritoId, Long itemId) {
 
         return respuesta;
     }
-    // lo usa ms-pedidos cuando pide el carrito por id
+    // lo usa ms-pedidos cuando pide el carrito por id.
     public CarritoResponseDTO verCarritoPorId(Long carritoId) {
     carritoRepository.findById(carritoId)
             .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado con ID: " + carritoId));

@@ -12,7 +12,7 @@ public interface ResenaRepository extends JpaRepository<Resena, Long> {
 
     List<Resena> findByUsuarioId(Long usuarioId);
 
-    // promedio de puntuacion de un producto
+    // promedio de puntuacion de un producto (aunque sea 1 solo puede haber varias)
     @Query("SELECT AVG(r.puntuacion) FROM Resena r WHERE r.productoId = :productoId")
     Double promedioByProductoId(Long productoId);
 }

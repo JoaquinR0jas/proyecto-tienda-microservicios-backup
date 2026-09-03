@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")       // clave secreta del application.properties
+    @Value("${jwt.secret}")       // clave secreta del application.properties es como su claveunica jskdks
     private String secret;
 
     @Value("${jwt.expiration}")   // expiracion del application.properties

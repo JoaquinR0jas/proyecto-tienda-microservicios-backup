@@ -34,6 +34,7 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> actualizar(Long id, Usuario datosActualizados) {
+        // cambio solo los campos que el usuario puede editar, el rol no se toca
         return usuarioRepository.findById(id).map(existente -> {
             if (!existente.getEmail().equals(datosActualizados.getEmail())) {
                 if (usuarioRepository.existsByEmail(datosActualizados.getEmail())) {

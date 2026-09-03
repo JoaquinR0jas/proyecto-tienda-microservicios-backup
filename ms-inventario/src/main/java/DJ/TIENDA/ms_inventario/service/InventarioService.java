@@ -23,7 +23,7 @@ public class InventarioService {
         return resultados.isEmpty() ? Optional.empty() : Optional.of(resultados.get(0));
     }
 
-    // si ya existe stock de ese producto, lo actualizo en vez de duplicar
+    // si ya existe stock de ese producto, lo actualizo en vez de duplicar (que era re ilogico duplicarlo)
     public Inventario guardar(Inventario inventario) {
         if (inventario.getProductoId() != null) {
             List<Inventario> existentes = inventarioRepository.findByProductoId(inventario.getProductoId());

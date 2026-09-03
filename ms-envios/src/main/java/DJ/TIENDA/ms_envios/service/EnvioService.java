@@ -47,7 +47,7 @@ public class EnvioService {
 
         envio.setEstado(nuevoEstado);
 
-        // Si se marca ENTREGADO guardamos la fecha, sino queda null
+        // Si se marca ENTREGADO guardamos la fecha, sino queda null y despues no se puede reclamar
         if (nuevoEstado == Envio.Estado.ENTREGADO) {
             envio.setFechaEntrega(LocalDateTime.now());
         }

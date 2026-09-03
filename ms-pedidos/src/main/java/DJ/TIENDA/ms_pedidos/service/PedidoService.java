@@ -22,7 +22,7 @@ public class PedidoService {
     private CarritoClient carritoClient;
 
     public PedidoResponseDTO crearPedido(Long usuarioId, Long carritoId) {
-        // armo el pedido con lo que trajo el carrito confirmado
+        // armo el pedido con lo que trajo el carrito confirmado (o sea cuando ya se pago)
         CarritoDTO carrito = carritoClient.obtenerCarritoPorId(carritoId);
 
         if (carrito == null || carrito.getItems().isEmpty()) {

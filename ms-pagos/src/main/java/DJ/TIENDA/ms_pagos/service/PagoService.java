@@ -15,7 +15,7 @@ public class PagoService {
     @Autowired
     private PagoRepository pagoRepository;
 
-    // Simula la pasarela de pago: 80% pasa, 20% se rechaza
+    // Simula la pasarela de pago: 80% pasa, 20% se rechaza (como no tenemos banco de verdad)
     public PagoResponseDTO procesarPago(Long pedidoId, Long usuarioId, Double monto) {
         Pago pago = new Pago();
         pago.setPedidoId(pedidoId);

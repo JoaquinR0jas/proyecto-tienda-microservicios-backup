@@ -10,6 +10,6 @@ public class ProductoDetalleDTO {
     private String descripcion;
     private Double precio;
 
-    // Este campo lo rellena el stock que nos manda ms-inventario via Feign
+    // Este campo lo rellena el stock que nos manda elinventario via feign(la comunicacion simple)
     private Integer stockDisponible;
 }
