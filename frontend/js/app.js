@@ -1,16 +1,7 @@
-/*
- * MODAVIVA - logica de la pagina
- * Proyecto FullStack II - Duoc UC
- *
- * La pagina se conecta al backend (microservicios) que corre en localhost:8080
- * Si el backend no esta corriendo, mostramos datos de ejemplo para que la
- * pagina no se vea vacia (nos paso en la prueba xd)
- */
-
-// direccion del API Gateway donde estan todos los microservicios
+// la api del gateway donde estan los microservicios
 const API = "http://localhost:8080/api";
 
-// datos de ejemplo por si el backend no esta disponible
+// datos de ejemplo por si el backend no corre
 const productosEjemplo = [
     { id: 1, nombre: "Polera Unisex", descripcion: "Polera de algodon 100%, varios colores", precio: 9990, stockDisponible: 50 },
     { id: 2, nombre: "Jeans Clasico", descripcion: "Jeans corte clasico, tela elastizada", precio: 18990, stockDisponible: 30 },
@@ -26,27 +17,23 @@ const ofertasEjemplo = [
     { id: 3, nombre: "Liquidacion", descripcion: "Ultimas unidades", descuentoPorcentaje: 50 }
 ];
 
-// variable que guarda los productos que estan en el carrito
 let carrito = [];
 
-// --- CARGA INICIAL ---
 document.addEventListener("DOMContentLoaded", function () {
     cargarProductos();
     cargarOfertas();
-    // si hay algo guardado en el navegador, lo cargamos
+
     let guardado = localStorage.getItem("carrito");
     if (guardado) {
         carrito = JSON.parse(guardado);
         actualizarCarrito();
     }
 
-    // eventos del carrito
     document.getElementById("btnCarrito").addEventListener("click", abrirCarrito);
     document.getElementById("cerrarCarrito").addEventListener("click", cerrarCarrito);
     document.getElementById("capaOscura").addEventListener("click", cerrarCarrito);
     document.getElementById("vaciarCarrito").addEventListener("click", vaciarCarrito);
 
-    // envio del formulario de contacto
     document.getElementById("formContacto").addEventListener("submit", function (e) {
         e.preventDefault();
         alert("Mensaje enviado. Te contactaremos pronto :)");
@@ -54,14 +41,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// --- PRODUCTOS ---
 function cargarProductos() {
     fetch(API + "/catalogo/productos")
         .then(function (resp) {
             return resp.json();
         })
         .then(function (lista) {
-            // por cada producto que venga del backend, mostramos su tarjeta
             let html = "";
             lista.forEach(function (producto) {
                 html += armarTarjeta(producto);
@@ -69,7 +54,7 @@ function cargarProductos() {
             document.getElementById("listaProductos").innerHTML = html;
         })
         .catch(function () {
-            // si no hay backend, mostramos los productos de ejemplo
+            // si no hay backend, muestro los de ejemplo
             let html = "";
             productosEjemplo.forEach(function (producto) {
                 html += armarTarjeta(producto);
@@ -78,7 +63,6 @@ function cargarProductos() {
         });
 }
 
-// arma el html de una tarjeta de producto
 function armarTarjeta(p) {
     return `
         <div class="producto-card">
@@ -93,7 +77,6 @@ function armarTarjeta(p) {
         </div>`;
 }
 
-// --- OFERTAS ---
 function cargarOfertas() {
     fetch(API + "/marketing/promociones/activas")
         .then(function (resp) {
@@ -125,8 +108,7 @@ function cargarOfertas() {
         });
 }
 
-// --- CARRITO ---
-// agrega un producto al carrito (uno solo por click, si ya esta suma la cantidad)
+// si ya esta agregado, le sumo 1 a la cantidad
 function agregarAlCarrito(id, nombre, precio) {
     let encontrado = carrito.find(function (item) {
         return item.id === id;
@@ -143,21 +125,17 @@ function agregarAlCarrito(id, nombre, precio) {
     alert(nombre + " agregado al carrito");
 }
 
-// guarda el carrito en el navegador para que no se pierda al recargar
 function guardarCarrito() {
     localStorage.setItem("carrito", JSON.stringify(carrito));
 }
 
-// vuelve a dibujar el carrito y el contador
 function actualizarCarrito() {
-    // contador de la barra
     let totalItems = 0;
     carrito.forEach(function (item) {
         totalItems = totalItems + item.cantidad;
     });
     document.getElementById("contador").textContent = totalItems;
 
-    // lista de items
     let contenedor = document.getElementById("itemsCarrito");
     if (carrito.length === 0) {
         contenedor.innerHTML = "<p>Tu carrito esta vacio</p>";
@@ -187,7 +165,6 @@ function vaciarCarrito() {
     actualizarCarrito();
 }
 
-// --- PANEL DEL CARRITO ---
 function abrirCarrito() {
     document.getElementById("panelCarrito").classList.add("abierto");
     document.getElementById("capaOscura").classList.add("visible");
@@ -198,8 +175,7 @@ function cerrarCarrito() {
     document.getElementById("capaOscura").classList.remove("visible");
 }
 
-// --- UTILIDADES ---
-// formatea el numero para que se vea con separador de miles, ej: 12.345
+// formatea para que se vea con punto de miles
 function formatearPrecio(precio) {
     return precio.toLocaleString("es-CL");
 }

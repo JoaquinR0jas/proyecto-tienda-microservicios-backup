@@ -1,9 +1,4 @@
-/* ==========================================
-   MODAVIVA - estilos de la tienda
-   Proyecto FullStack II - Duoc UC
-   ========================================== */
-
-/* colores principales de la tienda */
+/* colores de la tienda */
 :root {
     --azul: #1f3a5f;
     --azul-claro: #2f5496;
@@ -26,7 +21,6 @@ body {
     line-height: 1.6;
 }
 
-/* ---------- NAVEGACION ---------- */
 .nav {
     background-color: var(--azul);
     color: var(--blanco);
@@ -75,7 +69,6 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-/* ---------- HERO ---------- */
 .hero {
     display: flex;
     align-items: center;
@@ -109,7 +102,6 @@ body {
     border-radius: 12px;
 }
 
-/* boton generico reutilizable */
 .btn {
     background-color: var(--naranja);
     color: var(--blanco);
@@ -133,7 +125,6 @@ body {
     color: var(--azul);
 }
 
-/* ---------- SECCIONES ---------- */
 section {
     padding: 50px 60px;
 }
@@ -151,7 +142,6 @@ section {
     margin-bottom: 30px;
 }
 
-/* ---------- GRID DE OFERTAS ---------- */
 .grid-ofertas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -183,7 +173,6 @@ section {
     font-size: 14px;
 }
 
-/* ---------- GRID DE PRODUCTOS ---------- */
 .grid-productos {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -253,7 +242,6 @@ section {
     background-color: var(--azul-claro);
 }
 
-/* ---------- EQUIPO ---------- */
 .grid-equipo {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -278,7 +266,6 @@ section {
     font-size: 14px;
 }
 
-/* ---------- CONTACTO ---------- */
 .contacto {
     background-color: var(--blanco);
 }
@@ -316,7 +303,6 @@ section {
     align-self: center;
 }
 
-/* ---------- FOOTER ---------- */
 .footer {
     background-color: var(--azul);
     color: var(--blanco);
@@ -329,7 +315,6 @@ section {
     margin-bottom: 4px;
 }
 
-/* ---------- PANEL DEL CARRITO ---------- */
 .panel-carrito {
     position: fixed;
     top: 0;
@@ -397,7 +382,6 @@ section {
     margin-bottom: 10px;
 }
 
-/* capa oscura detras del carrito */
 .capa-oscura {
     position: fixed;
     top: 0;
@@ -413,14 +397,12 @@ section {
     display: block;
 }
 
-/* carga */
 .cargando {
     text-align: center;
     color: #999;
     grid-column: 1 / -1;
 }
 
-/* mensaje cuando no hay nada */
 .msj-error {
     text-align: center;
     color: #c0392b;
@@ -430,7 +412,7 @@ section {
     border-radius: 8px;
 }
 
-/* ---- responsive basico (celular) ---- */
+/* para el celular */
 @media (max-width: 768px) {
     .nav {
         flex-direction: column;
