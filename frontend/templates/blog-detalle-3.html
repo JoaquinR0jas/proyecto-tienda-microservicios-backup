@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}5 consejos para un look streetwear - Blog{% endblock %}
+
+{% block content %}
+<article class="container py-5" style="max-width: 800px;">
+    <img src="{{ url_for('static', filename='img/blog/5consejos.png') }}" class="img-fluid rounded mb-4" alt="5 consejos para un look streetwear">
+    <p class="text-muted small mb-1">20 de agosto, 2026</p>
+    <h1 class="mb-4">5 consejos para un look streetwear</h1>
+    <p>
+        Armar un outfit <strong>streetwear</strong> no requiere gastar de mas. Con estas cinco ideas
+        simples logras un look fresh, comodo y con identidad para el dia a dia.
+    </p>
+    <ol>
+        <li>Combina una prenda oversize (poleron o polera) con otra mas ajustada para equilibrar la silueta.</li>
+        <li>Usa colores neutros como base y agrega un solo acento de color o grafico.</li>
+        <li>Las zapatillas urbanas son el complemento clave: ligeras, comodas y con estilo.</li>
+        <li>Invierte en basicos de buena tela: una polera 100% algodon va con todo.</li>
+        <li>No descuides los accesorios: una gorra o un buzo cargo pueden cambiar todo el look.</li>
+    </ol>
+    <p>
+        Lo importante es sentirte comodo con lo que usas. Prueba combinaciones, revisa nuestro
+        catalogo y arma tu propio estilo fresh.
+    </p>
+    <a href="{{ url_for('blog') }}" class="btn btn-accent mt-3"><i class="bi bi-arrow-left"></i> Volver al Blog</a>
+</article>
+{% endblock %}

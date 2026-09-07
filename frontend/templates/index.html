@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}FreshFits - Tu tienda de ropa moderna{% endblock %}
+
+{% block content %}
+
+<section class="hero-intro" id="heroIntro">
+    <div class="hero-intro-bg">
+        <img src="{{ url_for('static', filename='img/banner-principal.png') }}" alt="FreshFits" class="hero-intro-img">
+        <div class="hero-intro-overlay"></div>
+    </div>
+    <div class="hero-intro-content">
+        <h1 class="hero-intro-title">FRESH <span>FITS</span></h1>
+    </div>
+    <div class="scroll-indicator" id="scrollIndicator">
+        <span class="scroll-text">scroll</span>
+        <i class="bi bi-chevron-double-down"></i>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Productos destacados</h2>
+        <a href="{{ url_for('productos') }}" class="btn btn-outline-accent btn-sm">Ver todos <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="position-relative">
+        <button class="btn btn-accent carrusel-flecha carrusel-flecha-izq" id="btnDesplazarIzq" type="button" aria-label="Anterior">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-accent carrusel-flecha carrusel-flecha-der" id="btnDesplazarDer" type="button" aria-label="Siguiente">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <div class="row g-4 carrusel-productos" id="destacadosContenedor"></div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Ultimas noticias</h2>
+        <a href="{{ url_for('blog') }}" class="btn btn-outline-accent btn-sm">Ver blog <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-4" id="noticiasContenedor"></div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+<script src="{{ url_for('static', filename='js/productos.js') }}"></script>
+<script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    mostrarProductosDestacados("destacadosContenedor");
+    mostrarNoticias("noticiasContenedor", 3);
+
+    const btnIzq = document.getElementById("btnDesplazarIzq");
+    const btnDer = document.getElementById("btnDesplazarDer");
+    const contDestacados = document.getElementById("destacadosContenedor");
+    if (btnIzq && btnDer && contDestacados) {
+        const desplazar = function (direccion) {
+            contDestacados.scrollBy({ left: direccion * contDestacados.clientWidth * 0.8, behavior: "smooth" });
+        };
+        btnIzq.addEventListener("click", function () { desplazar(-1); });
+        btnDer.addEventListener("click", function () { desplazar(1); });
+    }
+
+    const heroIntro = document.getElementById("heroIntro");
+    const imagenIntro = document.querySelector(".hero-intro-img");
+    const indicadorScroll = document.getElementById("scrollIndicator");
+
+    if (heroIntro && imagenIntro) {
+        window.addEventListener("scroll", function () {
+            const desplazamiento = window.scrollY;
+            imagenIntro.style.transform = "translateY(" + desplazamiento * 0.35 + "px) scale(1.08)";
+            if (indicadorScroll) {
+                indicadorScroll.style.opacity = desplazamiento > 30 ? "0" : "1";
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
