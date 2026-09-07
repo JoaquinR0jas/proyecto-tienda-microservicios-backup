@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Los lanzamientos mas esperados - Blog{% endblock %}
+
+{% block content %}
+<article class="container py-5" style="max-width: 800px;">
+    <img src="{{ url_for('static', filename='img/blog/lanzamientoesperados.png') }}" class="img-fluid rounded mb-4" alt="Los lanzamientos mas esperados">
+    <p class="text-muted small mb-1">10 de agosto, 2026</p>
+    <h1 class="mb-4">Los lanzamientos mas esperados de la temporada</h1>
+    <p>
+        La nueva temporada viene cargada de <strong>novedades</strong>. Desde polerones oversized
+        hasta jeans con cortes renovados, repasamos las prendas que marcaran tendencia en los
+        proximos meses.
+    </p>
+    <p>
+        En FreshFits ya estamos preparando el stock con los colores y estilos que mas se van a usar:
+        tonos tierra, denim lavado y poleras con graficos retro para todos los gustos.
+    </p>
+    <p>
+        Mantente atento a nuestro catalogo, porque cada semana llegan estrenos nuevos con precios
+        especiales de lanzamiento.
+    </p>
+    <a href="{{ url_for('blog') }}" class="btn btn-accent mt-3"><i class="bi bi-arrow-left"></i> Volver al Blog</a>
+</article>
+{% endblock %}

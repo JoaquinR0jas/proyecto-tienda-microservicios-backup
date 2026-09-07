@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Nosotros - FreshFits{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <h1 class="section-title">Quienes somos</h1>
+            <p>
+                <strong>FreshFits</strong> es una tienda online dedicada a la venta de ropa moderna,
+                creada para que lleves un estilo comodo, actual y sobre todo fresh en tu dia a dia.
+            </p>
+            <p>
+                En FreshFits encontraras poleras, polerones, jeans, camisas, zapatillas y accesorios,
+                con una experiencia de compra simple, rapida y pensada para quienes aman vestir bien
+                sin complicaciones.
+            </p>
+            <p>
+                Nuestro proposito es ofrecer un catalogo variado, informacion clara de cada prenda
+                y un proceso de compra sin complicaciones, todo dentro de una interfaz moderna y
+                atractiva con identidad streetwear.
+            </p>
+        </div>
+        <div class="col-lg-6 text-center">
+            <img src="{{ url_for('static', filename='img/quiensomos.jpg') }}" alt="Quienes somos - FreshFits" class="img-fluid rounded">
+        </div>
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <i class="bi bi-handbag display-5 text-accent mb-3"></i>
+                <h3 class="h5">Que vendemos</h3>
+                <p class="small text-muted mb-0">Ropa moderna para hombre y mujer, de multiples estilos y categorias.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <i class="bi bi-bullseye display-5 text-accent mb-3"></i>
+                <h3 class="h5">Nuestro proposito</h3>
+                <p class="small text-muted mb-0">Acercar la moda a mas personas con una plataforma simple y confiable.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <i class="bi bi-people display-5 text-accent mb-3"></i>
+                <h3 class="h5">Quienes lo desarrollamos</h3>
+                <p class="small text-muted mb-0">Un equipo de estudiantes que construyo este proyecto academico con mucha actitud.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-8">
+            <h2 class="section-title text-center">Como funciona FreshFits</h2>
+            <p class="text-center text-muted mb-4">Mirate este video y entiende en un minuto como esta construida la plataforma y su codigo.</p>
+            <div class="ratio ratio-16x9 ff-video">
+                <!-- Video promocional del proyecto.
+                     ACA VA EL VIDEO QUE GRABE: reemplaza 'video-promo.mp4' por el nombre de
+                     tu archivo y dejalo dentro de static/img/ (o agrega aqui mas formatos:
+                     <source src="..." type="video/mp4">). -->
+                <video controls poster="{{ url_for('static', filename='img/banner-principal.png') }}">
+                    <source src="{{ url_for('static', filename='img/video-promo.mp4') }}" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

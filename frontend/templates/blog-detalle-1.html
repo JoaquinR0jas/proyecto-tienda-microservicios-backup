@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}FreshFits abre sus puertas - Blog{% endblock %}
+
+{% block content %}
+<article class="container py-5" style="max-width: 800px;">
+    <img src="{{ url_for('static', filename='img/blog/blooms.png') }}" class="img-fluid rounded mb-4" alt="FreshFits abre sus puertas">
+    <p class="text-muted small mb-1">01 de agosto, 2026</p>
+    <h1 class="mb-4">FreshFits abre sus puertas</h1>
+    <p>
+        Despues de meses de trabajo, hoy nace <strong>FreshFits</strong>, una nueva tienda online
+        pensada para quienes quieren vestir bien sin complicarse. Nuestro objetivo es simple: ofrecer
+        un catalogo variado de ropa moderna, con una experiencia de compra rapida, clara y sin problemas.
+    </p>
+    <p>
+        Desde el primer dia contaras con un catalogo organizado por categorias, fichas de producto
+        con toda la informacion que necesitas, y un carrito de compras que recuerda tus prendas
+        aunque cierres el navegador.
+    </p>
+    <p>
+        Este es solo el comienzo. En las proximas semanas seguiremos sumando prendas, promociones
+        y contenido para toda la comunidad. Gracias por ser parte de este lanzamiento.
+    </p>
+    <a href="{{ url_for('blog') }}" class="btn btn-accent mt-3"><i class="bi bi-arrow-left"></i> Volver al Blog</a>
+</article>
+{% endblock %}

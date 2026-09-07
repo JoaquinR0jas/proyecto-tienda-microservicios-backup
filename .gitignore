@@ -24,6 +24,13 @@ FULLSTACK/
 *.docx
 *.doc
 
+# Python (carpetas de cache que solo ensucian el repo)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
 # Maven Wrapper redundante en submódulos (solo raíz es necesaria)
 */mvnw
 */mvnw.cmd
