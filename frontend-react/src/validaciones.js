@@ -42,3 +42,19 @@ export function textoOk(valor, maximo) {
   if (maximo && valor.trim().length > maximo) return false
   return true
 }
+
+export function numeroOk(valor, minimo) {
+  if (valor === "" || valor === null || valor === undefined) return false
+  const n = Number(valor)
+  return !isNaN(n) && n >= minimo
+}
+
+export function enteroOk(valor, minimo) {
+  return numeroOk(valor, minimo) && Number.isInteger(Number(valor))
+}
+
+// clase bootstrap del campo: verde si esta bien y rojo si tiene error (solo despues de intentar enviar)
+export function claseCampo(errores, validado, campo, base = "form-control") {
+  if (!validado) return base
+  return base + (errores[campo] ? " is-invalid" : " is-valid")
+}

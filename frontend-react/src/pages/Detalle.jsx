@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, plata, imgProducto, nombreCategoria } from '../datos.js'
+import { KEYS, getColeccion, plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { agregarConAviso } from '../alertas.js'
 
 export default function Detalle() {
   const { codigo } = useParams()
@@ -25,29 +26,11 @@ export default function Detalle() {
   const agotado = p.stock <= 0
 
   function agregar() {
-    const carrito = getColeccion(KEYS.carrito)
-    const item = carrito.find(i => i.codigo === p.codigo)
-    const actual = item ? item.cantidad : 0
-    if (actual + cant > p.stock) {
-      alert("Solo hay " + p.stock + " unidades disponibles")
-      return
-    }
-    if (item) item.cantidad += cant
-    else carrito.push({ codigo: p.codigo, cantidad: cant })
-    setColeccion(KEYS.carrito, carrito)
-    window.dispatchEvent(new Event("carrito-cambio"))
-    alert(p.nombre + " se agrego al carrito")
+    agregarConAviso(p.codigo, cant)
   }
 
   return (
     <section className="container py-5">
-      <nav>
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item"><Link to="/">Inicio</Link></li>
-          <li className="breadcrumb-item"><Link to="/productos">Tienda</Link></li>
-          <li className="breadcrumb-item active">Detalle</li>
-        </ol>
-      </nav>
       <div className="row g-4">
         <div className="col-md-5">
           <img src={imgProducto(p)} className="img-fluid rounded bg-ff-panel p-2" alt={p.nombre} />
@@ -56,7 +39,15 @@ export default function Detalle() {
           <span className="badge bg-secondary mb-2">{nombreCategoria(p.categoriaId)}</span>
           <h1 className="h3">{p.nombre}</h1>
           <p className="text-muted">{p.descripcion || "Sin descripcion disponible."}</p>
-          <p className="display-6">{plata(p.precio)}</p>
+          {enOferta(p) ? (
+            <p className="display-6">
+              <span className="precio-tachado fs-4 me-2">{plata(p.precio)}</span>
+              <span className="text-danger">{plata(precioFinal(p))}</span>
+              <span className="badge bg-danger fs-6 ms-2 align-middle">-{p.descuento}%</span>
+            </p>
+          ) : (
+            <p className="display-6">{plata(p.precio)}</p>
+          )}
           <p>{agotado ? <span className="badge bg-danger">Sin stock</span> : <span className="badge bg-success">Stock disponible: {p.stock}</span>}</p>
           <div className="d-flex align-items-center gap-3 my-3">
             <label className="form-label mb-0">Cantidad</label>

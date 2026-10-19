@@ -1,10 +1,13 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { KEYS, getColeccion, getSesion } from '../datos.js'
 
 export default function Navbar() {
   const [sesion, setSesion] = useState(null)
   const [cant, setCant] = useState(0)
+  const [texto, setTexto] = useState("")
+  const [linea, setLinea] = useState({ left: 0, width: 0 })
+  const menuRef = useRef(null)
   const nav = useNavigate()
   const ruta = useLocation().pathname
 
@@ -26,13 +29,52 @@ export default function Navbar() {
     }
   }, [ruta])
 
-  function salir() {
+  // mueve la linea indicadora bajo el enlace indicado, o bajo el activo si no se indica ninguno
+  function moverLinea(enlace) {
+    const menu = menuRef.current
+    if (!menu) return
+    const destino = enlace || menu.querySelector(".nav-link.active")
+    if (!destino) {
+      setLinea({ left: 0, width: 0 })
+      return
+    }
+    const r = destino.getBoundingClientRect()
+    const m = menu.getBoundingClientRect()
+    setLinea({ left: r.left - m.left, width: r.width })
+  }
+
+  useEffect(() => {
+    moverLinea(null)
+    // cuando terminan de cargar las fuentes cambia el ancho de los enlaces
+    document.fonts?.ready.then(() => moverLinea(null))
+    const alCambiarTamano = () => moverLinea(null)
+    window.addEventListener("resize", alCambiarTamano)
+    return () => window.removeEventListener("resize", alCambiarTamano)
+  }, [ruta, sesion])
+
+  function buscar(e) {
+    e.preventDefault()
+    nav("/productos" + (texto.trim() ? "?q=" + encodeURIComponent(texto.trim()) : ""))
+  }
+
+  function salir(e) {
+    e.preventDefault()
     localStorage.removeItem(KEYS.sesion)
     window.dispatchEvent(new Event("sesion-cambio"))
     nav("/login")
   }
 
   const esAdmin = sesion && (sesion.rolId === 1 || sesion.rolId === 2)
+
+  function enlace(to, contenido, activo) {
+    return (
+      <li className="nav-item">
+        <Link className={"nav-link" + (activo ? " active" : "")} to={to} onMouseEnter={e => moverLinea(e.currentTarget)}>
+          {contenido}
+        </Link>
+      </li>
+    )
+  }
 
   return (
     <header>
@@ -45,16 +87,20 @@ export default function Navbar() {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navMenu">
-            <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/" ? " active" : "")} to="/">Inicio</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta.startsWith("/productos") ? " active" : "")} to="/productos">Tienda</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta.startsWith("/blog") ? " active" : "")} to="/blog">Blog</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/nosotros" ? " active" : "")} to="/nosotros">Nosotros</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/contacto" ? " active" : "")} to="/contacto">Contacto</Link></li>
-              {esAdmin && (
-                <li className="nav-item"><Link className="nav-link" to="/admin"><i className="bi bi-speedometer2"></i> Administracion</Link></li>
-              )}
+            <ul className="navbar-nav mx-auto mb-2 mb-lg-0" id="navMenuPrincipal" ref={menuRef} onMouseLeave={() => moverLinea(null)}>
+              <span className="nav-indicator" style={{ left: linea.left, width: linea.width }}></span>
+              {enlace("/", "Inicio", ruta === "/")}
+              {enlace("/productos", "Tienda", ruta.startsWith("/productos") || ruta.startsWith("/producto/"))}
+              {enlace("/ofertas", "Ofertas", ruta === "/ofertas")}
+              {enlace("/blog", "Blog", ruta.startsWith("/blog"))}
+              {enlace("/nosotros", "Nosotros", ruta === "/nosotros")}
+              {enlace("/contacto", "Contacto", ruta === "/contacto")}
+              {esAdmin && enlace("/admin", <><i className="bi bi-speedometer2"></i> Administracion</>, ruta.startsWith("/admin"))}
             </ul>
+            <form className="d-flex my-2 my-lg-0 me-lg-3" role="search" onSubmit={buscar}>
+              <input className="form-control form-control-sm" type="search" placeholder="Buscar" value={texto} onChange={e => setTexto(e.target.value)} />
+              <button className="btn btn-outline-dark btn-sm ms-1" type="submit"><i className="bi bi-search"></i></button>
+            </form>
             <ul className="navbar-nav align-items-lg-center gap-lg-3">
               <li className="nav-item">
                 <Link className="nav-link position-relative" to="/carrito" title="Carrito">
@@ -66,7 +112,7 @@ export default function Navbar() {
               </li>
               {!sesion ? (
                 <li className="nav-item">
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex align-items-center gap-2 text-nowrap">
                     <Link className="btn btn-outline-dark btn-sm" to="/login">Iniciar sesion</Link>
                     <Link className="btn btn-dark btn-sm" to="/registro">Registrarse</Link>
                   </div>

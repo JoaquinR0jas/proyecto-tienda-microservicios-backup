@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { KEYS, getColeccion } from '../datos.js'
+import { agregarConAviso } from '../alertas.js'
 import Tarjeta from '../components/Tarjeta.jsx'
 
 export default function Home() {
@@ -29,23 +30,6 @@ export default function Home() {
     return () => clearInterval(t)
   }, [])
 
-  function agregar(codigo) {
-    const prods = getColeccion(KEYS.productos)
-    const prod = prods.find(p => p.codigo === codigo)
-    if (!prod || prod.stock <= 0) return
-    const carrito = getColeccion(KEYS.carrito)
-    const item = carrito.find(i => i.codigo === codigo)
-    const actual = item ? item.cantidad : 0
-    if (actual + 1 > prod.stock) {
-      alert("Solo hay " + prod.stock + " unidades de " + prod.nombre)
-      return
-    }
-    if (item) item.cantidad += 1
-    else carrito.push({ codigo, cantidad: 1 })
-    setColeccion(KEYS.carrito, carrito)
-    window.dispatchEvent(new Event("carrito-cambio"))
-  }
-
   function mover(dir) {
     if (filaRef.current) {
       filaRef.current.scrollBy({ left: dir * filaRef.current.clientWidth * 0.8, behavior: "smooth" })
@@ -69,26 +53,17 @@ export default function Home() {
         </div>
         <div className="hero-intro-content">
           <h1 className="hero-intro-title">FRESH <span>FITS</span></h1>
-          <div className="d-flex gap-2 justify-content-center mt-3">
-            <button className="btn btn-sm btn-light" onClick={() => setFoto((foto - 1 + fotos.length) % fotos.length)}>{"<"}</button>
-            <button className="btn btn-sm btn-light" onClick={() => setFoto((foto + 1) % fotos.length)}>{">"}</button>
-          </div>
-          <div className="d-flex gap-2 justify-content-center mt-2">
-            {fotos.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setFoto(i)}
-                style={{
-                  width: 10, height: 10, borderRadius: "50%", border: "none",
-                  background: i === foto ? "#fff" : "rgba(255,255,255,0.4)"
-                }}
-              />
-            ))}
-          </div>
         </div>
-        <div className="scroll-indicator" id="scrollIndicator">
-          <span className="scroll-text">scroll</span>
-          <i className="bi bi-chevron-double-down"></i>
+        <div className="hero-controles">
+          <button className="hero-flecha" type="button" aria-label="Imagen anterior" onClick={() => setFoto((foto - 1 + fotos.length) % fotos.length)}>
+            <i className="bi bi-chevron-left"></i>
+          </button>
+          {fotos.map((_, i) => (
+            <button key={i} type="button" aria-label={"Imagen " + (i + 1)} className={"hero-punto" + (i === foto ? " activo" : "")} onClick={() => setFoto(i)} />
+          ))}
+          <button className="hero-flecha" type="button" aria-label="Imagen siguiente" onClick={() => setFoto((foto + 1) % fotos.length)}>
+            <i className="bi bi-chevron-right"></i>
+          </button>
         </div>
       </section>
 
@@ -105,7 +80,7 @@ export default function Home() {
             <i className="bi bi-chevron-right"></i>
           </button>
           <div className="row g-4 carrusel-productos" ref={filaRef}>
-            {destacados.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={agregar} />)}
+            {destacados.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={c => agregarConAviso(c)} />)}
           </div>
         </div>
       </section>
