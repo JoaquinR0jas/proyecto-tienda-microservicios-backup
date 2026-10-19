@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "karma start karma.conf.cjs",
+    "test:watch": "karma start karma.conf.cjs --no-single-run"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -14,7 +16,18 @@
     "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-react": "^7.29.7",
+    "@testing-library/react": "^14.3.1",
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0"
+    "babel-loader": "^9.2.1",
+    "jasmine-core": "^5.13.0",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-jasmine": "^5.1.0",
+    "karma-webpack": "^5.0.1",
+    "vite": "^5.4.0",
+    "webpack": "^5.112.0"
   }
 }
