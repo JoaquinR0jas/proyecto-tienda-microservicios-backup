@@ -1,40 +1,38 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, plata, getSesion, nombreCategoria } from '../datos.js'
-import { AdminLayout } from '../components/AdminMenu.jsx'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { KEYS, getColeccion, setColeccion, plata, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
+import { aviso, confirmar } from '../alertas.js'
 
 export default function AdminProductos() {
-  const nav = useNavigate()
-  const [prods, setProds] = useState([])
-  const [soloVer, setSoloVer] = useState(false)
+  const sesion = useAdmin()
+  const [prods, setProds] = useState(() => getColeccion(KEYS.productos))
+  const [busqueda, setBusqueda] = useState("")
+  if (!sesion) return null
 
-  useEffect(() => {
-    const s = getSesion()
-    if (!s || (s.rolId !== 1 && s.rolId !== 2)) {
-      alert("No tienes permiso para ver esto")
-      nav("/login")
-      return
-    }
-    setSoloVer(s.rolId === 2)
-    setProds(getColeccion(KEYS.productos))
-  }, [])
+  const soloVer = sesion.rolId === 2
 
-  function eliminar(codigo) {
-    if (!confirm("Eliminar este producto? No se puede deshacer")) return
+  async function eliminar(codigo) {
+    if (!await confirmar("Eliminar producto?", "Esta accion no se puede deshacer.")) return
     setColeccion(KEYS.productos, getColeccion(KEYS.productos).filter(p => p.codigo !== codigo))
     setProds(getColeccion(KEYS.productos))
+    aviso("Eliminado", "El producto fue eliminado correctamente.")
   }
 
-  function ver(p) {
-    alert(p.nombre + "\nCodigo: " + p.codigo + "\nPrecio: " + plata(p.precio) + "\nStock: " + p.stock)
-  }
+  const texto = busqueda.toLowerCase()
+  const lista = prods.filter(p => !texto || p.nombre.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto))
 
   return (
     <AdminLayout>
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h1 className="section-title mb-0">Productos</h1>
-        {!soloVer && <Link to="/admin/productos/nuevo" className="btn btn-accent btn-sm">+ Nuevo producto</Link>}
+        <div className="d-flex flex-wrap gap-2">
+          <Link to="/admin/productos/criticos" className="btn btn-outline-danger btn-sm"><i className="bi bi-exclamation-triangle"></i> Productos criticos</Link>
+          <Link to="/admin/productos/reportes" className="btn btn-outline-accent btn-sm"><i className="bi bi-bar-chart"></i> Reportes</Link>
+          {!soloVer && <Link to="/admin/productos/nuevo" className="btn btn-accent btn-sm">+ Nuevo producto</Link>}
+        </div>
       </div>
+      <input className="form-control mb-3" placeholder="Buscar por nombre o codigo..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0">
           <thead>
@@ -49,16 +47,16 @@ export default function AdminProductos() {
             </tr>
           </thead>
           <tbody>
-            {prods.map(p => (
+            {lista.map(p => (
               <tr key={p.codigo}>
                 <td>{p.codigo}</td>
-                <td>{p.nombre}</td>
+                <td>{p.nombre} {enOferta(p) && <span className="badge bg-danger">-{p.descuento}%</span>}</td>
                 <td>{nombreCategoria(p.categoriaId)}</td>
-                <td>{plata(p.precio)}</td>
+                <td>{plata(precioFinal(p))}</td>
                 <td className={p.stockCritico != null && p.stock <= p.stockCritico ? "stock-critico" : ""}>{p.stock}</td>
                 <td><span className={"badge " + (p.estado === "Activo" ? "bg-success" : "bg-secondary")}>{p.estado}</span></td>
                 <td className="text-nowrap">
-                  <button className="btn btn-sm btn-outline-accent me-1" onClick={() => ver(p)}><i className="bi bi-eye"></i></button>
+                  <Link to={"/admin/productos/ver/" + p.codigo} className="btn btn-sm btn-outline-accent me-1"><i className="bi bi-eye"></i></Link>
                   {!soloVer && (
                     <>
                       <Link to={"/admin/productos/" + p.codigo} className="btn btn-sm btn-outline-dark me-1"><i className="bi bi-pencil"></i></Link>

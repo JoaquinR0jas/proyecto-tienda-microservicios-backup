@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { useSearchParams } from 'react-router-dom'
+import { KEYS, getColeccion } from '../datos.js'
+import { agregarConAviso } from '../alertas.js'
 import Tarjeta from '../components/Tarjeta.jsx'
 
 export default function Productos() {
-  const [busqueda, setBusqueda] = useState("")
+  const [params] = useSearchParams()
+  const [busqueda, setBusqueda] = useState(params.get("q") || "")
   const [cat, setCat] = useState("")
   const [cats, setCats] = useState([])
   const [lista, setLista] = useState([])
@@ -11,6 +14,11 @@ export default function Productos() {
   useEffect(() => {
     setCats(getColeccion(KEYS.categorias))
   }, [])
+
+  // el buscador del navbar manda la busqueda por la url
+  useEffect(() => {
+    setBusqueda(params.get("q") || "")
+  }, [params])
 
   useEffect(() => {
     let prods = getColeccion(KEYS.productos).filter(p => p.estado === "Activo")
@@ -22,22 +30,6 @@ export default function Productos() {
     }
     setLista(prods)
   }, [busqueda, cat])
-
-  function agregar(codigo) {
-    const prod = getColeccion(KEYS.productos).find(p => p.codigo === codigo)
-    if (!prod || prod.stock <= 0) return
-    const carrito = getColeccion(KEYS.carrito)
-    const item = carrito.find(i => i.codigo === codigo)
-    const actual = item ? item.cantidad : 0
-    if (actual + 1 > prod.stock) {
-      alert("Solo hay " + prod.stock + " unidades disponibles")
-      return
-    }
-    if (item) item.cantidad += 1
-    else carrito.push({ codigo, cantidad: 1 })
-    setColeccion(KEYS.carrito, carrito)
-    window.dispatchEvent(new Event("carrito-cambio"))
-  }
 
   return (
     <section className="container py-5">
@@ -68,7 +60,7 @@ export default function Productos() {
         {lista.length === 0 && (
           <div className="col-12"><p className="text-muted text-center py-5">No se encontraron prendas con esos criterios.</p></div>
         )}
-        {lista.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={agregar} />)}
+        {lista.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={c => agregarConAviso(c)} />)}
       </div>
     </section>
   )

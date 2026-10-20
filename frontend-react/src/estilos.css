@@ -26,7 +26,7 @@ main {
     flex: 1;
 }
 
-h1, h2, h3, h4, .brand-text, .ff-heading {
+h1, h2, h3, h4, .brand-text {
     font-family: "Archivo Black", sans-serif;
     letter-spacing: 0.03em;
 }
@@ -120,7 +120,8 @@ a {
 /* Hero intro */
 .hero-intro {
     position: relative;
-    height: 100vh;
+    /* se descuenta el alto del navbar para que los controles del carrusel queden a la vista */
+    height: calc(100vh - 63px);
     min-height: 480px;
     display: flex;
     align-items: center;
@@ -171,44 +172,45 @@ a {
     color: #ffffff;
 }
 
-.scroll-indicator {
+/* controles del carrusel del banner, abajo al centro */
+.hero-controles {
     position: absolute;
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    color: #ffffff;
-    text-decoration: none;
-    transition: opacity 0.4s ease;
+    gap: 1rem;
     z-index: 1;
 }
 
-.scroll-text {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
+.hero-flecha {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: transparent;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Hero / Carousel */
-.hero-section {
-    background: var(--ff-bg);
-    border-bottom: 1px solid var(--ff-border);
+.hero-flecha:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
-.carousel-item img {
-    height: 380px;
-    object-fit: cover;
-    filter: brightness(0.85);
+.hero-punto {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
 }
 
-.carousel-caption {
-    text-align: left;
-    left: 5%;
-    right: auto;
-    bottom: 20%;
+.hero-punto.activo {
+    background: #ffffff;
 }
 
 /* Sections */
@@ -286,22 +288,6 @@ footer.ff-footer .brand-text {
     color: var(--ff-text);
 }
 
-.admin-summary-card {
-    border-left: 4px solid var(--ff-text);
-}
-
-/* Tables */
-table.dataTable {
-    color: var(--ff-text);
-}
-
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter,
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_paginate {
-    color: var(--ff-text-muted);
-}
-
 .stock-critico {
     color: var(--ff-pink);
     font-weight: 600;
@@ -358,4 +344,44 @@ table.dataTable {
 
 .carrusel-flecha-der {
     right: -21px;
+}
+
+/* Ofertas */
+.precio-tachado {
+    text-decoration: line-through;
+    color: var(--ff-text-muted);
+    font-weight: 400;
+}
+
+.badge-oferta {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+    font-size: 0.85rem;
+}
+
+/* Dashboard admin */
+.stat-card {
+    border: none;
+}
+
+.admin-modulo {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-modulo:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.admin-sidebar .nav-link.active {
+    font-weight: 600;
+}
+
+/* Boleta: al imprimir solo se ve el contenido */
+@media print {
+    header, footer, .admin-sidebar, .no-print, .d-lg-none {
+        display: none !important;
+    }
 }
