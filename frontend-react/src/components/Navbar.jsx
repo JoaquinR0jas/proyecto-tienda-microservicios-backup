@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { Navbar as NavbarBootstrap, Nav, NavDropdown, Container, Badge, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, getSesion } from '../datos.js'
 
 export default function Navbar() {
@@ -36,55 +37,64 @@ export default function Navbar() {
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light ff-navbar sticky-top">
-        <div className="container">
-          <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
+      <NavbarBootstrap expand="lg" className="navbar-light ff-navbar sticky-top">
+        <Container>
+          <NavbarBootstrap.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
             <span className="brand-text">FRESH FITS</span>
-          </Link>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navMenu">
-            <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/" ? " active" : "")} to="/">Inicio</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta.startsWith("/productos") ? " active" : "")} to="/productos">Tienda</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta.startsWith("/blog") ? " active" : "")} to="/blog">Blog</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/nosotros" ? " active" : "")} to="/nosotros">Nosotros</Link></li>
-              <li className="nav-item"><Link className={"nav-link" + (ruta === "/contacto" ? " active" : "")} to="/contacto">Contacto</Link></li>
+          </NavbarBootstrap.Brand>
+          <NavbarBootstrap.Toggle aria-controls="navMenu" />
+          <NavbarBootstrap.Collapse id="navMenu">
+            <Nav className="mx-auto mb-2 mb-lg-0">
+              <Nav.Item>
+                <Nav.Link as={Link} to="/" active={ruta === "/"}>Inicio</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link as={Link} to="/productos" active={ruta.startsWith("/productos")}>Tienda</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link as={Link} to="/blog" active={ruta.startsWith("/blog")}>Blog</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link as={Link} to="/nosotros" active={ruta === "/nosotros"}>Nosotros</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link as={Link} to="/contacto" active={ruta === "/contacto"}>Contacto</Nav.Link>
+              </Nav.Item>
               {esAdmin && (
-                <li className="nav-item"><Link className="nav-link" to="/admin"><i className="bi bi-speedometer2"></i> Administracion</Link></li>
+                <Nav.Item>
+                  <Nav.Link as={Link} to="/admin"><i className="bi bi-speedometer2"></i> Administracion</Nav.Link>
+                </Nav.Item>
               )}
-            </ul>
-            <ul className="navbar-nav align-items-lg-center gap-lg-3">
-              <li className="nav-item">
-                <Link className="nav-link position-relative" to="/carrito" title="Carrito">
+            </Nav>
+            <Nav className="align-items-lg-center gap-lg-3">
+              <Nav.Item>
+                <Nav.Link as={Link} to="/carrito" title="Carrito" className="position-relative">
                   <i className="bi bi-bag fs-5"></i>
                   {cant > 0 && (
-                    <span className="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">{cant}</span>
+                    <Badge pill bg="danger" className="position-absolute top-0 start-100 translate-middle">{cant}</Badge>
                   )}
-                </Link>
-              </li>
+                </Nav.Link>
+              </Nav.Item>
               {!sesion ? (
-                <li className="nav-item">
+                <Nav.Item>
                   <div className="d-flex align-items-center gap-2">
-                    <Link className="btn btn-outline-dark btn-sm" to="/login">Iniciar sesion</Link>
-                    <Link className="btn btn-dark btn-sm" to="/registro">Registrarse</Link>
+                    <Button as={Link} to="/login" variant="outline-dark" size="sm">Iniciar sesion</Button>
+                    <Button as={Link} to="/registro" variant="dark" size="sm">Registrarse</Button>
                   </div>
-                </li>
+                </Nav.Item>
               ) : (
-                <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i className="bi bi-person-circle fs-5"></i> {sesion.nombre}
-                  </a>
-                  <ul className="dropdown-menu dropdown-menu-end">
-                    <li><a className="dropdown-item" href="#" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</a></li>
-                  </ul>
-                </li>
+                <NavDropdown
+                  id="userMenu"
+                  align="end"
+                  title={<><i className="bi bi-person-circle fs-5"></i> {sesion.nombre}</>}
+                >
+                  <NavDropdown.Item as="button" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</NavDropdown.Item>
+                </NavDropdown>
               )}
-            </ul>
-          </div>
-        </div>
-      </nav>
+            </Nav>
+          </NavbarBootstrap.Collapse>
+        </Container>
+      </NavbarBootstrap>
     </header>
   )
 }

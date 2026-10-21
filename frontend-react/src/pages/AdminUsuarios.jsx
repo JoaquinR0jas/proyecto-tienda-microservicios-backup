@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Table, Button, Badge } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, getSesion } from '../datos.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
@@ -37,10 +38,10 @@ export default function AdminUsuarios() {
     <AdminLayout>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="section-title mb-0">Usuarios</h1>
-        <Link to="/admin/usuarios/nuevo" className="btn btn-accent btn-sm">+ Nuevo usuario</Link>
+        <Button as={Link} to="/admin/usuarios/nuevo" variant="accent" size="sm">+ Nuevo usuario</Button>
       </div>
       <div className="table-responsive bg-ff-panel rounded p-2">
-        <table className="table table-striped mb-0">
+        <Table striped className="mb-0">
           <thead>
             <tr>
               <th>RUN</th>
@@ -60,15 +61,15 @@ export default function AdminUsuarios() {
                 <td>{u.correo}</td>
                 <td>{nombreRol(u.rolId)}</td>
                 <td>{nombreRegion(u.regionId)}</td>
-                <td><span className={"badge " + (u.estado === "Activo" ? "bg-success" : "bg-secondary")}>{u.estado}</span></td>
+                <td><Badge bg={u.estado === "Activo" ? "success" : "secondary"}>{u.estado}</Badge></td>
                 <td className="text-nowrap">
-                  <Link to={"/admin/usuarios/" + u.run} className="btn btn-sm btn-outline-dark me-1"><i className="bi bi-pencil"></i></Link>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => eliminar(u.run)}><i className="bi bi-trash"></i></button>
+                  <Button as={Link} to={"/admin/usuarios/" + u.run} variant="outline-dark" size="sm" className="me-1"><i className="bi bi-pencil"></i></Button>
+                  <Button variant="outline-danger" size="sm" onClick={() => eliminar(u.run)}><i className="bi bi-trash"></i></Button>
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </div>
     </AdminLayout>
   )

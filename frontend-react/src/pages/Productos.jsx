@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Container, Row, Col, Form, InputGroup } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion } from '../datos.js'
 import Tarjeta from '../components/Tarjeta.jsx'
 
@@ -40,36 +41,35 @@ export default function Productos() {
   }
 
   return (
-    <section className="container py-5">
+    <Container className="py-5">
       <h1 className="section-title">Catalogo FreshFits</h1>
 
-      <div className="row g-3 mb-4 bg-ff-panel p-3 rounded">
-        <div className="col-md-8">
-          <div className="input-group">
-            <span className="input-group-text bg-transparent text-muted"><i className="bi bi-search"></i></span>
-            <input
+      <Row className="g-3 mb-4 bg-ff-panel p-3 rounded">
+        <Col md={8}>
+          <InputGroup>
+            <InputGroup.Text className="bg-transparent text-muted"><i className="bi bi-search"></i></InputGroup.Text>
+            <Form.Control
               type="text"
-              className="form-control"
               placeholder="Buscar prenda por nombre..."
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
             />
-          </div>
-        </div>
-        <div className="col-md-4">
-          <select className="form-select" value={cat} onChange={e => setCat(e.target.value)}>
+          </InputGroup>
+        </Col>
+        <Col md={4}>
+          <Form.Select value={cat} onChange={e => setCat(e.target.value)}>
             <option value="">Todas las categorias</option>
             {cats.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
-        </div>
-      </div>
+          </Form.Select>
+        </Col>
+      </Row>
 
-      <div className="row g-4">
+      <Row className="g-4">
         {lista.length === 0 && (
-          <div className="col-12"><p className="text-muted text-center py-5">No se encontraron prendas con esos criterios.</p></div>
+          <Col xs={12}><p className="text-muted text-center py-5">No se encontraron prendas con esos criterios.</p></Col>
         )}
         {lista.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={agregar} />)}
-      </div>
-    </section>
+      </Row>
+    </Container>
   )
 }

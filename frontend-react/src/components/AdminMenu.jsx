@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom'
+import { Nav } from 'react-bootstrap'
 
 export function AdminMenu() {
   return (
     <>
       <div className="admin-sidebar d-none d-lg-block">
-        <div className="d-flex flex-column gap-1">
-          <Link to="/admin" className="nav-link px-3 py-2">Panel principal</Link>
-          <Link to="/admin/productos" className="nav-link px-3 py-2">Productos</Link>
-          <Link to="/admin/usuarios" className="nav-link px-3 py-2">Usuarios</Link>
-          <Link to="/" className="nav-link px-3 py-2">Volver a la tienda</Link>
-        </div>
+        <Nav className="flex-column gap-1">
+          <Nav.Link as={Link} to="/admin" className="px-3 py-2">Panel principal</Nav.Link>
+          <Nav.Link as={Link} to="/admin/productos" className="px-3 py-2">Productos</Nav.Link>
+          <Nav.Link as={Link} to="/admin/usuarios" className="px-3 py-2">Usuarios</Nav.Link>
+          <Nav.Link as={Link} to="/" className="px-3 py-2">Volver a la tienda</Nav.Link>
+        </Nav>
       </div>
     </>
   )

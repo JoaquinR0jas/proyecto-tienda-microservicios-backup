@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Row, Col, Form, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, getSesion } from '../datos.js'
 import { correoOk, passOk, runOk, textoOk } from '../validaciones.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
@@ -96,70 +97,70 @@ export default function AdminUsuarioForm() {
   return (
     <AdminLayout>
       <h1 className="section-title">{editando ? "Editar usuario" : "Nuevo usuario"}</h1>
-      <form onSubmit={guardar} className="bg-ff-panel rounded p-4">
-        <div className="row g-3">
-          <div className="col-md-6">
-            <label className="form-label">RUN</label>
-            <input name="run" className="form-control" value={form.run} onChange={cambiar} readOnly={editando} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Fecha nacimiento</label>
-            <input name="fecha" type="date" className="form-control" value={form.fecha} onChange={cambiar} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Nombre</label>
-            <input name="nombre" className="form-control" value={form.nombre} onChange={cambiar} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Apellidos</label>
-            <input name="apellidos" className="form-control" value={form.apellidos} onChange={cambiar} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Correo</label>
-            <input name="correo" className="form-control" value={form.correo} onChange={cambiar} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Contrasena</label>
-            <input name="pass" className="form-control" value={form.pass} onChange={cambiar} />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Rol</label>
-            <select name="rol" className="form-select" value={form.rol} onChange={cambiar}>
+      <Form onSubmit={guardar} className="bg-ff-panel rounded p-4">
+        <Row className="g-3">
+          <Col md={6}>
+            <Form.Label>RUN</Form.Label>
+            <Form.Control name="run" value={form.run} onChange={cambiar} readOnly={editando} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Fecha nacimiento</Form.Label>
+            <Form.Control name="fecha" type="date" value={form.fecha} onChange={cambiar} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Nombre</Form.Label>
+            <Form.Control name="nombre" value={form.nombre} onChange={cambiar} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Apellidos</Form.Label>
+            <Form.Control name="apellidos" value={form.apellidos} onChange={cambiar} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Correo</Form.Label>
+            <Form.Control name="correo" value={form.correo} onChange={cambiar} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Contrasena</Form.Label>
+            <Form.Control name="pass" value={form.pass} onChange={cambiar} />
+          </Col>
+          <Col md={4}>
+            <Form.Label>Rol</Form.Label>
+            <Form.Select name="rol" value={form.rol} onChange={cambiar}>
               <option value="">Seleccione...</option>
               {roles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
-            </select>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Region</label>
-            <select name="region" className="form-select" value={form.region} onChange={cambiar}>
+            </Form.Select>
+          </Col>
+          <Col md={4}>
+            <Form.Label>Region</Form.Label>
+            <Form.Select name="region" value={form.region} onChange={cambiar}>
               <option value="">Seleccione...</option>
               {regiones.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
-            </select>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Comuna</label>
-            <select name="comuna" className="form-select" value={form.comuna} onChange={cambiar}>
+            </Form.Select>
+          </Col>
+          <Col md={4}>
+            <Form.Label>Comuna</Form.Label>
+            <Form.Select name="comuna" value={form.comuna} onChange={cambiar}>
               <option value="">Seleccione...</option>
               {comunas.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
-          </div>
-          <div className="col-md-8">
-            <label className="form-label">Direccion</label>
-            <input name="direccion" className="form-control" value={form.direccion} onChange={cambiar} />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Estado</label>
-            <select name="estado" className="form-select" value={form.estado} onChange={cambiar}>
+            </Form.Select>
+          </Col>
+          <Col md={8}>
+            <Form.Label>Direccion</Form.Label>
+            <Form.Control name="direccion" value={form.direccion} onChange={cambiar} />
+          </Col>
+          <Col md={4}>
+            <Form.Label>Estado</Form.Label>
+            <Form.Select name="estado" value={form.estado} onChange={cambiar}>
               <option>Activo</option>
               <option>Inactivo</option>
-            </select>
-          </div>
-        </div>
+            </Form.Select>
+          </Col>
+        </Row>
         <div className="d-flex gap-2 mt-4">
-          <button type="submit" className="btn btn-accent">Guardar</button>
-          <Link to="/admin/usuarios" className="btn btn-outline-accent">Volver</Link>
+          <Button type="submit" variant="accent">Guardar</Button>
+          <Button as={Link} to="/admin/usuarios" variant="outline-accent">Volver</Button>
         </div>
-      </form>
+      </Form>
     </AdminLayout>
   )
 }

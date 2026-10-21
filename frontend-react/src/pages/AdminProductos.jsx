@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Table, Button, Badge } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, plata, getSesion, nombreCategoria } from '../datos.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
@@ -33,10 +34,10 @@ export default function AdminProductos() {
     <AdminLayout>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="section-title mb-0">Productos</h1>
-        {!soloVer && <Link to="/admin/productos/nuevo" className="btn btn-accent btn-sm">+ Nuevo producto</Link>}
+        {!soloVer && <Button as={Link} to="/admin/productos/nuevo" variant="accent" size="sm">+ Nuevo producto</Button>}
       </div>
       <div className="table-responsive bg-ff-panel rounded p-2">
-        <table className="table table-striped mb-0">
+        <Table striped className="mb-0">
           <thead>
             <tr>
               <th>Codigo</th>
@@ -56,20 +57,20 @@ export default function AdminProductos() {
                 <td>{nombreCategoria(p.categoriaId)}</td>
                 <td>{plata(p.precio)}</td>
                 <td className={p.stockCritico != null && p.stock <= p.stockCritico ? "stock-critico" : ""}>{p.stock}</td>
-                <td><span className={"badge " + (p.estado === "Activo" ? "bg-success" : "bg-secondary")}>{p.estado}</span></td>
+                <td><Badge bg={p.estado === "Activo" ? "success" : "secondary"}>{p.estado}</Badge></td>
                 <td className="text-nowrap">
-                  <button className="btn btn-sm btn-outline-accent me-1" onClick={() => ver(p)}><i className="bi bi-eye"></i></button>
+                  <Button variant="outline-accent" size="sm" className="me-1" onClick={() => ver(p)}><i className="bi bi-eye"></i></Button>
                   {!soloVer && (
                     <>
-                      <Link to={"/admin/productos/" + p.codigo} className="btn btn-sm btn-outline-dark me-1"><i className="bi bi-pencil"></i></Link>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => eliminar(p.codigo)}><i className="bi bi-trash"></i></button>
+                      <Button as={Link} to={"/admin/productos/" + p.codigo} variant="outline-dark" size="sm" className="me-1"><i className="bi bi-pencil"></i></Button>
+                      <Button variant="outline-danger" size="sm" onClick={() => eliminar(p.codigo)}><i className="bi bi-trash"></i></Button>
                     </>
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </div>
     </AdminLayout>
   )

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Container, Row, Col, Button, Breadcrumb } from 'react-bootstrap'
 import { KEYS, getColeccion } from '../datos.js'
 
 const TEXTOS = {
@@ -27,34 +28,32 @@ export default function BlogDetalle() {
 
   if (!n) {
     return (
-      <section className="container py-5 text-center">
+      <Container className="py-5 text-center">
         <p className="text-muted">Noticia no encontrada.</p>
-        <Link to="/blog" className="btn btn-accent">Volver al blog</Link>
-      </section>
+        <Button as={Link} to="/blog" variant="accent">Volver al blog</Button>
+      </Container>
     )
   }
 
   const extra = TEXTOS[n.slug]
 
   return (
-    <section className="container py-5">
-      <nav>
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item"><Link to="/">Inicio</Link></li>
-          <li className="breadcrumb-item"><Link to="/blog">Blog</Link></li>
-          <li className="breadcrumb-item active">{n.titulo}</li>
-        </ol>
-      </nav>
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <Container className="py-5">
+      <Breadcrumb>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/" }}>Inicio</Breadcrumb.Item>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/blog" }}>Blog</Breadcrumb.Item>
+        <Breadcrumb.Item active>{n.titulo}</Breadcrumb.Item>
+      </Breadcrumb>
+      <Row className="justify-content-center">
+        <Col lg={8}>
           <p className="small text-muted">{n.fecha}</p>
           <h1 className="h3">{n.titulo}</h1>
           <img src={"/img/" + n.imagen} className="img-fluid rounded my-3" alt={n.titulo} />
           <p>{n.resumen}</p>
           {extra && <p className="text-muted">{extra.texto}</p>}
-          <Link to="/blog" className="btn btn-outline-accent mt-3">Volver</Link>
-        </div>
-      </div>
-    </section>
+          <Button as={Link} to="/blog" variant="outline-accent" className="mt-3">Volver</Button>
+        </Col>
+      </Row>
+    </Container>
   )
 }

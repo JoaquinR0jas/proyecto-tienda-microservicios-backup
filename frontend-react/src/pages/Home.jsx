@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Container, Row, Col, Card, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion } from '../datos.js'
 import Tarjeta from '../components/Tarjeta.jsx'
 
@@ -70,8 +71,8 @@ export default function Home() {
         <div className="hero-intro-content">
           <h1 className="hero-intro-title">FRESH <span>FITS</span></h1>
           <div className="d-flex gap-2 justify-content-center mt-3">
-            <button className="btn btn-sm btn-light" onClick={() => setFoto((foto - 1 + fotos.length) % fotos.length)}>{"<"}</button>
-            <button className="btn btn-sm btn-light" onClick={() => setFoto((foto + 1) % fotos.length)}>{">"}</button>
+            <Button variant="light" size="sm" onClick={() => setFoto((foto - 1 + fotos.length) % fotos.length)}>{"<"}</Button>
+            <Button variant="light" size="sm" onClick={() => setFoto((foto + 1) % fotos.length)}>{">"}</Button>
           </div>
           <div className="d-flex gap-2 justify-content-center mt-2">
             {fotos.map((_, i) => (
@@ -92,45 +93,45 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container py-5">
+      <Container className="py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="section-title mb-0">Productos destacados</h2>
-          <Link to="/productos" className="btn btn-outline-accent btn-sm">Ver todos <i className="bi bi-arrow-right"></i></Link>
+          <Button as={Link} to="/productos" variant="outline-accent" size="sm">Ver todos <i className="bi bi-arrow-right"></i></Button>
         </div>
         <div className="position-relative">
-          <button className="btn btn-accent carrusel-flecha carrusel-flecha-izq" onClick={() => mover(-1)} type="button">
+          <Button variant="accent" className="carrusel-flecha carrusel-flecha-izq" onClick={() => mover(-1)} type="button">
             <i className="bi bi-chevron-left"></i>
-          </button>
-          <button className="btn btn-accent carrusel-flecha carrusel-flecha-der" onClick={() => mover(1)} type="button">
+          </Button>
+          <Button variant="accent" className="carrusel-flecha carrusel-flecha-der" onClick={() => mover(1)} type="button">
             <i className="bi bi-chevron-right"></i>
-          </button>
+          </Button>
           <div className="row g-4 carrusel-productos" ref={filaRef}>
             {destacados.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={agregar} />)}
           </div>
         </div>
-      </section>
+      </Container>
 
-      <section className="container py-5">
+      <Container className="py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="section-title mb-0">Ultimas noticias</h2>
-          <Link to="/blog" className="btn btn-outline-accent btn-sm">Ver blog <i className="bi bi-arrow-right"></i></Link>
+          <Button as={Link} to="/blog" variant="outline-accent" size="sm">Ver blog <i className="bi bi-arrow-right"></i></Button>
         </div>
-        <div className="row g-4">
+        <Row className="g-4">
           {noticias.map(n => (
-            <div className="col-md-6 col-lg-4" key={n.id}>
-              <article className="card h-100 card-ff-hover">
-                <img src={"/img/" + n.imagen} className="card-img-top" alt={n.titulo} />
-                <div className="card-body d-flex flex-column">
+            <Col md={6} lg={4} key={n.id}>
+              <Card className="h-100 card-ff-hover">
+                <Card.Img variant="top" src={"/img/" + n.imagen} alt={n.titulo} />
+                <Card.Body className="d-flex flex-column">
                   <p className="small text-muted mb-1">{n.fecha}</p>
-                  <h3 className="h6">{n.titulo}</h3>
+                  <Card.Title as="h3" className="h6">{n.titulo}</Card.Title>
                   <p className="small text-muted flex-grow-1">{n.resumen}</p>
-                  <Link to={"/blog/" + n.slug} className="btn btn-outline-accent btn-sm align-self-start">Ver noticia</Link>
-                </div>
-              </article>
-            </div>
+                  <Button as={Link} to={"/blog/" + n.slug} variant="outline-accent" size="sm" className="align-self-start">Ver noticia</Button>
+                </Card.Body>
+              </Card>
+            </Col>
           ))}
-        </div>
-      </section>
+        </Row>
+      </Container>
     </>
   )
 }

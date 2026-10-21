@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
 import { KEYS, getColeccion } from '../datos.js'
 import { correoOk, passOk } from '../validaciones.js'
 
@@ -46,44 +47,42 @@ export default function Login() {
   }
 
   return (
-    <section className="container py-5 min-vh-70 d-flex align-items-center">
-      <div className="row justify-content-center w-100">
-        <div className="col-md-6 col-lg-5">
+    <Container className="py-5 min-vh-70 d-flex align-items-center">
+      <Row className="justify-content-center w-100">
+        <Col md={6} lg={5}>
           <div className="auth-card p-4 p-md-5 text-center">
             <img src="/img/logo.svg" alt="FreshFits" height="70" className="mb-3" />
             <h1 className="h3 mb-4">Iniciar sesion</h1>
-            <form onSubmit={entrar} className="text-start">
-              <div className="mb-3">
-                <label className="form-label">Correo</label>
-                <input
+            <Form onSubmit={entrar} className="text-start">
+              <Form.Group className="mb-3">
+                <Form.Label>Correo</Form.Label>
+                <Form.Control
                   type="email"
-                  className="form-control"
                   maxLength="100"
                   placeholder="usuario@gmail.com"
                   value={correo}
                   onChange={e => setCorreo(e.target.value)}
                 />
-              </div>
-              <div className="mb-4">
-                <label className="form-label">Contrasena</label>
-                <input
+              </Form.Group>
+              <Form.Group className="mb-4">
+                <Form.Label>Contrasena</Form.Label>
+                <Form.Control
                   type="password"
-                  className="form-control"
                   maxLength="10"
                   value={pass}
                   onChange={e => setPass(e.target.value)}
                 />
-              </div>
-              {error && <div className="alert alert-danger py-2">{error}</div>}
-              <button type="submit" className="btn btn-accent w-100">Iniciar sesion</button>
-            </form>
+              </Form.Group>
+              {error && <Alert variant="danger" className="py-2">{error}</Alert>}
+              <Button type="submit" variant="accent" className="w-100">Iniciar sesion</Button>
+            </Form>
             <p className="mt-4 mb-0 small text-muted">
               No tienes cuenta? <Link to="/registro">Registrate aqui</Link>
             </p>
             <p className="mt-2 mb-0 small text-muted">admin@gmail.com / admin123</p>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }

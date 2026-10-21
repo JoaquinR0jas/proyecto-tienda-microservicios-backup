@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Row, Col, Card, ListGroup } from 'react-bootstrap'
 import { KEYS, getColeccion, getSesion } from '../datos.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
@@ -32,50 +33,50 @@ export default function Admin() {
       <h1 className="section-title">Panel principal</h1>
       <p className="text-muted">Bienvenido, {info.sesion.nombre} ({rolNombre})</p>
 
-      <div className="row g-4 mt-2">
-        <div className="col-md-4">
-          <div className="card admin-summary-card p-4">
+      <Row className="g-4 mt-2">
+        <Col md={4}>
+          <Card className="admin-summary-card p-4">
             <i className="bi bi-handbag fs-2"></i>
             <h3 className="h2 mt-2 mb-0">{info.prods.length}</h3>
             <p className="text-muted mb-0">Productos registrados</p>
             <Link to="/admin/productos" className="stretched-link"></Link>
-          </div>
-        </div>
+          </Card>
+        </Col>
         {info.sesion.rolId === 1 && (
-          <div className="col-md-4">
-            <div className="card admin-summary-card p-4">
+          <Col md={4}>
+            <Card className="admin-summary-card p-4">
               <i className="bi bi-people fs-2"></i>
               <h3 className="h2 mt-2 mb-0">{info.users.length}</h3>
               <p className="text-muted mb-0">Usuarios registrados</p>
               <Link to="/admin/usuarios" className="stretched-link"></Link>
-            </div>
-          </div>
+            </Card>
+          </Col>
         )}
-        <div className="col-md-4">
-          <div className="card admin-summary-card p-4">
+        <Col md={4}>
+          <Card className="admin-summary-card p-4">
             <i className="bi bi-envelope fs-2"></i>
             <h3 className="h2 mt-2 mb-0">{info.contactos.length}</h3>
             <p className="text-muted mb-0">Mensajes de contacto</p>
-          </div>
-        </div>
-      </div>
+          </Card>
+        </Col>
+      </Row>
 
-      <div className="row g-4 mt-1">
-        <div className="col-md-6">
-          <div className="card p-4">
+      <Row className="g-4 mt-1">
+        <Col md={6}>
+          <Card className="p-4">
             <h3 className="h5"><i className="bi bi-exclamation-triangle-fill text-danger"></i> Stock critico</h3>
-            <ul className="list-group list-group-flush">
-              {criticos.length === 0 && <li className="list-group-item text-muted">Sin alertas de stock por el momento.</li>}
+            <ListGroup variant="flush">
+              {criticos.length === 0 && <ListGroup.Item className="text-muted">Sin alertas de stock por el momento.</ListGroup.Item>}
               {criticos.map(p => (
-                <li className="list-group-item d-flex justify-content-between" key={p.codigo}>
+                <ListGroup.Item className="d-flex justify-content-between" key={p.codigo}>
                   <span>{p.nombre}</span>
                   <span className="stock-critico">Stock: {p.stock}</span>
-                </li>
+                </ListGroup.Item>
               ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+            </ListGroup>
+          </Card>
+        </Col>
+      </Row>
     </AdminLayout>
   )
 }

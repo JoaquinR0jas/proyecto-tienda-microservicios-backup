@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Row, Col, Form, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, getSesion } from '../datos.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
@@ -80,62 +81,59 @@ export default function AdminProductoForm() {
   return (
     <AdminLayout>
       <h1 className="section-title">{editando ? "Editar producto" : "Nuevo producto"}</h1>
-      <form onSubmit={guardar} className="bg-ff-panel rounded p-4">
-        <div className="row g-3">
-          <div className="col-md-6">
-            <label className="form-label">Codigo</label>
-            <input name="codigo" className="form-control" value={form.codigo} onChange={cambiar} readOnly={editando} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Nombre</label>
-            <input name="nombre" className="form-control" maxLength="100" value={form.nombre} onChange={cambiar} />
-          </div>
-          <div className="col-12">
-            <label className="form-label">Descripcion</label>
-            <textarea name="descripcion" className="form-control" rows="2" value={form.descripcion} onChange={cambiar}></textarea>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Precio</label>
-            <input name="precio" type="number" className="form-control" value={form.precio} onChange={cambiar} />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Stock</label>
-            <input name="stock" type="number" className="form-control" value={form.stock} onChange={cambiar} />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Stock critico</label>
-            <input name="stockCritico" type="number" className="form-control" value={form.stockCritico} onChange={cambiar} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Categoria</label>
-            <select name="categoriaId" className="form-select" value={form.categoriaId} onChange={cambiar}>
+      <Form onSubmit={guardar} className="bg-ff-panel rounded p-4">
+        <Row className="g-3">
+          <Col md={6}>
+            <Form.Label>Codigo</Form.Label>
+            <Form.Control name="codigo" value={form.codigo} onChange={cambiar} readOnly={editando} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Nombre</Form.Label>
+            <Form.Control name="nombre" maxLength="100" value={form.nombre} onChange={cambiar} />
+          </Col>
+          <Col xs={12}>
+            <Form.Label>Descripcion</Form.Label>
+            <Form.Control as="textarea" name="descripcion" rows={2} value={form.descripcion} onChange={cambiar} />
+          </Col>
+          <Col md={4}>
+            <Form.Label>Precio</Form.Label>
+            <Form.Control name="precio" type="number" value={form.precio} onChange={cambiar} />
+          </Col>
+          <Col md={4}>
+            <Form.Label>Stock</Form.Label>
+            <Form.Control name="stock" type="number" value={form.stock} onChange={cambiar} />
+          </Col>
+          <Col md={4}>
+            <Form.Label>Stock critico</Form.Label>
+            <Form.Control name="stockCritico" type="number" value={form.stockCritico} onChange={cambiar} />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Categoria</Form.Label>
+            <Form.Select name="categoriaId" value={form.categoriaId} onChange={cambiar}>
               <option value="">Seleccione una categoria</option>
               {cats.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Imagen (ruta dentro de /img)</label>
-            <input name="imagen" className="form-control" value={form.imagen} onChange={cambiar} placeholder="productos/polera-basica.webp" />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Estado</label>
-            <select name="estado" className="form-select" value={form.estado} onChange={cambiar}>
+            </Form.Select>
+          </Col>
+          <Col md={6}>
+            <Form.Label>Imagen (ruta dentro de /img)</Form.Label>
+            <Form.Control name="imagen" value={form.imagen} onChange={cambiar} placeholder="productos/polera-basica.webp" />
+          </Col>
+          <Col md={6}>
+            <Form.Label>Estado</Form.Label>
+            <Form.Select name="estado" value={form.estado} onChange={cambiar}>
               <option>Activo</option>
               <option>Inactivo</option>
-            </select>
-          </div>
-          <div className="col-md-6 d-flex align-items-end">
-            <div className="form-check">
-              <input name="destacado" type="checkbox" className="form-check-input" checked={form.destacado} onChange={cambiar} />
-              <label className="form-check-label">Destacado en el home</label>
-            </div>
-          </div>
-        </div>
+            </Form.Select>
+          </Col>
+          <Col md={6} className="d-flex align-items-end">
+            <Form.Check name="destacado" type="checkbox" label="Destacado en el home" checked={form.destacado} onChange={cambiar} />
+          </Col>
+        </Row>
         <div className="d-flex gap-2 mt-4">
-          <button type="submit" className="btn btn-accent">Guardar</button>
-          <Link to="/admin/productos" className="btn btn-outline-accent">Volver</Link>
+          <Button type="submit" variant="accent">Guardar</Button>
+          <Button as={Link} to="/admin/productos" variant="outline-accent">Volver</Button>
         </div>
-      </form>
+      </Form>
     </AdminLayout>
   )
 }

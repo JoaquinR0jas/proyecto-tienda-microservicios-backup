@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Container, Row, Col, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, plata, imgProducto } from '../datos.js'
 
 export default function Carrito() {
@@ -72,58 +73,58 @@ export default function Carrito() {
 
   if (items.length === 0) {
     return (
-      <section className="container py-5 text-center">
+      <Container className="py-5 text-center">
         <i className="bi bi-bag-x display-1 text-muted"></i>
         <p className="text-muted mt-3">Tu carrito esta vacio.</p>
-        <Link to="/productos" className="btn btn-accent">Ver catalogo</Link>
-      </section>
+        <Button as={Link} to="/productos" variant="accent">Ver catalogo</Button>
+      </Container>
     )
   }
 
   return (
-    <section className="container py-5">
+    <Container className="py-5">
       <h1 className="section-title">Carrito de compras</h1>
-      <div className="row">
-        <div className="col-lg-8">
+      <Row>
+        <Col lg={8}>
           {items.map(i => {
             const p = prodDe(i.codigo)
             if (!p) return null
             return (
-              <div className="row align-items-center bg-ff-panel rounded p-3 mb-3 g-3" key={i.codigo}>
-                <div className="col-3 col-md-2">
+              <Row className="align-items-center bg-ff-panel rounded p-3 mb-3 g-3" key={i.codigo}>
+                <Col xs={3} md={2}>
                   <img src={imgProducto(p)} className="img-fluid rounded" alt={p.nombre} />
-                </div>
-                <div className="col-9 col-md-4">
+                </Col>
+                <Col xs={9} md={4}>
                   <h3 className="h6 mb-1">{p.nombre}</h3>
                   <p className="small text-muted mb-0">{plata(p.precio)} c/u</p>
-                </div>
-                <div className="col-6 col-md-3 d-flex align-items-center gap-2">
-                  <button className="btn btn-outline-accent cart-qty-btn" onClick={() => cambiar(i.codigo, -1)}>-</button>
+                </Col>
+                <Col xs={6} md={3} className="d-flex align-items-center gap-2">
+                  <Button variant="outline-accent" className="cart-qty-btn" onClick={() => cambiar(i.codigo, -1)}>-</Button>
                   <span className="fw-bold">{i.cantidad}</span>
-                  <button className="btn btn-outline-accent cart-qty-btn" onClick={() => cambiar(i.codigo, 1)}>+</button>
-                </div>
-                <div className="col-4 col-md-2">
+                  <Button variant="outline-accent" className="cart-qty-btn" onClick={() => cambiar(i.codigo, 1)}>+</Button>
+                </Col>
+                <Col xs={4} md={2}>
                   <span className="fw-bold">{plata(p.precio * i.cantidad)}</span>
-                </div>
-                <div className="col-2 col-md-1 text-end">
-                  <button className="btn btn-outline-danger btn-sm" onClick={() => sacar(i.codigo)}><i className="bi bi-trash"></i></button>
-                </div>
-              </div>
+                </Col>
+                <Col xs={2} md={1} className="text-end">
+                  <Button variant="outline-danger" size="sm" onClick={() => sacar(i.codigo)}><i className="bi bi-trash"></i></Button>
+                </Col>
+              </Row>
             )
           })}
-        </div>
-        <div className="col-lg-4">
+        </Col>
+        <Col lg={4}>
           <div className="bg-ff-panel rounded p-4">
             <h3 className="h5 mb-3">Resumen</h3>
             <div className="d-flex justify-content-between mb-3">
               <span>Total</span>
               <span className="fw-bold fs-4">{plata(total)}</span>
             </div>
-            <button className="btn btn-accent w-100 mb-2" onClick={comprar}>Finalizar compra</button>
-            <button className="btn btn-outline-danger w-100" onClick={vaciar}>Vaciar carrito</button>
+            <Button variant="accent" className="w-100 mb-2" onClick={comprar}>Finalizar compra</Button>
+            <Button variant="outline-danger" className="w-100" onClick={vaciar}>Vaciar carrito</Button>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }
