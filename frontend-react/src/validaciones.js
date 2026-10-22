@@ -10,13 +10,16 @@ export function passOk(pass) {
   return typeof pass === "string" && pass.length >= 4 && pass.length <= 10
 }
 
-export function runOk(run) {
-  if (!run) return false
-  run = run.toUpperCase().trim()
-  if (run.length < 7 || run.length > 9) return false
+export function normalizarRun(run) {
+  return String(run || "").replace(/[.\s-]/g, "").toUpperCase()
+}
 
-  const cuerpo = run.slice(0, -1)
-  const dv = run.slice(-1)
+export function runOk(run) {
+  const limpio = normalizarRun(run)
+  if (limpio.length < 7 || limpio.length > 9) return false
+
+  const cuerpo = limpio.slice(0, -1)
+  const dv = limpio.slice(-1)
 
   if (!/^[0-9]+$/.test(cuerpo)) return false
   if (!/^[0-9K]$/.test(dv)) return false

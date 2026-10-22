@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion } from '../datos.js'
-import { correoOk, passOk, runOk, textoOk } from '../validaciones.js'
+import { correoOk, passOk, runOk, textoOk, normalizarRun } from '../validaciones.js'
 
 export default function Registro() {
   const nav = useNavigate()
@@ -34,11 +34,13 @@ export default function Registro() {
     e.preventDefault()
     setError("")
 
-    if (!runOk(form.run)) {
-      setError("El run no es valido")
+    const run = normalizarRun(form.run)
+
+    if (!runOk(run)) {
+      setError("Revisa el RUN: debe incluir el digito verificador (ej: 12345678-5)")
       return
     }
-    if (getColeccion(KEYS.usuarios).some(u => u.run === form.run.toUpperCase().trim())) {
+    if (getColeccion(KEYS.usuarios).some(u => normalizarRun(u.run) === run)) {
       setError("Ese run ya esta registrado")
       return
     }
@@ -61,7 +63,7 @@ export default function Registro() {
 
     const users = getColeccion(KEYS.usuarios)
     users.push({
-      run: form.run.toUpperCase().trim(),
+      run,
       nombre: form.nombre.trim(),
       apellidos: form.apellidos.trim(),
       correo: form.correo.trim(),
@@ -87,8 +89,9 @@ export default function Registro() {
             <Form onSubmit={guardar}>
               <Row className="g-3">
                 <Col md={6}>
-                  <Form.Label>RUN (sin puntos ni guion)</Form.Label>
-                  <Form.Control name="run" maxLength="9" placeholder="Ej: 123456785" value={form.run} onChange={cambiar} />
+                  <Form.Label>RUN (con digito verificador)</Form.Label>
+                  <Form.Control name="run" maxLength="12" placeholder="Ej: 12345678-5" value={form.run} onChange={cambiar} />
+                  <Form.Text className="text-muted">Puedes escribirlo con puntos y guion; se guarda sin formato.</Form.Text>
                 </Col>
                 <Col md={6}>
                   <Form.Label>Fecha de nacimiento</Form.Label>

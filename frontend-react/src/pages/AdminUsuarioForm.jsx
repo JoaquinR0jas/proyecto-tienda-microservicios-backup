@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Row, Col, Form, Button } from 'react-bootstrap'
 import { KEYS, getColeccion, setColeccion, getSesion } from '../datos.js'
-import { correoOk, passOk, runOk, textoOk } from '../validaciones.js'
+import { correoOk, passOk, runOk, textoOk, normalizarRun } from '../validaciones.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
 export default function AdminUsuarioForm() {
@@ -65,13 +65,13 @@ export default function AdminUsuarioForm() {
     }
 
     const todos = getColeccion(KEYS.usuarios)
-    if (!editando && todos.some(u => u.run === form.run.toUpperCase().trim())) {
+    if (!editando && todos.some(u => normalizarRun(u.run) === normalizarRun(form.run))) {
       alert("Ese run ya existe")
       return
     }
 
     const user = {
-      run: form.run.toUpperCase().trim(),
+      run: normalizarRun(form.run),
       nombre: form.nombre.trim(),
       apellidos: form.apellidos.trim(),
       correo: form.correo.trim(),
