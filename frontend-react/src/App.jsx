@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
@@ -17,13 +16,8 @@ import AdminProductos from './pages/AdminProductos.jsx'
 import AdminProductoForm from './pages/AdminProductoForm.jsx'
 import AdminUsuarios from './pages/AdminUsuarios.jsx'
 import AdminUsuarioForm from './pages/AdminUsuarioForm.jsx'
-import { initDatos } from './datos.js'
 
 export default function App() {
-  useEffect(() => {
-    initDatos()
-  }, [])
-
   return (
     <>
       <Navbar />
