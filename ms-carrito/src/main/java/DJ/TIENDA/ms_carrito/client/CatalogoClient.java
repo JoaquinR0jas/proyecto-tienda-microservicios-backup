@@ -11,4 +11,5 @@ public interface CatalogoClient {
 
     @GetMapping("/api/catalogo/productos/{id}")
     ProductoDTO obtenerProducto(@PathVariable("id") Long id);
+    
 }
