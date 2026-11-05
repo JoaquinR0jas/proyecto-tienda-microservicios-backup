@@ -95,6 +95,7 @@ export default function Navbar() {
               {enlace("/blog", "Blog", ruta.startsWith("/blog"))}
               {enlace("/nosotros", "Nosotros", ruta === "/nosotros")}
               {enlace("/contacto", "Contacto", ruta === "/contacto")}
+              {sesion && sesion.rolId === 3 && enlace("/mis-compras", "Mis compras", ruta.startsWith("/mis-compras"))}
               {esAdmin && enlace("/admin", <><i className="bi bi-speedometer2"></i> Administracion</>, ruta.startsWith("/admin"))}
             </ul>
             <form className="d-flex my-2 my-lg-0 me-lg-3" role="search" onSubmit={buscar}>
@@ -123,6 +124,9 @@ export default function Navbar() {
                     <i className="bi bi-person-circle fs-5"></i> {sesion.nombre}
                   </a>
                   <ul className="dropdown-menu dropdown-menu-end">
+                    {sesion.rolId === 3 && (
+                      <li><Link className="dropdown-item" to="/mis-compras"><i className="bi bi-bag-check"></i> Mis compras</Link></li>
+                    )}
                     <li><a className="dropdown-item" href="#" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</a></li>
                   </ul>
                 </li>

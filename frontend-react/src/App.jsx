@@ -10,6 +10,8 @@ import Carrito from './pages/Carrito.jsx'
 import Checkout from './pages/Checkout.jsx'
 import CompraExitosa from './pages/CompraExitosa.jsx'
 import CompraError from './pages/CompraError.jsx'
+import MisCompras from './pages/MisCompras.jsx'
+import MiCompraDetalle from './pages/MiCompraDetalle.jsx'
 import Login from './pages/Login.jsx'
 import Registro from './pages/Registro.jsx'
 import Blog from './pages/Blog.jsx'
@@ -37,7 +39,6 @@ import AdminMensajes from './pages/AdminMensajes.jsx'
 export default function App() {
   const ruta = useLocation().pathname
 
-  // al cambiar de pagina se vuelve arriba
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [ruta])
@@ -47,7 +48,6 @@ export default function App() {
       <Navbar />
       <main>
         <Routes>
-          {/* tienda */}
           <Route path="/" element={<Home />} />
           <Route path="/productos" element={<Productos />} />
           <Route path="/producto/:codigo" element={<Detalle />} />
@@ -56,6 +56,8 @@ export default function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra/exitosa/:id" element={<CompraExitosa />} />
           <Route path="/compra/error/:id" element={<CompraError />} />
+          <Route path="/mis-compras" element={<MisCompras />} />
+          <Route path="/mis-compras/:id" element={<MiCompraDetalle />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/blog" element={<Blog />} />
@@ -63,7 +65,6 @@ export default function App() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/contacto" element={<Contacto />} />
 
-          {/* administrador */}
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/ordenes" element={<AdminOrdenes />} />
           <Route path="/admin/ordenes/:id" element={<AdminBoleta />} />

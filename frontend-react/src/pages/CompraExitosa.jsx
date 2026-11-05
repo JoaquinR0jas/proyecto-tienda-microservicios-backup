@@ -1,10 +1,11 @@
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, plata } from '../datos.js'
+import { KEYS, getColeccion, getSesion, plata } from '../datos.js'
 import Boleta from '../components/Boleta.jsx'
 import { aviso } from '../alertas.js'
 
 export default function CompraExitosa() {
   const { id } = useParams()
+  const sesion = getSesion()
   const orden = getColeccion(KEYS.ordenes).find(o => o.id === Number(id) && o.estado === "Pagada")
 
   if (!orden) {
@@ -36,6 +37,9 @@ export default function CompraExitosa() {
             <div className="d-flex flex-wrap justify-content-center gap-2 no-print">
               <button className="btn btn-danger btn-sm" onClick={() => window.print()}><i className="bi bi-file-earmark-pdf"></i> Imprimir boleta en PDF</button>
               <button className="btn btn-success btn-sm" onClick={enviarCorreo}><i className="bi bi-envelope"></i> Enviar boleta por email</button>
+              {sesion && sesion.rolId === 3 && (
+                <Link to="/mis-compras" className="btn btn-outline-dark btn-sm"><i className="bi bi-bag-check"></i> Ver mis compras</Link>
+              )}
               <Link to="/productos" className="btn btn-outline-accent btn-sm">Seguir comprando</Link>
             </div>
           </div>

@@ -287,9 +287,21 @@ export function registrarOrden({ cliente, envio, items, subtotal, estado }) {
 }
 
 export function ordenesDeUsuario(usuario) {
-  return getColeccion(KEYS.ordenes).filter(o =>
-    o.cliente.run === usuario.run || o.cliente.correo.toLowerCase() === usuario.correo.toLowerCase()
-  )
+  if (!usuario) return []
+  const run = (usuario.run || "").toString().toUpperCase().replace(/[^0-9K]/g, "").trim()
+  const correo = (usuario.correo || "").toString().toLowerCase().trim()
+  const nombre = ((usuario.nombre || "") + " " + (usuario.apellidos || "")).toLowerCase().trim()
+  const ordenes = getColeccion(KEYS.ordenes)
+  return ordenes.filter(o => {
+    if (!o.cliente) return false
+    const oRun = (o.cliente.run || "").toString().toUpperCase().replace(/[^0-9K]/g, "").trim()
+    const oCorreo = (o.cliente.correo || "").toString().toLowerCase().trim()
+    const oNombre = ((o.cliente.nombre || "") + " " + (o.cliente.apellidos || "")).toLowerCase().trim()
+    if (run && oRun && run === oRun) return true
+    if (correo && oCorreo && correo === oCorreo) return true
+    if (nombre && oNombre && nombre === oNombre) return true
+    return false
+  })
 }
 
 export function fechaCorta(iso) {

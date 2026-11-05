@@ -68,12 +68,12 @@ export function AdminLayout({ children }) {
   return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-lg-3 col-xl-2 d-none d-lg-block px-0">
+        <div className="col-lg-3 col-xl-2 d-none d-lg-block px-0 admin-sidebar-col">
           <div className="admin-sidebar">
             <AdminMenu />
           </div>
         </div>
-        <div className="col-lg-9 col-xl-10 p-3 p-md-4">
+        <div className="col-lg-9 col-xl-10 p-3 p-md-4 admin-contenido">
           <div className="d-lg-none mb-3">
             <button className="btn btn-outline-dark btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminOffcanvas">
               <i className="bi bi-list"></i> Menu administracion

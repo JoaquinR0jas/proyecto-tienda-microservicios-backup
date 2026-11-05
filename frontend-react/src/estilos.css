@@ -379,9 +379,61 @@ footer.ff-footer .brand-text {
     font-weight: 600;
 }
 
-/* Boleta: al imprimir solo se ve el contenido */
+/* Informe de ventas imprimible */
+.informe {
+    color: #111;
+}
+
+.informe-dato {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    height: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 0.5rem;
+}
+
+.informe-dato small {
+    color: #6c757d;
+}
+
+.informe-dato strong {
+    font-size: 1.1rem;
+}
+
+/* Boleta e informes: al imprimir solo se ve el contenido */
 @media print {
-    header, footer, .admin-sidebar, .no-print, .d-lg-none {
+    header, footer, .admin-sidebar, .admin-sidebar-col, .no-print, .d-lg-none {
         display: none !important;
+    }
+
+    .admin-contenido {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .informe {
+        border: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    .informe .table-responsive {
+        overflow: visible !important;
+    }
+
+    .informe thead {
+        display: table-header-group;
+    }
+
+    .informe table {
+        font-size: 0.8rem;
+    }
+
+    .informe-bloque,
+    .informe tr {
+        page-break-inside: avoid;
     }
 }

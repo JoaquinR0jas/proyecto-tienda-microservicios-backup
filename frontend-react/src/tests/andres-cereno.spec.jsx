@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { useState } from 'react'
 import Tarjeta from '../components/Tarjeta.jsx'
 import Contacto from '../pages/Contacto.jsx'
 import { KEYS, getColeccion, initDatos } from '../datos.js'
@@ -35,7 +36,7 @@ describe('Tarjeta de producto: props y evento onClick', () => {
   })
 })
 
-describe('Formulario de contacto: estado', () => {
+describe('Seccion de comentarios / formulario de contacto: estado con useState', () => {
   afterEach(() => {
     cleanup()
   })
@@ -45,7 +46,54 @@ describe('Formulario de contacto: estado', () => {
     initDatos()
   })
 
-  // caso borde: un nombre con solo espacios no esta vacio, pero tampoco es un nombre valido
+  it('actualiza el estado del comentario al escribir usando useState', () => {
+    function ComentarioTest() {
+      const [comentario, setComentario] = useState('')
+      return (
+        <div>
+          <textarea
+            id="comentarioTest"
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
+          />
+          <span data-testid="estado-comentario">{comentario}</span>
+        </div>
+      )
+    }
+
+    const { container } = render(<ComentarioTest />)
+    const textarea = container.querySelector('#comentarioTest')
+
+    act(() => {
+      fireEvent.change(textarea, { target: { value: 'Tienen tallas grandes disponibles?' } })
+    })
+
+    expect(textarea.value).toBe('Tienen tallas grandes disponibles?')
+    expect(screen.getByTestId('estado-comentario').textContent).toBe('Tienen tallas grandes disponibles?')
+  })
+
+  it('maneja el estado completo del formulario de comentarios con useState', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Contacto />
+      </MemoryRouter>
+    )
+
+    const nombre = container.querySelector('#nombreContacto')
+    const correo = container.querySelector('#correoContacto')
+    const comentario = container.querySelector('#comentarioContacto')
+
+    act(() => {
+      fireEvent.change(nombre, { target: { value: 'Andres Cereno' } })
+      fireEvent.change(correo, { target: { value: 'andres@gmail.com' } })
+      fireEvent.change(comentario, { target: { value: 'Necesito informacion sobre envios' } })
+    })
+
+    expect(nombre.value).toBe('Andres Cereno')
+    expect(correo.value).toBe('andres@gmail.com')
+    expect(comentario.value).toBe('Necesito informacion sobre envios')
+  })
+
   it('no acepta un nombre con solo espacios y no guarda el mensaje', () => {
     const { container } = render(
       <MemoryRouter>
@@ -59,7 +107,6 @@ describe('Formulario de contacto: estado', () => {
     fireEvent.change(correo, { target: { value: 'camila@gmail.com' } })
     fireEvent.change(container.querySelector('#comentarioContacto'), { target: { value: 'Hola, tienen tallas grandes?' } })
 
-    // el estado guarda lo escrito, aunque sean solo espacios
     expect(nombre.value).toBe('     ')
 
     fireEvent.click(container.querySelector('button[type="submit"]'))
