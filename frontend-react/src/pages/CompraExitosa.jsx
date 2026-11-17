@@ -1,12 +1,25 @@
-import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, getSesion, plata } from '../datos.js'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { getSesion, plata } from '../datos.js'
+import { obtenerOrden } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import Boleta from '../components/Boleta.jsx'
 import { aviso } from '../alertas.js'
 
 export default function CompraExitosa() {
   const { id } = useParams()
   const sesion = getSesion()
-  const orden = getColeccion(KEYS.ordenes).find(o => o.id === Number(id) && o.estado === "Pagada")
+  const desdeCheckout = useLocation().state?.orden
+  // si viene del checkout ya trae la orden; si se recarga la pagina se pide a ms-pedidos
+  const carga = useCarga(async () => desdeCheckout || await obtenerOrden(id), [id])
+  const orden = carga.datos && carga.datos.estado === "Pagada" ? carga.datos : null
+
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
 
   if (!orden) {
     return (

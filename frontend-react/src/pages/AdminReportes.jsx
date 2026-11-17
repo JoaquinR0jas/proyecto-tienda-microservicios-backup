@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { KEYS, getColeccion, plata, nombreRegion, fechaCorta } from '../datos.js'
+import { plata, nombreRegion, fechaCorta } from '../datos.js'
+import { listarOrdenes } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import Barra from '../components/Barra.jsx'
 import { aviso } from '../alertas.js'
@@ -59,7 +61,8 @@ export default function AdminReportes() {
   const [incluirDetalle, setIncluirDetalle] = useState(true)
   const [informe, setInforme] = useState(null)
 
-  const ordenes = getColeccion(KEYS.ordenes)
+  const carga = useCarga(listarOrdenes) // las ventas salen de los pedidos de ms-pedidos
+  const ordenes = carga.datos || []
   const pagadas = ordenes.filter(o => o.estado === "Pagada")
   const rechazadas = ordenes.length - pagadas.length
   const ventas = pagadas.reduce((s, o) => s + o.total, 0)
@@ -75,6 +78,15 @@ export default function AdminReportes() {
   const max = lista => Math.max(0, ...lista.map(x => x[1]))
 
   if (!sesion) return null
+
+  if (carga.cargando || carga.error) {
+    return (
+      <AdminLayout>
+        <h1 className="section-title">Reportes</h1>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </AdminLayout>
+    )
+  }
 
   function generar(e) {
     e.preventDefault()

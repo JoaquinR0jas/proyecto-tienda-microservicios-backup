@@ -1,15 +1,19 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { listarCategorias, listarProductos, eliminarCategoria, cargarReferencias } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso, confirmar } from '../alertas.js'
 
 export default function AdminCategorias() {
   const sesion = useAdmin(true)
-  const [cats, setCats] = useState(() => getColeccion(KEYS.categorias))
+  const carga = useCarga(async () => {
+    const [cats, prods] = await Promise.all([listarCategorias(), listarProductos()])
+    return { cats, prods }
+  })
   if (!sesion) return null
 
-  const prods = getColeccion(KEYS.productos)
+  const cats = carga.datos ? carga.datos.cats : []
+  const prods = carga.datos ? carga.datos.prods : []
 
   async function eliminar(c) {
     if (prods.some(p => p.categoriaId === c.id)) {
@@ -17,8 +21,14 @@ export default function AdminCategorias() {
       return
     }
     if (!await confirmar("Eliminar categoria?", "Se eliminara la categoria " + c.nombre + ".")) return
-    setColeccion(KEYS.categorias, getColeccion(KEYS.categorias).filter(x => x.id !== c.id))
-    setCats(getColeccion(KEYS.categorias))
+    try {
+      await eliminarCategoria(c.id) // ms-catalogo tambien rechaza si la categoria tiene productos
+    } catch (e) {
+      aviso("No se puede eliminar", e.message, "error")
+      return
+    }
+    await cargarReferencias()
+    carga.recargar()
     aviso("Eliminada", "La categoria fue eliminada correctamente.")
   }
 
@@ -28,6 +38,7 @@ export default function AdminCategorias() {
         <h1 className="section-title mb-0">Categorias</h1>
         <Link to="/admin/categorias/nueva" className="btn btn-accent btn-sm">+ Nueva categoria</Link>
       </div>
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0">
           <thead><tr><th>ID</th><th>Nombre</th><th>Descripcion</th><th>Productos</th><th></th></tr></thead>

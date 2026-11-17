@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
-import { KEYS, getColeccion, getSesion } from '../datos.js'
+import { getCarrito, getSesion, cerrarSesion } from '../datos.js'
 
 export default function Navbar() {
   const [sesion, setSesion] = useState(null)
@@ -13,7 +13,7 @@ export default function Navbar() {
 
   function refrescar() {
     setSesion(getSesion())
-    const carrito = getColeccion(KEYS.carrito)
+    const carrito = getCarrito()
     let total = 0
     carrito.forEach(i => total += i.cantidad)
     setCant(total)
@@ -59,8 +59,7 @@ export default function Navbar() {
 
   function salir(e) {
     e.preventDefault()
-    localStorage.removeItem(KEYS.sesion)
-    window.dispatchEvent(new Event("sesion-cambio"))
+    cerrarSesion()
     nav("/login")
   }
 

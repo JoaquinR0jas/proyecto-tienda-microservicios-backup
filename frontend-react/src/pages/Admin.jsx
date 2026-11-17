@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion, getSesion } from '../datos.js'
+import { getSesion } from '../datos.js'
+import { listarProductos, listarUsuarios, listarMensajes } from '../api.js'
+import { aviso } from '../alertas.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
 export default function Admin() {
@@ -14,12 +16,18 @@ export default function Admin() {
       nav("/login")
       return
     }
-    setInfo({
-      prods: getColeccion(KEYS.productos),
-      users: getColeccion(KEYS.usuarios),
-      contactos: getColeccion(KEYS.contactos),
-      sesion: s
-    })
+    // resumen armado con los datos de ms-catalogo, ms-usuarios y ms-contenido
+    // (el vendedor no tiene acceso a la lista de usuarios, no se pide)
+    Promise.all([
+      listarProductos(),
+      s.rolId === 1 ? listarUsuarios() : Promise.resolve([]),
+      listarMensajes()
+    ])
+      .then(([prods, users, contactos]) => setInfo({ prods, users, contactos, sesion: s }))
+      .catch(e => {
+        aviso("No se pudo cargar el panel", e.message, "error")
+        setInfo({ prods: [], users: [], contactos: [], sesion: s })
+      })
   }, [nav])
 
   if (!info.sesion) return null

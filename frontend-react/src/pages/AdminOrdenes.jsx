@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, plata, fechaCorta } from '../datos.js'
+import { plata, fechaCorta } from '../datos.js'
+import { listarOrdenes } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 
 export default function AdminOrdenes() {
   const sesion = useAdmin()
   const [busqueda, setBusqueda] = useState("")
   const [estado, setEstado] = useState("")
+  const carga = useCarga(listarOrdenes) // pedidos de ms-pedidos
   if (!sesion) return null
 
   const texto = busqueda.toLowerCase()
-  const ordenes = getColeccion(KEYS.ordenes)
+  const ordenes = (carga.datos || [])
     .filter(o => !estado || o.estado === estado)
     .filter(o => !texto || o.numero.includes(texto) ||
       (o.cliente.nombre + " " + o.cliente.apellidos + " " + o.cliente.correo).toLowerCase().includes(texto))
@@ -31,6 +34,7 @@ export default function AdminOrdenes() {
           </select>
         </div>
       </div>
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0 align-middle">
           <thead>

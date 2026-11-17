@@ -1,28 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, plata, imgProducto, detalleCarrito, COSTO_DESPACHO, DESPACHO_GRATIS_DESDE } from '../datos.js'
+import { getCarrito, setCarrito, getSesion, plata, imgProducto, detalleCarrito, COSTO_DESPACHO, DESPACHO_GRATIS_DESDE } from '../datos.js'
+import { listarProductos } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { aviso, confirmar } from '../alertas.js'
 
 export default function Carrito() {
   const nav = useNavigate()
   const [detalle, setDetalle] = useState({ items: [], subtotal: 0 })
+  // el carrito vive en el navegador, pero los precios y el stock se toman del backend
+  const productos = useCarga(() => listarProductos({ soloActivos: true }))
 
   function cargar() {
-    setDetalle(detalleCarrito())
+    setDetalle(detalleCarrito(productos.datos || []))
   }
 
   useEffect(() => {
     cargar()
-  }, [])
+  }, [productos.datos])
 
   function guardar(carrito) {
-    setColeccion(KEYS.carrito, carrito)
+    setCarrito(carrito)
     cargar()
-    window.dispatchEvent(new Event("carrito-cambio"))
   }
 
   function cambiar(codigo, delta) {
-    const carrito = getColeccion(KEYS.carrito)
+    const carrito = getCarrito()
     const item = carrito.find(i => i.codigo === codigo)
     const info = detalle.items.find(i => i.codigo === codigo)
     if (!item || !info) return
@@ -41,8 +44,18 @@ export default function Carrito() {
 
   async function sacar(codigo) {
     if (!await confirmar("Eliminar producto?", "Se quitara del carrito de compras.")) return
-    guardar(getColeccion(KEYS.carrito).filter(i => i.codigo !== codigo))
+    guardar(getCarrito().filter(i => i.codigo !== codigo))
     aviso("Eliminado", "El producto fue eliminado del carrito.")
+  }
+
+  // se puede llenar el carrito sin cuenta, pero para comprar hay que iniciar sesion
+  async function irAPagar() {
+    if (!getSesion()) {
+      await aviso("Inicia sesion para comprar", "Tu carrito se mantiene, despues de entrar vuelves al pago.", "info")
+      nav("/login", { state: { volverA: "/checkout" } })
+      return
+    }
+    nav("/checkout")
   }
 
   async function vaciar() {
@@ -51,6 +64,14 @@ export default function Carrito() {
   }
 
   const { items, subtotal } = detalle
+
+  if (productos.cargando || productos.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={productos.cargando} error={productos.error} onReintentar={productos.recargar} />
+      </section>
+    )
+  }
 
   if (items.length === 0) {
     return (
@@ -102,7 +123,7 @@ export default function Carrito() {
                 ? "Tu compra tiene despacho gratis."
                 : "Despacho " + plata(COSTO_DESPACHO) + " (gratis sobre " + plata(DESPACHO_GRATIS_DESDE) + "). Retiro en tienda sin costo."}
             </p>
-            <button className="btn btn-accent w-100 mb-2" onClick={() => nav("/checkout")}>Ir a pagar</button>
+            <button className="btn btn-accent w-100 mb-2" onClick={irAPagar}>Ir a pagar</button>
             <button className="btn btn-outline-danger w-100 mb-2" onClick={vaciar}>Vaciar carrito</button>
             <Link to="/productos" className="btn btn-link w-100">Seguir comprando</Link>
           </div>

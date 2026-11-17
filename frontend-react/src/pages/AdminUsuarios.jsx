@@ -1,18 +1,16 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, nombreRegion } from '../datos.js'
+import { nombreRegion, nombreRol } from '../datos.js'
+import { listarUsuarios, eliminarUsuario } from '../api.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso, confirmar } from '../alertas.js'
-
-function nombreRol(id) {
-  const r = getColeccion(KEYS.roles).find(x => x.id === id)
-  return r ? r.nombre : ""
-}
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function AdminUsuarios() {
   const sesion = useAdmin(true)
-  const [users, setUsers] = useState(() => getColeccion(KEYS.usuarios))
+  const carga = useCarga(listarUsuarios) // usuarios de ms-usuarios
   if (!sesion) return null
+
+  const users = carga.datos || []
 
   async function eliminar(run) {
     if (run === sesion.run) {
@@ -20,8 +18,13 @@ export default function AdminUsuarios() {
       return
     }
     if (!await confirmar("Eliminar usuario?", "Esta accion no se puede deshacer.")) return
-    setColeccion(KEYS.usuarios, getColeccion(KEYS.usuarios).filter(u => u.run !== run))
-    setUsers(getColeccion(KEYS.usuarios))
+    try {
+      await eliminarUsuario(users.find(u => u.run === run).id)
+    } catch (e) {
+      aviso("No se pudo eliminar", e.message, "error")
+      return
+    }
+    carga.recargar()
     aviso("Eliminado", "El usuario fue eliminado correctamente.")
   }
 
@@ -31,6 +34,7 @@ export default function AdminUsuarios() {
         <h1 className="section-title mb-0">Usuarios</h1>
         <Link to="/admin/usuarios/nuevo" className="btn btn-accent btn-sm">+ Nuevo usuario</Link>
       </div>
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0">
           <thead>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion } from '../datos.js'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { iniciarSesion } from '../api.js'
 import { correoOk, passOk, claseCampo } from '../validaciones.js'
 import { aviso } from '../alertas.js'
 
@@ -10,6 +10,7 @@ export default function Login() {
   const [errores, setErrores] = useState({})
   const [validado, setValidado] = useState(false)
   const nav = useNavigate()
+  const destino = useLocation().state?.volverA
 
   async function entrar(e) {
     e.preventDefault()
@@ -24,31 +25,25 @@ export default function Login() {
       return
     }
 
-    const user = getColeccion(KEYS.usuarios).find(
-      u => u.correo.toLowerCase() === correo.toLowerCase() && u.password === pass
-    )
-
-    if (!user) {
-      aviso("Credenciales incorrectas", "El correo o la contrasena no coinciden.", "error")
+    // auth-service valida las credenciales y entrega el token
+    let sesion
+    try {
+      sesion = await iniciarSesion(correo.trim(), pass)
+    } catch (e) {
+      if (e.status === 401 && e.message.includes("deshabilitada")) {
+        aviso("Cuenta inactiva", "Tu cuenta se encuentra deshabilitada. Contacta a un administrador.", "warning")
+      } else if (e.status === 401) {
+        aviso("Credenciales incorrectas", "El correo o la contrasena no coinciden.", "error")
+      } else {
+        aviso("No se pudo iniciar sesion", e.message, "error")
+      }
       return
     }
-
-    if (user.estado === "Inactivo") {
-      aviso("Cuenta inactiva", "Tu cuenta se encuentra deshabilitada. Contacta a un administrador.", "warning")
-      return
-    }
-
-    localStorage.setItem(KEYS.sesion, JSON.stringify({
-      run: user.run,
-      nombre: user.nombre,
-      apellidos: user.apellidos,
-      correo: user.correo,
-      rolId: user.rolId
-    }))
-    window.dispatchEvent(new Event("sesion-cambio"))
 
     await aviso("Bienvenido", "Inicio de sesion correcto.")
-    if (user.rolId === 1 || user.rolId === 2) nav("/admin")
+    // si venia del carrito, vuelve al checkout para terminar la compra
+    if (destino) nav(destino)
+    else if (sesion.rolId === 1 || sesion.rolId === 2) nav("/admin")
     else nav("/")
   }
 

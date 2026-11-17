@@ -1,19 +1,27 @@
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, plata, fechaCorta, ordenesDeUsuario } from '../datos.js'
+import { plata, fechaCorta } from '../datos.js'
+import { obtenerUsuarioPorRun, ordenesDeUsuario } from '../api.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function AdminUsuarioHistorial() {
   const { run } = useParams()
   const sesion = useAdmin(true)
+  const carga = useCarga(async () => {
+    const usuario = await obtenerUsuarioPorRun(run)
+    const ordenes = usuario ? await ordenesDeUsuario(usuario.id) : []
+    return { usuario, ordenes }
+  }, [run])
   if (!sesion) return null
 
-  const u = getColeccion(KEYS.usuarios).find(x => x.run === run)
-  const ordenes = u ? ordenesDeUsuario(u).sort((a, b) => b.fecha.localeCompare(a.fecha)) : []
+  const u = carga.datos ? carga.datos.usuario : null
+  const ordenes = carga.datos ? [...carga.datos.ordenes].sort((a, b) => b.fecha.localeCompare(a.fecha)) : []
   const gastado = ordenes.filter(o => o.estado === "Pagada").reduce((s, o) => s + o.total, 0)
 
   return (
     <AdminLayout>
-      {!u ? (
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      {carga.cargando || carga.error ? null : !u ? (
         <p className="text-muted">Usuario no encontrado. <Link to="/admin/usuarios">Volver</Link></p>
       ) : (
         <>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { KEYS, getSesion } from '../datos.js'
+import { getSesion, cerrarSesion } from '../datos.js'
 import { aviso } from '../alertas.js'
 
 // opciones del menu, soloAdmin = el vendedor no las ve
@@ -45,8 +45,7 @@ export function AdminMenu() {
   if (!sesion) return null
 
   function salir() {
-    localStorage.removeItem(KEYS.sesion)
-    window.dispatchEvent(new Event("sesion-cambio"))
+    cerrarSesion()
     nav("/login")
   }
 

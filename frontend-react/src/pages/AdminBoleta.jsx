@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { KEYS, getColeccion } from '../datos.js'
+import { obtenerOrden } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import Boleta from '../components/Boleta.jsx'
 
@@ -7,13 +8,15 @@ export default function AdminBoleta() {
   const { id } = useParams()
   const nav = useNavigate()
   const sesion = useAdmin()
+  const carga = useCarga(() => obtenerOrden(id), [id])
   if (!sesion) return null
 
-  const orden = getColeccion(KEYS.ordenes).find(o => o.id === Number(id))
+  const orden = carga.datos
 
   return (
     <AdminLayout>
-      {!orden ? (
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      {carga.cargando || carga.error ? null : !orden ? (
         <p className="text-muted">Orden no encontrada. <Link to="/admin/ordenes">Volver</Link></p>
       ) : (
         <div className="bg-ff-panel rounded p-4">

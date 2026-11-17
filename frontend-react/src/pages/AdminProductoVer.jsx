@@ -1,21 +1,29 @@
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, plata, imgProducto, nombreCategoria, precioFinal } from '../datos.js'
+import { plata, imgProducto, nombreCategoria, precioFinal } from '../datos.js'
+import { obtenerProductoPorCodigo, listarOrdenes } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 
 export default function AdminProductoVer() {
   const { codigo } = useParams()
   const sesion = useAdmin()
+  // el producto viene de ms-catalogo y las ventas de ms-pedidos
+  const carga = useCarga(async () => {
+    const [producto, ordenes] = await Promise.all([obtenerProductoPorCodigo(codigo), listarOrdenes()])
+    return { producto, ordenes }
+  }, [codigo])
   if (!sesion) return null
 
-  const p = getColeccion(KEYS.productos).find(x => x.codigo === codigo)
+  const p = carga.datos ? carga.datos.producto : null
   // unidades vendidas segun las ordenes pagadas
-  const vendidas = getColeccion(KEYS.ordenes)
+  const vendidas = (carga.datos ? carga.datos.ordenes : [])
     .filter(o => o.estado === "Pagada")
     .reduce((s, o) => s + o.items.filter(i => i.codigo === codigo).reduce((a, i) => a + i.cantidad, 0), 0)
 
   return (
     <AdminLayout>
-      {!p ? (
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      {carga.cargando || carga.error ? null : !p ? (
         <p className="text-muted">Producto no encontrado. <Link to="/admin/productos">Volver</Link></p>
       ) : (
         <>

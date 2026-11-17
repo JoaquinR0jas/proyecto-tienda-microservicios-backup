@@ -10,6 +10,7 @@ export default function Boleta({ orden }) {
       <div className="d-flex flex-wrap justify-content-between small text-muted mb-3">
         <span>Fecha: {fechaCorta(orden.fecha)}</span>
         <span>Codigo orden: ORDER{String(orden.id).padStart(5, "0")}</span>
+        {orden.folioBoleta && <span className="fw-bold text-dark">Boleta folio N° {orden.folioBoleta}</span>}
       </div>
 
       <h3 className="h6">Datos del cliente</h3>
@@ -41,7 +42,7 @@ export default function Boleta({ orden }) {
           </thead>
           <tbody>
             {orden.items.map(i => (
-              <tr key={i.codigo}>
+              <tr key={i.codigo || i.productoId}>
                 <td><img src={imgProducto(i)} alt={i.nombre} width="48" className="rounded" /></td>
                 <td>{i.nombre}</td>
                 <td>{plata(i.precio)}</td>
@@ -54,6 +55,12 @@ export default function Boleta({ orden }) {
             <tr><td colSpan="4" className="text-end">Subtotal</td><td className="text-end">{plata(orden.subtotal)}</td></tr>
             <tr><td colSpan="4" className="text-end">Envio</td><td className="text-end">{orden.costoEnvio ? plata(orden.costoEnvio) : "Gratis"}</td></tr>
             <tr><td colSpan="4" className="text-end fw-bold">Total</td><td className="text-end fw-bold">{plata(orden.total)}</td></tr>
+            {orden.folioBoleta && (
+              <tr className="small text-muted">
+                <td colSpan="4" className="text-end">Neto / IVA 19% incluido</td>
+                <td className="text-end">{plata(Math.round(orden.total / 1.19))} / {plata(orden.total - Math.round(orden.total / 1.19))}</td>
+              </tr>
+            )}
           </tfoot>
         </table>
       </div>

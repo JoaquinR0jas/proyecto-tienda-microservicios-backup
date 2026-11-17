@@ -1,6 +1,6 @@
 // alertas de la tienda con SweetAlert2 (igual que en el frontend original)
 import Swal from 'sweetalert2'
-import { KEYS, getColeccion, agregarAlCarrito } from './datos.js'
+import { agregarAlCarrito } from './datos.js'
 
 export function aviso(titulo, texto, icono = "success") {
   return Swal.fire({ title: titulo, text: texto, icon: icono, confirmButtonColor: "#111111" })
@@ -19,15 +19,14 @@ export function confirmar(titulo, texto, boton = "Eliminar") {
   }).then(r => r.isConfirmed)
 }
 
-// agrega al carrito y avisa el resultado
-export function agregarConAviso(codigo, cantidad = 1) {
-  const prod = getColeccion(KEYS.productos).find(p => p.codigo === codigo)
+// agrega al carrito y avisa el resultado (el producto viene de la lista que mostro la pagina)
+export function agregarConAviso(prod, cantidad = 1) {
   if (!prod) return
   if (prod.stock <= 0) {
     aviso("Sin stock", "Esta prenda no tiene stock disponible.", "error")
     return
   }
-  const error = agregarAlCarrito(codigo, cantidad)
+  const error = agregarAlCarrito(prod, cantidad)
   if (error) {
     aviso("Stock insuficiente", "Solo hay " + prod.stock + " unidades disponibles de " + prod.nombre + ".", "warning")
     return

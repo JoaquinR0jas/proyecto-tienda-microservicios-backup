@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { getReferencias } from '../datos.js'
+import { crearUsuario } from '../api.js'
 import { correoOk, passOk, runOk, textoOk, normalizarRun } from '../validaciones.js'
 import { aviso } from '../alertas.js'
 
@@ -15,7 +16,7 @@ export default function Registro() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    setRegiones(getColeccion(KEYS.regiones))
+    setRegiones(getReferencias().regiones)
   }, [])
 
   useEffect(() => {
@@ -23,14 +24,14 @@ export default function Registro() {
       setComunas([])
       return
     }
-    setComunas(getColeccion(KEYS.comunas).filter(c => c.regionId === Number(form.region)))
+    setComunas(getReferencias().comunas.filter(c => c.regionId === Number(form.region)))
   }, [form.region])
 
   function cambiar(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function guardar(e) {
+  async function guardar(e) {
     e.preventDefault()
     setError("")
 
@@ -38,10 +39,6 @@ export default function Registro() {
 
     if (!runOk(run)) {
       setError("Revisa el RUN: debe incluir el digito verificador (ej: 12345678-5)")
-      return
-    }
-    if (getColeccion(KEYS.usuarios).some(u => normalizarRun(u.run) === run)) {
-      setError("Ese run ya esta registrado")
       return
     }
     if (!textoOk(form.nombre, 50) || !textoOk(form.apellidos, 100)) {
@@ -61,21 +58,25 @@ export default function Registro() {
       return
     }
 
-    const users = getColeccion(KEYS.usuarios)
-    users.push({
-      run,
-      nombre: form.nombre.trim(),
-      apellidos: form.apellidos.trim(),
-      correo: form.correo.trim(),
-      password: form.pass,
-      fechaNacimiento: form.fecha || "",
-      rolId: 3,
-      regionId: Number(form.region),
-      comunaId: Number(form.comuna),
-      direccion: form.direccion.trim(),
-      estado: "Activo"
-    })
-    setColeccion(KEYS.usuarios, users)
+    // ms-usuarios valida que el RUN y el correo no esten registrados
+    try {
+      await crearUsuario({
+        run,
+        nombre: form.nombre.trim(),
+        apellidos: form.apellidos.trim(),
+        correo: form.correo.trim(),
+        password: form.pass,
+        fechaNacimiento: form.fecha || "",
+        rolId: 3,
+        regionId: Number(form.region),
+        comunaId: Number(form.comuna),
+        direccion: form.direccion.trim(),
+        estado: "Activo"
+      })
+    } catch (err) {
+      setError(err.status === 409 ? "Ese RUN o correo ya esta registrado" : err.message)
+      return
+    }
     aviso("Cuenta creada", "Ahora inicia sesion.")
     nav("/login")
   }

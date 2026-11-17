@@ -1,19 +1,28 @@
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, plata, nombreRegion, nombreComuna, ordenesDeUsuario } from '../datos.js'
+import { plata, nombreRegion, nombreComuna, nombreRol } from '../datos.js'
+import { obtenerUsuarioPorRun, ordenesDeUsuario } from '../api.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function AdminUsuarioVer() {
   const { run } = useParams()
   const sesion = useAdmin(true)
+  // el usuario viene de ms-usuarios y sus compras de ms-pedidos
+  const carga = useCarga(async () => {
+    const usuario = await obtenerUsuarioPorRun(run)
+    const ordenes = usuario ? await ordenesDeUsuario(usuario.id) : []
+    return { usuario, ordenes }
+  }, [run])
   if (!sesion) return null
 
-  const u = getColeccion(KEYS.usuarios).find(x => x.run === run)
-  const rol = u && getColeccion(KEYS.roles).find(r => r.id === u.rolId)
-  const compras = u ? ordenesDeUsuario(u).filter(o => o.estado === "Pagada") : []
+  const u = carga.datos ? carga.datos.usuario : null
+  const rol = u && { nombre: nombreRol(u.rolId) }
+  const compras = carga.datos ? carga.datos.ordenes.filter(o => o.estado === "Pagada") : []
 
   return (
     <AdminLayout>
-      {!u ? (
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      {carga.cargando || carga.error ? null : !u ? (
         <p className="text-muted">Usuario no encontrado. <Link to="/admin/usuarios">Volver</Link></p>
       ) : (
         <>

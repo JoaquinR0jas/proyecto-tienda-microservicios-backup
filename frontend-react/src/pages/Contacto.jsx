@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KEYS, getColeccion, setColeccion, siguienteId } from '../datos.js'
+import { enviarMensaje } from '../api.js'
 import { correoOk, textoOk, claseCampo } from '../validaciones.js'
 import { aviso } from '../alertas.js'
 
@@ -14,7 +14,7 @@ export default function Contacto() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault()
     const err = {}
     if (!textoOk(form.nombre, 100)) err.nombre = true
@@ -28,15 +28,17 @@ export default function Contacto() {
       return
     }
 
-    const lista = getColeccion(KEYS.contactos)
-    lista.push({
-      id: siguienteId(lista),
-      nombre: form.nombre.trim(),
-      correo: form.correo.trim(),
-      comentario: form.comentario.trim(),
-      fecha: new Date().toISOString().slice(0, 10)
-    })
-    setColeccion(KEYS.contactos, lista)
+    // el mensaje se guarda en ms-contenido y aparece en el panel admin
+    try {
+      await enviarMensaje({
+        nombre: form.nombre.trim(),
+        correo: form.correo.trim(),
+        comentario: form.comentario.trim()
+      })
+    } catch (err) {
+      aviso("No se pudo enviar el mensaje", err.message, "error")
+      return
+    }
 
     aviso("Mensaje enviado", "Gracias por escribirnos, te responderemos pronto.")
     setForm(VACIO)

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Productos from '../pages/Productos.jsx'
-import { initDatos } from '../datos.js'
+import { mockApi } from './mockApi.js'
 
 describe('Renderizado del catalogo', () => {
   beforeEach(() => {
     localStorage.clear()
-    initDatos()
+    mockApi() // los productos vienen de un backend falso
   })
   // Limpiar el DOM después de cada prueba
   afterEach(() => {

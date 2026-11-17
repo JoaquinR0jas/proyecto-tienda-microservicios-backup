@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import Cargando, { useCarga } from './components/Cargando.jsx'
+import { cargarReferencias } from './api.js'
 import Home from './pages/Home.jsx'
 import Productos from './pages/Productos.jsx'
 import Detalle from './pages/Detalle.jsx'
@@ -38,10 +40,24 @@ import AdminMensajes from './pages/AdminMensajes.jsx'
 
 export default function App() {
   const ruta = useLocation().pathname
+  // categorias, regiones y comunas se cargan una vez y las usan muchas paginas
+  const referencias = useCarga(cargarReferencias)
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [ruta])
+
+  if (referencias.cargando || referencias.error) {
+    return (
+      <>
+        <Navbar />
+        <main className="container py-5">
+          <Cargando cargando={referencias.cargando} error={referencias.error} onReintentar={referencias.recargar} />
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   return (
     <>

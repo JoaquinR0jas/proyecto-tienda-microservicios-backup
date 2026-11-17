@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { obtenerProductoPorCodigo } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { agregarConAviso } from '../alertas.js'
 
 export default function Detalle() {
   const { codigo } = useParams()
-  const [p, setP] = useState(null)
   const [cant, setCant] = useState(1)
+  const carga = useCarga(() => obtenerProductoPorCodigo(codigo), [codigo])
+  const p = carga.datos && carga.datos.estado === "Activo" ? carga.datos : null
 
   useEffect(() => {
-    const prod = getColeccion(KEYS.productos).find(x => x.codigo === codigo)
-    setP(prod || null)
     setCant(1)
   }, [codigo])
+
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
 
   if (!p) {
     return (
@@ -26,7 +35,7 @@ export default function Detalle() {
   const agotado = p.stock <= 0
 
   function agregar() {
-    agregarConAviso(p.codigo, cant)
+    agregarConAviso(p, cant)
   }
 
   return (

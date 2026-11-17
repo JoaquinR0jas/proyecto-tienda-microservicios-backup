@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, siguienteId } from '../datos.js'
+import { getReferencias } from '../datos.js'
+import { crearCategoria, actualizarCategoria, cargarReferencias } from '../api.js'
 import { textoOk } from '../validaciones.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso } from '../alertas.js'
@@ -11,7 +12,7 @@ export default function AdminCategoriaForm() {
   const sesion = useAdmin(true)
   const editando = !!id
   const [form, setForm] = useState(() => {
-    const c = id && getColeccion(KEYS.categorias).find(x => x.id === Number(id))
+    const c = id && getReferencias().categorias.find(x => x.id === Number(id))
     return c ? { nombre: c.nombre, descripcion: c.descripcion || "" } : { nombre: "", descripcion: "" }
   })
   const [error, setError] = useState("")
@@ -24,7 +25,7 @@ export default function AdminCategoriaForm() {
 
   async function guardar(e) {
     e.preventDefault()
-    const todas = getColeccion(KEYS.categorias)
+    const todas = getReferencias().categorias
     let err = ""
     if (!textoOk(form.nombre, 50)) err = "El nombre es obligatorio (maximo 50 caracteres)."
     else if (todas.some(c => c.nombre.toLowerCase() === form.nombre.trim().toLowerCase() && c.id !== Number(id))) err = "Ya existe una categoria con ese nombre."
@@ -35,12 +36,15 @@ export default function AdminCategoriaForm() {
       return
     }
     const datos = { nombre: form.nombre.trim(), descripcion: form.descripcion.trim() }
-    if (editando) {
-      setColeccion(KEYS.categorias, todas.map(c => c.id === Number(id) ? { ...c, ...datos } : c))
-    } else {
-      todas.push({ id: siguienteId(todas), ...datos })
-      setColeccion(KEYS.categorias, todas)
+    try {
+      if (editando) await actualizarCategoria(id, datos)
+      else await crearCategoria(datos)
+    } catch (e2) {
+      setError(e2.message)
+      aviso("No se pudo guardar", e2.message, "error")
+      return
     }
+    await cargarReferencias() // para que la tienda vea la categoria nueva o con su nuevo nombre
     await aviso("Correcto", "Categoria guardada correctamente.")
     nav("/admin/categorias")
   }

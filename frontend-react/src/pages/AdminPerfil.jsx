@@ -1,26 +1,38 @@
 import { useEffect, useState } from 'react'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { getReferencias, guardarSesion, nombreRol } from '../datos.js'
+import { obtenerUsuario, actualizarUsuario } from '../api.js'
 import { passOk, textoOk } from '../validaciones.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso } from '../alertas.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function AdminPerfil() {
   const sesion = useAdmin()
-  const [regiones] = useState(() => getColeccion(KEYS.regiones))
+  const [regiones] = useState(() => getReferencias().regiones)
   const [comunas, setComunas] = useState([])
-  const [form, setForm] = useState(() => {
-    const u = sesion && getColeccion(KEYS.usuarios).find(x => x.run === sesion.run)
-    return u
-      ? { nombre: u.nombre, apellidos: u.apellidos, direccion: u.direccion, region: u.regionId, comuna: u.comunaId, pass: "", pass2: "" }
-      : null
-  })
+  const [form, setForm] = useState(null)
+  // los datos de la cuenta vienen de ms-usuarios
+  const carga = useCarga(async () => (sesion ? obtenerUsuario(sesion.id) : null))
 
   useEffect(() => {
-    if (form) setComunas(getColeccion(KEYS.comunas).filter(c => c.regionId === Number(form.region)))
+    const u = carga.datos
+    if (u) setForm({ nombre: u.nombre, apellidos: u.apellidos, direccion: u.direccion, region: u.regionId, comuna: u.comunaId, pass: "", pass2: "" })
+  }, [carga.datos])
+
+  useEffect(() => {
+    if (form) setComunas(getReferencias().comunas.filter(c => c.regionId === Number(form.region)))
   }, [form?.region])
 
-  if (!sesion || !form) return null
-  const rol = getColeccion(KEYS.roles).find(r => r.id === sesion.rolId)
+  if (!sesion) return null
+  if (!form) {
+    return (
+      <AdminLayout>
+        <h1 className="section-title">Perfil</h1>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </AdminLayout>
+    )
+  }
+  const rol = { nombre: nombreRol(sesion.rolId) }
 
   function cambiar(e) {
     const nuevo = { ...form, [e.target.name]: e.target.value }
@@ -28,7 +40,7 @@ export default function AdminPerfil() {
     setForm(nuevo)
   }
 
-  function guardar(e) {
+  async function guardar(e) {
     e.preventDefault()
     if (!textoOk(form.nombre, 50) || !textoOk(form.apellidos, 100) || !textoOk(form.direccion, 300) || !form.comuna) {
       aviso("Revisa el formulario", "Completa nombre, apellidos, direccion y comuna.", "error")
@@ -38,18 +50,20 @@ export default function AdminPerfil() {
       aviso("Revisa el formulario", "La contrasena debe tener entre 4 y 10 caracteres y coincidir.", "error")
       return
     }
-    const users = getColeccion(KEYS.usuarios).map(u => {
-      if (u.run !== sesion.run) return u
-      return {
+    const u = carga.datos
+    try {
+      await actualizarUsuario(u.id, {
         ...u, nombre: form.nombre.trim(), apellidos: form.apellidos.trim(), direccion: form.direccion.trim(),
         regionId: Number(form.region), comunaId: Number(form.comuna),
         password: form.pass ? form.pass : u.password
-      }
-    })
-    setColeccion(KEYS.usuarios, users)
-    localStorage.setItem(KEYS.sesion, JSON.stringify({ ...sesion, nombre: form.nombre.trim(), apellidos: form.apellidos.trim() }))
-    window.dispatchEvent(new Event("sesion-cambio"))
+      })
+    } catch (err) {
+      aviso("No se pudo guardar", err.message, "error")
+      return
+    }
+    guardarSesion({ ...sesion, nombre: form.nombre.trim(), apellidos: form.apellidos.trim() })
     setForm({ ...form, pass: "", pass2: "" })
+    carga.recargar()
     aviso("Correcto", "Perfil actualizado correctamente.")
   }
 

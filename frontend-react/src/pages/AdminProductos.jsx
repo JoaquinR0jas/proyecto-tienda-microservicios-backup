@@ -1,21 +1,29 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, plata, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { plata, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { listarProductos, eliminarProducto } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso, confirmar } from '../alertas.js'
 
 export default function AdminProductos() {
   const sesion = useAdmin()
-  const [prods, setProds] = useState(() => getColeccion(KEYS.productos))
+  const carga = useCarga(listarProductos) // todos los productos de ms-catalogo, activos e inactivos
   const [busqueda, setBusqueda] = useState("")
   if (!sesion) return null
 
   const soloVer = sesion.rolId === 2
+  const prods = carga.datos || []
 
   async function eliminar(codigo) {
     if (!await confirmar("Eliminar producto?", "Esta accion no se puede deshacer.")) return
-    setColeccion(KEYS.productos, getColeccion(KEYS.productos).filter(p => p.codigo !== codigo))
-    setProds(getColeccion(KEYS.productos))
+    try {
+      await eliminarProducto(prods.find(p => p.codigo === codigo).id)
+    } catch (e) {
+      aviso("No se pudo eliminar", e.message, "error")
+      return
+    }
+    carga.recargar()
     aviso("Eliminado", "El producto fue eliminado correctamente.")
   }
 
@@ -33,6 +41,7 @@ export default function AdminProductos() {
         </div>
       </div>
       <input className="form-control mb-3" placeholder="Buscar por nombre o codigo..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0">
           <thead>

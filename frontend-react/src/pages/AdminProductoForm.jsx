@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion, imgProducto } from '../datos.js'
+import { getReferencias, imgProducto } from '../datos.js'
+import { obtenerProductoPorCodigo, crearProducto, actualizarProducto } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { textoOk, numeroOk, enteroOk, claseCampo } from '../validaciones.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso } from '../alertas.js'
@@ -15,19 +17,34 @@ export default function AdminProductoForm() {
   const nav = useNavigate()
   const sesion = useAdmin(true)
   const editando = !!codigo
-  const [cats] = useState(() => getColeccion(KEYS.categorias))
+  const [cats] = useState(() => getReferencias().categorias)
   const [errores, setErrores] = useState({})
   const [validado, setValidado] = useState(false)
-  const [form, setForm] = useState(() => {
-    const p = codigo && getColeccion(KEYS.productos).find(x => x.codigo === codigo)
-    if (!p) return VACIO
-    return {
+  const [guardando, setGuardando] = useState(false)
+  const [form, setForm] = useState(VACIO)
+  // al editar se trae el producto desde ms-catalogo
+  const carga = useCarga(async () => (codigo ? obtenerProductoPorCodigo(codigo) : null), [codigo])
+
+  useEffect(() => {
+    const p = carga.datos
+    if (!p) return
+    setForm({
       codigo: p.codigo, nombre: p.nombre, descripcion: p.descripcion || "",
       precio: p.precio, descuento: p.descuento || 0, stock: p.stock, stockCritico: p.stockCritico ?? "",
       categoriaId: p.categoriaId, imagen: p.imagen || "", estado: p.estado, destacado: !!p.destacado
-    }
-  })
+    })
+  }, [carga.datos])
+
   if (!sesion) return null
+
+  if (editando && (carga.cargando || carga.error || !carga.datos)) {
+    return (
+      <AdminLayout>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+        {!carga.cargando && !carga.error && <p className="text-muted">Producto no encontrado. <Link to="/admin/productos">Volver</Link></p>}
+      </AdminLayout>
+    )
+  }
 
   function cambiar(e) {
     const { name, value, type, checked } = e.target
@@ -56,10 +73,10 @@ export default function AdminProductoForm() {
 
   async function guardar(e) {
     e.preventDefault()
-    const todos = getColeccion(KEYS.productos)
+    if (guardando) return
     const err = {}
+    // que el codigo no se repita lo revisa ms-catalogo al guardar
     if (form.codigo.trim().length < 3) err.codigo = "Codigo obligatorio, minimo 3 caracteres."
-    else if (!editando && todos.some(p => p.codigo === form.codigo.trim())) err.codigo = "Ese codigo ya existe."
     if (!textoOk(form.nombre, 100)) err.nombre = true
     if (form.descripcion.trim().length > 500) err.descripcion = true
     if (!numeroOk(form.precio, 0)) err.precio = true
@@ -89,11 +106,19 @@ export default function AdminProductoForm() {
       destacado: form.destacado
     }
 
-    if (editando) {
-      setColeccion(KEYS.productos, todos.map(p => p.codigo === codigo ? prod : p))
-    } else {
-      todos.push(prod)
-      setColeccion(KEYS.productos, todos)
+    setGuardando(true)
+    try {
+      if (editando) await actualizarProducto(carga.datos.id, prod)
+      else await crearProducto(prod)
+    } catch (e2) {
+      setGuardando(false)
+      if (e2.status === 409) {
+        setErrores({ ...err, codigo: "Ese codigo ya existe." })
+        aviso("Revisa el formulario", "Ese codigo ya existe.", "error")
+      } else {
+        aviso("No se pudo guardar", e2.message, "error")
+      }
+      return
     }
 
     let extra = ""

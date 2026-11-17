@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { useState } from 'react'
 import Tarjeta from '../components/Tarjeta.jsx'
 import Contacto from '../pages/Contacto.jsx'
-import { KEYS, getColeccion, initDatos } from '../datos.js'
+import { mockApi, llamadasA } from './mockApi.js'
 
 const producto = {
   codigo: 'FF-TEST',
@@ -41,9 +41,11 @@ describe('Seccion de comentarios / formulario de contacto: estado con useState',
     cleanup()
   })
 
+  let api // backend falso, para revisar si el formulario llamo a ms-contenido
+
   beforeEach(() => {
     localStorage.clear()
-    initDatos()
+    api = mockApi()
   })
 
   it('actualiza el estado del comentario al escribir usando useState', () => {
@@ -113,6 +115,7 @@ describe('Seccion de comentarios / formulario de contacto: estado con useState',
 
     expect(nombre.classList.contains('is-invalid')).toBeTrue()
     expect(correo.classList.contains('is-valid')).toBeTrue()
-    expect(getColeccion(KEYS.contactos).length).toBe(0)
+    // el mensaje nunca se envio al backend
+    expect(llamadasA(api, '/api/contenido/mensajes', 'POST')).toBe(0)
   })
 })

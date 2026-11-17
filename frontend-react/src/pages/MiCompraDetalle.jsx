@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getSesion, ordenesDeUsuario, plata } from '../datos.js'
+import { getSesion, plata } from '../datos.js'
+import { obtenerOrden } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import Boleta from '../components/Boleta.jsx'
 
 export default function MiCompraDetalle() {
   const { id } = useParams()
   const [sesion] = useState(() => getSesion())
+  const carga = useCarga(async () => (sesion && sesion.rolId === 3 ? obtenerOrden(id) : null), [id])
 
   if (!sesion) {
     return (
@@ -26,7 +29,16 @@ export default function MiCompraDetalle() {
     )
   }
 
-  const orden = ordenesDeUsuario(sesion).find(o => o.id === Number(id))
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
+
+  // solo se muestra si la compra es de este usuario
+  const orden = carga.datos && carga.datos.usuarioId === sesion.id ? carga.datos : null
 
   if (!orden) {
     return (

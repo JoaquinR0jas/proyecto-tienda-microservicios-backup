@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, nombreCategoria } from '../datos.js'
+import { nombreCategoria } from '../datos.js'
+import { listarCriticos } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 
 export default function AdminProductosCriticos() {
   const sesion = useAdmin()
+  const carga = useCarga(listarCriticos) // ms-catalogo calcula cuales estan en o bajo su stock critico
   if (!sesion) return null
 
-  const criticos = getColeccion(KEYS.productos)
-    .filter(p => p.stockCritico != null && p.stock <= p.stockCritico)
-    .sort((a, b) => a.stock - b.stock)
+  const criticos = [...(carga.datos || [])].sort((a, b) => a.stock - b.stock)
 
   return (
     <AdminLayout>
       <h1 className="section-title">Listado de productos criticos</h1>
       <p className="text-muted">Productos cuyo stock esta en o bajo el stock critico definido.</p>
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <table className="table table-striped mb-0">
           <thead>

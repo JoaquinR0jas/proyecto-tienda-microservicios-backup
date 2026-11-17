@@ -1,14 +1,29 @@
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion, plata, nombreCategoria } from '../datos.js'
+import { plata, nombreCategoria } from '../datos.js'
+import { listarProductos, listarOrdenes } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import Barra from '../components/Barra.jsx'
 
 export default function AdminProductosReportes() {
   const sesion = useAdmin()
+  const carga = useCarga(async () => {
+    const [prods, ordenes] = await Promise.all([listarProductos(), listarOrdenes()])
+    return { prods, ordenes }
+  })
   if (!sesion) return null
 
-  const prods = getColeccion(KEYS.productos)
-  const pagadas = getColeccion(KEYS.ordenes).filter(o => o.estado === "Pagada")
+  if (carga.cargando || carga.error) {
+    return (
+      <AdminLayout>
+        <h1 className="section-title">Reportes de productos</h1>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </AdminLayout>
+    )
+  }
+
+  const prods = carga.datos.prods
+  const pagadas = carga.datos.ordenes.filter(o => o.estado === "Pagada")
 
   // unidades e ingresos por producto
   const ventas = prods.map(p => {

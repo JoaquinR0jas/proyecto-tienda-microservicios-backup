@@ -1,11 +1,23 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { KEYS, getColeccion } from '../datos.js'
+import { obtenerOrden } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import Boleta from '../components/Boleta.jsx'
 
 export default function CompraError() {
   const { id } = useParams()
-  const motivo = useLocation().state?.motivo
-  const orden = getColeccion(KEYS.ordenes).find(o => o.id === Number(id) && o.estado === "Rechazada")
+  const estado = useLocation().state
+  // si viene del checkout ya trae la orden; si se recarga la pagina se pide a ms-pedidos
+  const carga = useCarga(async () => estado?.orden || await obtenerOrden(id), [id])
+  const orden = carga.datos && carga.datos.estado === "Rechazada" ? carga.datos : null
+  const motivo = estado?.motivo || orden?.motivo
+
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
 
   if (!orden) {
     return (

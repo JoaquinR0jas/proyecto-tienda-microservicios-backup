@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getSesion, ordenesDeUsuario, plata, fechaCorta } from '../datos.js'
+import { getSesion, plata, fechaCorta } from '../datos.js'
+import { ordenesDeUsuario } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function MisCompras() {
   const [sesion] = useState(() => getSesion())
   const [estado, setEstado] = useState("")
   const [busqueda, setBusqueda] = useState("")
+  // historial de compras del usuario en ms-pedidos
+  const carga = useCarga(async () => (sesion && sesion.rolId === 3 ? ordenesDeUsuario(sesion.id) : []))
 
   if (!sesion) {
     return (
@@ -37,8 +41,17 @@ export default function MisCompras() {
     )
   }
 
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <h1 className="section-title">Mis compras</h1>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
+
   const texto = busqueda.trim().toLowerCase()
-  const todas = ordenesDeUsuario(sesion)
+  const todas = carga.datos
   const ordenes = todas
     .filter(o => !estado || o.estado === estado)
     .filter(o => {

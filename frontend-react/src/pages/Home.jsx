@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { KEYS, getColeccion } from '../datos.js'
+import { listarProductos, listarArticulos } from '../api.js'
 import { agregarConAviso } from '../alertas.js'
+import { imgProducto } from '../datos.js'
 import Tarjeta from '../components/Tarjeta.jsx'
 
 export default function Home() {
@@ -18,9 +19,13 @@ export default function Home() {
   ]
 
   useEffect(() => {
-    const prods = getColeccion(KEYS.productos).filter(p => p.estado === "Activo" && p.destacado)
-    setDestacados(prods)
-    setNoticias(getColeccion(KEYS.blog).slice(0, 3))
+    // si el backend no responde, el inicio igual se muestra con el banner
+    listarProductos({ soloActivos: true })
+      .then(prods => setDestacados(prods.filter(p => p.destacado)))
+      .catch(() => setDestacados([]))
+    listarArticulos()
+      .then(arts => setNoticias(arts.slice(0, 3)))
+      .catch(() => setNoticias([]))
   }, [])
 
   useEffect(() => {
@@ -80,7 +85,7 @@ export default function Home() {
             <i className="bi bi-chevron-right"></i>
           </button>
           <div className="row g-4 carrusel-productos" ref={filaRef}>
-            {destacados.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={c => agregarConAviso(c)} />)}
+            {destacados.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={() => agregarConAviso(p)} />)}
           </div>
         </div>
       </section>
@@ -94,7 +99,7 @@ export default function Home() {
           {noticias.map(n => (
             <div className="col-md-6 col-lg-4" key={n.id}>
               <article className="card h-100 card-ff-hover">
-                <img src={"/img/" + n.imagen} className="card-img-top" alt={n.titulo} />
+                <img src={imgProducto(n)} className="card-img-top" alt={n.titulo} />
                 <div className="card-body d-flex flex-column">
                   <p className="small text-muted mb-1">{n.fecha}</p>
                   <h3 className="h6">{n.titulo}</h3>

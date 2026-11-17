@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { KEYS, getColeccion, getSesion, plata, imgProducto, detalleCarrito, costoEnvio, registrarOrden } from '../datos.js'
+import { getSesion, getReferencias, setCarrito, plata, imgProducto, detalleCarrito, costoEnvio } from '../datos.js'
+import { listarProductos, obtenerUsuario, comprar } from '../api.js'
+import { aviso } from '../alertas.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import { correoOk, textoOk } from '../validaciones.js'
 
 const VACIO = {
@@ -11,24 +14,41 @@ const VACIO = {
 
 export default function Checkout() {
   const nav = useNavigate()
-  const [detalle] = useState(() => detalleCarrito())
-  const [regiones] = useState(() => getColeccion(KEYS.regiones))
+  const [regiones] = useState(() => getReferencias().regiones)
   const [comunas, setComunas] = useState([])
   const [errores, setErrores] = useState({})
+  const [enviando, setEnviando] = useState(false)
   const [sesion] = useState(() => getSesion())
-  const [form, setForm] = useState(() => {
-    // si el usuario inicio sesion se rellenan sus datos automaticamente
-    if (!sesion) return VACIO
-    const u = getColeccion(KEYS.usuarios).find(x => x.run === sesion.run)
-    if (!u) return VACIO
-    return {
-      ...VACIO, nombre: u.nombre, apellidos: u.apellidos, correo: u.correo,
-      calle: u.direccion || "", region: u.regionId || "", comuna: u.comunaId || ""
-    }
+  const [form, setForm] = useState(VACIO)
+
+  // precios y stock actuales (ms-catalogo) + datos del usuario para rellenar el formulario (ms-usuarios)
+  const carga = useCarga(async () => {
+    if (!sesion) return null
+    const [productos, usuario] = await Promise.all([
+      listarProductos({ soloActivos: true }),
+      obtenerUsuario(sesion.id)
+    ])
+    return { detalle: detalleCarrito(productos), usuario }
   })
+  const detalle = carga.datos ? carga.datos.detalle : { items: [], subtotal: 0 }
 
   useEffect(() => {
-    setComunas(form.region ? getColeccion(KEYS.comunas).filter(c => c.regionId === Number(form.region)) : [])
+    // comprar requiere sesion: sin ella se va al login y despues vuelve aqui
+    if (!sesion) nav("/login", { replace: true, state: { volverA: "/checkout" } })
+  }, [])
+
+  useEffect(() => {
+    // si el usuario inicio sesion se rellenan sus datos automaticamente
+    const u = carga.datos && carga.datos.usuario
+    if (!u) return
+    setForm(f => ({
+      ...f, nombre: u.nombre, apellidos: u.apellidos, correo: u.correo,
+      calle: u.direccion || "", region: u.regionId || "", comuna: u.comunaId || ""
+    }))
+  }, [carga.datos])
+
+  useEffect(() => {
+    setComunas(form.region ? getReferencias().comunas.filter(c => c.regionId === Number(form.region)) : [])
   }, [form.region])
 
   function cambiar(e) {
@@ -52,34 +72,48 @@ export default function Checkout() {
     return Object.keys(e).length === 0
   }
 
-  function pagar(e) {
+  // ms-pedidos arma el pedido con los precios reales, ms-pagos aprueba o rechaza el pago
+  // (rechaza si alguien compro el stock antes o si se simula un rechazo del banco)
+  async function pagar(e) {
     e.preventDefault()
-    if (!validar()) return
+    if (!validar() || enviando) return
 
-    // el pago se rechaza si alguien compro el stock antes o si se simula un rechazo del banco
-    let motivo = ""
-    const prods = getColeccion(KEYS.productos)
-    const sinStock = detalle.items.find(i => {
-      const p = prods.find(x => x.codigo === i.codigo)
-      return !p || p.stock < i.cantidad
-    })
-    if (sinStock) motivo = "No hay stock suficiente de " + sinStock.nombre
-    else if (form.simularError) motivo = "El medio de pago fue rechazado por el banco"
+    setEnviando(true)
+    let orden
+    try {
+      orden = await comprar({
+        usuarioId: sesion.id,
+        cliente: { run: sesion.run, nombre: form.nombre.trim(), apellidos: form.apellidos.trim(), correo: form.correo.trim() },
+        envio: {
+          tipo: form.tipo, calle: form.calle.trim(), depto: form.depto.trim(),
+          regionId: Number(form.region) || null, comunaId: Number(form.comuna) || null,
+          indicaciones: form.indicaciones.trim(), medio: form.medio
+        },
+        items: detalle.items,
+        simularRechazo: form.simularError
+      })
+    } catch (err) {
+      setEnviando(false)
+      aviso("No se pudo procesar la compra", err.message, "error")
+      return
+    }
 
-    const orden = registrarOrden({
-      cliente: { run: sesion ? sesion.run : "", nombre: form.nombre.trim(), apellidos: form.apellidos.trim(), correo: form.correo.trim() },
-      envio: {
-        tipo: form.tipo, calle: form.calle.trim(), depto: form.depto.trim(),
-        regionId: Number(form.region) || null, comunaId: Number(form.comuna) || null,
-        indicaciones: form.indicaciones.trim(), medio: form.medio
-      },
-      items: detalle.items,
-      subtotal: detalle.subtotal,
-      estado: motivo ? "Rechazada" : "Pagada"
-    })
+    if (orden.estado === "Pagada") {
+      setCarrito([]) // la compra se pago, el carrito queda vacio
+      nav("/compra/exitosa/" + orden.id, { state: { orden } })
+    } else {
+      nav("/compra/error/" + orden.id, { state: { orden, motivo: orden.motivo } })
+    }
+  }
 
-    if (motivo) nav("/compra/error/" + orden.id, { state: { motivo } })
-    else nav("/compra/exitosa/" + orden.id)
+  if (!sesion) return null
+
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
   }
 
   if (detalle.items.length === 0) {
@@ -219,7 +253,9 @@ export default function Checkout() {
 
             <div className="d-flex flex-wrap justify-content-between gap-2">
               <Link to="/carrito" className="btn btn-outline-accent">Volver al carrito</Link>
-              <button type="submit" className="btn btn-success">Pagar ahora {plata(total)}</button>
+              <button type="submit" className="btn btn-success" disabled={enviando}>
+                {enviando ? "Procesando pago..." : "Pagar ahora " + plata(total)}
+              </button>
             </div>
           </form>
         </div>

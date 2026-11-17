@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
-import { correoOk, passOk, runOk, textoOk, claseCampo } from '../validaciones.js'
+import { ROLES, getReferencias } from '../datos.js'
+import { obtenerUsuarioPorRun, crearUsuario, actualizarUsuario } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
+import { correoOk, passOk, runOk, textoOk, claseCampo, normalizarRun } from '../validaciones.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
 import { aviso } from '../alertas.js'
 
@@ -15,26 +17,39 @@ export default function AdminUsuarioForm() {
   const nav = useNavigate()
   const sesion = useAdmin(true)
   const editando = !!run
-  const [roles] = useState(() => getColeccion(KEYS.roles))
-  const [regiones] = useState(() => getColeccion(KEYS.regiones))
+  const [roles] = useState(ROLES)
+  const [regiones] = useState(() => getReferencias().regiones)
   const [comunas, setComunas] = useState([])
   const [errores, setErrores] = useState({})
   const [validado, setValidado] = useState(false)
-  const [form, setForm] = useState(() => {
-    const u = run && getColeccion(KEYS.usuarios).find(x => x.run === run)
-    if (!u) return VACIO
-    return {
+  const [form, setForm] = useState(VACIO)
+  // al editar se trae el usuario desde ms-usuarios
+  const carga = useCarga(async () => (run ? obtenerUsuarioPorRun(run) : null), [run])
+
+  useEffect(() => {
+    const u = carga.datos
+    if (!u) return
+    setForm({
       run: u.run, nombre: u.nombre, apellidos: u.apellidos, correo: u.correo,
       pass: u.password, fecha: u.fechaNacimiento || "", rol: u.rolId,
       region: u.regionId, comuna: u.comunaId, direccion: u.direccion, estado: u.estado
-    }
-  })
+    })
+  }, [carga.datos])
 
   useEffect(() => {
-    setComunas(form.region ? getColeccion(KEYS.comunas).filter(c => c.regionId === Number(form.region)) : [])
+    setComunas(form.region ? getReferencias().comunas.filter(c => c.regionId === Number(form.region)) : [])
   }, [form.region])
 
   if (!sesion) return null
+
+  if (editando && (carga.cargando || carga.error || !carga.datos)) {
+    return (
+      <AdminLayout>
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+        {!carga.cargando && !carga.error && <p className="text-muted">Usuario no encontrado. <Link to="/admin/usuarios">Volver</Link></p>}
+      </AdminLayout>
+    )
+  }
 
   function cambiar(e) {
     const nuevo = { ...form, [e.target.name]: e.target.value }
@@ -44,10 +59,9 @@ export default function AdminUsuarioForm() {
 
   async function guardar(e) {
     e.preventDefault()
-    const todos = getColeccion(KEYS.usuarios)
     const err = {}
+    // que el RUN o el correo no esten repetidos lo revisa ms-usuarios al guardar
     if (!runOk(form.run)) err.run = "RUN invalido."
-    else if (!editando && todos.some(u => u.run === form.run.toUpperCase().trim())) err.run = "Ese RUN ya esta registrado."
     if (!textoOk(form.nombre, 50)) err.nombre = true
     if (!textoOk(form.apellidos, 100)) err.apellidos = true
     if (!correoOk(form.correo)) err.correo = true
@@ -65,7 +79,7 @@ export default function AdminUsuarioForm() {
     }
 
     const user = {
-      run: form.run.toUpperCase().trim(),
+      run: normalizarRun(form.run),
       nombre: form.nombre.trim(),
       apellidos: form.apellidos.trim(),
       correo: form.correo.trim(),
@@ -78,11 +92,17 @@ export default function AdminUsuarioForm() {
       estado: form.estado
     }
 
-    if (editando) {
-      setColeccion(KEYS.usuarios, todos.map(u => u.run === run ? user : u))
-    } else {
-      todos.push(user)
-      setColeccion(KEYS.usuarios, todos)
+    try {
+      if (editando) await actualizarUsuario(carga.datos.id, user)
+      else await crearUsuario(user)
+    } catch (e2) {
+      if (e2.status === 409) {
+        setErrores({ ...err, run: "Ese RUN o correo ya esta registrado." })
+        aviso("Revisa el formulario", e2.message, "error")
+      } else {
+        aviso("No se pudo guardar", e2.message, "error")
+      }
+      return
     }
     await aviso("Correcto", "Usuario guardado correctamente.")
     nav("/admin/usuarios")
