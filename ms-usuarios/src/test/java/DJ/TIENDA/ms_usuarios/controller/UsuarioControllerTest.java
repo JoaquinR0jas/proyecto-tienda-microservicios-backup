@@ -28,6 +28,20 @@ class UsuarioControllerTest {
 
     private static final ObjectMapper om = new ObjectMapper();
 
+    // usuario con todos los campos obligatorios, para pasar la validacion @Valid
+    private Usuario usuarioValido(String nombre, String email) {
+        Usuario usuario = new Usuario();
+        usuario.setRun("112223339");
+        usuario.setNombre(nombre);
+        usuario.setApellidos("Prueba");
+        usuario.setEmail(email);
+        usuario.setPassword("pass");
+        usuario.setRegionId(1L);
+        usuario.setComunaId(1L);
+        usuario.setDireccion("Calle 123");
+        return usuario;
+    }
+
     @Test
     void listarTodos_returnsAllUsers() throws Exception {
         Usuario usuario = new Usuario();
@@ -89,10 +103,7 @@ class UsuarioControllerTest {
 
     @Test
     void crear_whenValid_returns201() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Nuevo");
-        usuario.setEmail("nuevo@example.com");
-        usuario.setPassword("pass");
+        Usuario usuario = usuarioValido("Nuevo", "nuevo@example.com");
 
         Usuario creado = new Usuario();
         creado.setId(1L);
@@ -112,10 +123,7 @@ class UsuarioControllerTest {
 
     @Test
     void crear_whenEmailAlreadyExists_returns409() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Nuevo");
-        usuario.setEmail("existing@example.com");
-        usuario.setPassword("pass");
+        Usuario usuario = usuarioValido("Nuevo", "existing@example.com");
 
         when(usuarioService.crear(any(Usuario.class)))
                 .thenThrow(new IllegalArgumentException("Ya existe un usuario con el email: existing@example.com"));
@@ -128,10 +136,7 @@ class UsuarioControllerTest {
 
     @Test
     void actualizar_whenExists_returns200() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Updated");
-        usuario.setEmail("test@example.com");
-        usuario.setPassword("pass");
+        Usuario usuario = usuarioValido("Updated", "test@example.com");
 
         Usuario actualizado = new Usuario();
         actualizado.setId(1L);
@@ -147,10 +152,7 @@ class UsuarioControllerTest {
 
     @Test
     void actualizar_whenNotExists_returns404() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Updated");
-        usuario.setEmail("test@example.com");
-        usuario.setPassword("pass");
+        Usuario usuario = usuarioValido("Updated", "test@example.com");
 
         when(usuarioService.actualizar(eq(99L), any(Usuario.class))).thenReturn(Optional.empty());
 
@@ -174,5 +176,17 @@ class UsuarioControllerTest {
 
         mockMvc.perform(delete("/api/usuarios/99"))
                 .andExpect(status().isNotFound());
+    }
+    @Test
+    void crear_whenMissingRequiredFields_returns400() throws Exception {
+        Usuario usuario = new Usuario();
+        usuario.setNombre("Sin datos");
+        usuario.setEmail("sin@example.com");
+        usuario.setPassword("pass");
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(usuario)))
+                .andExpect(status().isBadRequest());
     }
 }

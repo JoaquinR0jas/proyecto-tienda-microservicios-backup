@@ -2,6 +2,7 @@ package DJ.TIENDA.ms_pagos.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -24,17 +25,27 @@ public class Pago {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private Medio medio = Medio.DEBITO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Estado estado = Estado.PENDIENTE;
 
     @Column
-    private String detalle; // Mensaje del resultado del pago
+    private String detalle; // Mensaje del resultado del pago, o el motivo si fue rechazado
 
     @Column(nullable = false)
     private LocalDateTime fechaPago = LocalDateTime.now();
 
+    public enum Medio {
+        DEBITO,
+        CREDITO,
+        TRANSFERENCIA
+    }
+
     public enum Estado {
         PENDIENTE,   // Pago iniciado, esperando procesamiento
-        COMPLETADO,  // Pago exitoso
-        FALLIDO      // Pago rechazado
+        APROBADO,    // Pago exitoso, se emite la boleta
+        RECHAZADO    // Pago rechazado, no hay boleta
     }
 }

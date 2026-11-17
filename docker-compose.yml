@@ -35,6 +35,7 @@ services:
         limits:
           memory: 256M
 
+  # auth-service no tiene base de datos propia: valida contra ms-usuarios
   auth-service:
     build:
       context: .
@@ -44,12 +45,7 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx96m"
       "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
       "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_auth?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
     depends_on:
-      mysql:
-        condition: service_healthy
       eureka-server:
         condition: service_started
     ports:
@@ -107,54 +103,6 @@ services:
         limits:
           memory: 256M
 
-  ms-inventario:
-    build:
-      context: .
-      target: ms-inventario
-    container_name: tienda-inventario
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx96m"
-      "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
-      "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_inventario?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
-    depends_on:
-      mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    ports:
-      - "8089:8089"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-
-  ms-carrito:
-    build:
-      context: .
-      target: ms-carrito
-    container_name: tienda-carrito
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx96m"
-      "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
-      "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_carrito?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
-    depends_on:
-      mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    ports:
-      - "8082:8082"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-
   ms-pedidos:
     build:
       context: .
@@ -203,16 +151,16 @@ services:
         limits:
           memory: 256M
 
-  ms-envios:
+  ms-contenido:
     build:
       context: .
-      target: ms-envios
-    container_name: tienda-envios
+      target: ms-contenido
+    container_name: tienda-contenido
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx96m"
       "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
       "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_envios?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_contenido?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       "spring.datasource.username": "root"
       "spring.datasource.password": ""
     depends_on:
@@ -222,78 +170,6 @@ services:
         condition: service_started
     ports:
       - "8083:8083"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-
-  ms-notificaciones:
-    build:
-      context: .
-      target: ms-notificaciones
-    container_name: tienda-notificaciones
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx96m"
-      "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
-      "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_notificaciones?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
-    depends_on:
-      mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    ports:
-      - "8085:8085"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-
-  ms-marketing:
-    build:
-      context: .
-      target: ms-marketing
-    container_name: tienda-marketing
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx96m"
-      "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
-      "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_marketing?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
-    depends_on:
-      mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    ports:
-      - "8084:8084"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-
-  ms-resenas:
-    build:
-      context: .
-      target: ms-resenas
-    container_name: tienda-resenas
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx96m"
-      "eureka.client.serviceUrl.defaultZone": "http://eureka-server:8761/eureka/"
-      "eureka.instance.prefer-ip-address": "false"
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/ms_resenas?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      "spring.datasource.username": "root"
-      "spring.datasource.password": ""
-    depends_on:
-      mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    ports:
-      - "8088:8088"
     deploy:
       resources:
         limits:

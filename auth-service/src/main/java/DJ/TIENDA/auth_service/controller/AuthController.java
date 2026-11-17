@@ -21,10 +21,10 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @Operation(summary = "Iniciar sesion", description = "Autentica un usuario con email y password, devuelve un token JWT")
+    @Operation(summary = "Iniciar sesion", description = "Autentica un usuario con email y password, devuelve un token JWT y los datos del usuario")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Login exitoso, token JWT generado"),
-        @ApiResponse(responseCode = "401", description = "Credenciales invalidas")
+        @ApiResponse(responseCode = "401", description = "Credenciales invalidas o cuenta deshabilitada")
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
@@ -32,12 +32,7 @@ public class AuthController {
             String email = credenciales.get("email");
             String password = credenciales.get("password");
 
-            String token = authService.login(email, password);
-
-            Map<String, String> respuesta = new HashMap<>();
-            respuesta.put("token", token);
-            respuesta.put("tipo", "Bearer");
-            return ResponseEntity.ok(respuesta);
+            return ResponseEntity.ok(authService.login(email, password));
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

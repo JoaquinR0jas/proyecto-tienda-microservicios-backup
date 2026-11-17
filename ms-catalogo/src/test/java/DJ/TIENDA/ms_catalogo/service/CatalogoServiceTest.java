@@ -1,9 +1,8 @@
 package DJ.TIENDA.ms_catalogo.service;
 
-import DJ.TIENDA.ms_catalogo.client.InventarioClient;
-import DJ.TIENDA.ms_catalogo.dto.InventarioDTO;
-import DJ.TIENDA.ms_catalogo.dto.ProductoDetalleDTO;
+import DJ.TIENDA.ms_catalogo.dto.StockItemDTO;
 import DJ.TIENDA.ms_catalogo.model.Producto;
+import DJ.TIENDA.ms_catalogo.repository.CategoriaRepository;
 import DJ.TIENDA.ms_catalogo.repository.ProductoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ class CatalogoServiceTest {
     private ProductoRepository productoRepository;
 
     @Mock
-    private InventarioClient inventarioClient;
+    private CategoriaRepository categoriaRepository;
 
     @InjectMocks
     private CatalogoService catalogoService;
@@ -36,9 +35,13 @@ class CatalogoServiceTest {
     void setUp() {
         producto = new Producto();
         producto.setId(1L);
+        producto.setCodigo("FF-001");
         producto.setNombre("Test Product");
         producto.setDescripcion("A test product");
-        producto.setPrecio(99.99);
+        producto.setPrecio(10000.0);
+        producto.setStock(10);
+        producto.setStockCritico(3);
+        producto.setCategoriaId(1L);
     }
 
     @Test
@@ -58,36 +61,79 @@ class CatalogoServiceTest {
         Optional<Producto> resultado = catalogoService.obtenerPorId(1L);
 
         assertTrue(resultado.isPresent());
-        assertEquals(99.99, resultado.get().getPrecio());
+        assertEquals(10000.0, resultado.get().getPrecio());
     }
 
     @Test
     void obtenerPorId_whenNotExists_returnsEmpty() {
         when(productoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<Producto> resultado = catalogoService.obtenerPorId(99L);
-
-        assertFalse(resultado.isPresent());
+        assertFalse(catalogoService.obtenerPorId(99L).isPresent());
     }
 
     @Test
-    void crear_savesAndReturnsProduct() {
+    void precioFinal_appliesDiscount() {
+        producto.setDescuento(20);
+
+        assertEquals(8000.0, producto.getPrecioFinal());
+    }
+
+    @Test
+    void obtenerCriticos_returnsOnlyProductsAtOrBelowCriticalStock() {
+        Producto critico = new Producto();
+        critico.setStock(2);
+        critico.setStockCritico(3);
+
+        when(productoRepository.findAll()).thenReturn(List.of(producto, critico));
+
+        List<Producto> resultado = catalogoService.obtenerCriticos();
+
+        assertEquals(1, resultado.size());
+        assertSame(critico, resultado.get(0));
+    }
+
+    @Test
+    void crear_whenCodeIsUniqueAndCategoryExists_saves() {
+        when(productoRepository.existsByCodigo("FF-001")).thenReturn(false);
+        when(categoriaRepository.existsById(1L)).thenReturn(true);
         when(productoRepository.save(producto)).thenReturn(producto);
 
         Producto resultado = catalogoService.crear(producto);
 
-        assertNotNull(resultado);
-        assertEquals("Test Product", resultado.getNombre());
+        assertEquals("FF-001", resultado.getCodigo());
         verify(productoRepository).save(producto);
+    }
+
+    @Test
+    void crear_whenCodeAlreadyExists_throwsException() {
+        when(productoRepository.existsByCodigo("FF-001")).thenReturn(true);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> catalogoService.crear(producto));
+        assertTrue(ex.getMessage().startsWith("Ya existe"));
+        verify(productoRepository, never()).save(any());
+    }
+
+    @Test
+    void crear_whenCategoryDoesNotExist_throwsException() {
+        when(productoRepository.existsByCodigo("FF-001")).thenReturn(false);
+        when(categoriaRepository.existsById(1L)).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> catalogoService.crear(producto));
+        verify(productoRepository, never()).save(any());
+    }
+
+    @Test
+    void actualizar_whenNotExists_returnsEmpty() {
+        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertFalse(catalogoService.actualizar(99L, producto).isPresent());
     }
 
     @Test
     void eliminar_whenExists_returnsTrueAndDeletes() {
         when(productoRepository.existsById(1L)).thenReturn(true);
 
-        boolean resultado = catalogoService.eliminar(1L);
-
-        assertTrue(resultado);
+        assertTrue(catalogoService.eliminar(1L));
         verify(productoRepository).deleteById(1L);
     }
 
@@ -95,45 +141,28 @@ class CatalogoServiceTest {
     void eliminar_whenNotExists_returnsFalse() {
         when(productoRepository.existsById(99L)).thenReturn(false);
 
-        boolean resultado = catalogoService.eliminar(99L);
-
-        assertFalse(resultado);
+        assertFalse(catalogoService.eliminar(99L));
         verify(productoRepository, never()).deleteById(any());
     }
 
     @Test
-    void obtenerDetalleConStock_whenProductExistsAndHasStock_returnsDetailWithStock() {
-        InventarioDTO inventarioDTO = new InventarioDTO();
-        inventarioDTO.setCantidad(50);
-
+    void descontarStock_whenEnoughStock_subtractsQuantity() {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-        when(inventarioClient.obtenerStock(1L)).thenReturn(inventarioDTO);
 
-        Optional<ProductoDetalleDTO> resultado = catalogoService.obtenerDetalleConStock(1L);
+        catalogoService.descontarStock(List.of(new StockItemDTO(1L, 4)));
 
-        assertTrue(resultado.isPresent());
-        assertEquals("Test Product", resultado.get().getNombre());
-        assertEquals(99.99, resultado.get().getPrecio());
-        assertEquals(50, resultado.get().getStockDisponible());
+        assertEquals(6, producto.getStock());
+        verify(productoRepository).save(producto);
     }
 
     @Test
-    void obtenerDetalleConStock_whenProductExistsAndNoStock_returnsDetailWithZeroStock() {
+    void descontarStock_whenNotEnoughStock_throwsAndSavesNothing() {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-        when(inventarioClient.obtenerStock(1L)).thenReturn(null);
 
-        Optional<ProductoDetalleDTO> resultado = catalogoService.obtenerDetalleConStock(1L);
-
-        assertTrue(resultado.isPresent());
-        assertEquals(0, resultado.get().getStockDisponible());
-    }
-
-    @Test
-    void obtenerDetalleConStock_whenProductNotExists_returnsEmpty() {
-        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
-
-        Optional<ProductoDetalleDTO> resultado = catalogoService.obtenerDetalleConStock(99L);
-
-        assertFalse(resultado.isPresent());
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> catalogoService.descontarStock(List.of(new StockItemDTO(1L, 11))));
+        assertTrue(ex.getMessage().contains("No hay stock suficiente"));
+        assertEquals(10, producto.getStock());
+        verify(productoRepository, never()).save(any());
     }
 }

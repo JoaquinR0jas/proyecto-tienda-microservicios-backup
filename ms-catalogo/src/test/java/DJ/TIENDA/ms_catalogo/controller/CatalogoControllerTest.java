@@ -1,7 +1,6 @@
 package DJ.TIENDA.ms_catalogo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import DJ.TIENDA.ms_catalogo.dto.ProductoDetalleDTO;
 import DJ.TIENDA.ms_catalogo.model.Producto;
 import DJ.TIENDA.ms_catalogo.service.CatalogoService;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,12 +29,20 @@ class CatalogoControllerTest {
 
     private static final ObjectMapper om = new ObjectMapper();
 
+    private Producto productoValido() {
+        Producto producto = new Producto();
+        producto.setCodigo("FF-001");
+        producto.setNombre("Producto Test");
+        producto.setPrecio(19990.0);
+        producto.setStock(10);
+        producto.setCategoriaId(1L);
+        return producto;
+    }
+
     @Test
     void listar_returnsAllProducts() throws Exception {
-        Producto producto = new Producto();
+        Producto producto = productoValido();
         producto.setId(1L);
-        producto.setNombre("Producto Test");
-        producto.setPrecio(19.99);
 
         when(catalogoService.obtenerTodos()).thenReturn(List.of(producto));
 
@@ -44,47 +52,92 @@ class CatalogoControllerTest {
     }
 
     @Test
-    void verDetallesConStock_whenExists_returnsDetail() throws Exception {
-        ProductoDetalleDTO detalle = new ProductoDetalleDTO();
-        detalle.setId(1L);
-        detalle.setNombre("Producto Test");
-        detalle.setPrecio(19.99);
-        detalle.setStockDisponible(10);
+    void listar_soloActivos_usesActiveList() throws Exception {
+        when(catalogoService.obtenerActivos()).thenReturn(List.of());
 
-        when(catalogoService.obtenerDetalleConStock(1L)).thenReturn(Optional.of(detalle));
+        mockMvc.perform(get("/api/catalogo/productos").param("soloActivos", "true"))
+                .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/catalogo/productos/1/detalles"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stockDisponible").value(10));
+        verify(catalogoService).obtenerActivos();
+        verify(catalogoService, never()).obtenerTodos();
     }
 
     @Test
-    void verDetallesConStock_whenNotExists_returns404() throws Exception {
-        when(catalogoService.obtenerDetalleConStock(99L)).thenReturn(Optional.empty());
+    void listarOfertas_returnsPrecioFinal() throws Exception {
+        Producto producto = productoValido();
+        producto.setDescuento(20);
 
-        mockMvc.perform(get("/api/catalogo/productos/99/detalles"))
+        when(catalogoService.obtenerOfertas()).thenReturn(List.of(producto));
+
+        mockMvc.perform(get("/api/catalogo/productos/ofertas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].precioFinal").value(15992.0));
+    }
+
+    @Test
+    void obtenerPorId_whenExists_returnsProduct() throws Exception {
+        Producto producto = productoValido();
+        producto.setId(1L);
+
+        when(catalogoService.obtenerPorId(1L)).thenReturn(Optional.of(producto));
+
+        mockMvc.perform(get("/api/catalogo/productos/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codigo").value("FF-001"));
+    }
+
+    @Test
+    void obtenerPorId_whenNotExists_returns404() throws Exception {
+        when(catalogoService.obtenerPorId(99L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/catalogo/productos/99"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void crear_whenValid_returns201() throws Exception {
-        Producto producto = new Producto();
-        producto.setNombre("Nuevo Producto");
-        producto.setPrecio(29.99);
-
-        Producto creado = new Producto();
+        Producto creado = productoValido();
         creado.setId(1L);
-        creado.setNombre("Nuevo Producto");
-        creado.setPrecio(29.99);
 
         when(catalogoService.crear(any(Producto.class))).thenReturn(creado);
 
         mockMvc.perform(post("/api/catalogo/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(producto)))
+                        .content(om.writeValueAsString(productoValido())))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Nuevo Producto"));
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void crear_whenCodeAlreadyExists_returns409() throws Exception {
+        when(catalogoService.crear(any(Producto.class)))
+                .thenThrow(new IllegalArgumentException("Ya existe un producto con el codigo: FF-001"));
+
+        mockMvc.perform(post("/api/catalogo/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(productoValido())))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void crear_whenNegativeStock_returns400() throws Exception {
+        Producto producto = productoValido();
+        producto.setStock(-1);
+
+        mockMvc.perform(post("/api/catalogo/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(producto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void actualizar_whenNotExists_returns404() throws Exception {
+        when(catalogoService.actualizar(eq(99L), any(Producto.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/catalogo/productos/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(productoValido())))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -104,24 +157,13 @@ class CatalogoControllerTest {
     }
 
     @Test
-    void obtenerPorId_whenExists_returnsProduct() throws Exception {
-        Producto producto = new Producto();
-        producto.setId(1L);
-        producto.setNombre("Producto Test");
-        producto.setPrecio(19.99);
+    void descontarStock_whenNotEnoughStock_returns400() throws Exception {
+        doThrow(new IllegalArgumentException("No hay stock suficiente de Producto Test"))
+                .when(catalogoService).descontarStock(anyList());
 
-        when(catalogoService.obtenerTodos()).thenReturn(List.of(producto));
-
-        mockMvc.perform(get("/api/catalogo/productos/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Producto Test"));
-    }
-
-    @Test
-    void obtenerPorId_whenNotExists_returns404() throws Exception {
-        when(catalogoService.obtenerTodos()).thenReturn(List.of());
-
-        mockMvc.perform(get("/api/catalogo/productos/99"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/catalogo/productos/descontar-stock")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"productoId\":1,\"cantidad\":99}]"))
+                .andExpect(status().isBadRequest());
     }
 }
