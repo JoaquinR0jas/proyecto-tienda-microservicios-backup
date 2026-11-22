@@ -1,26 +1,24 @@
 package DJ.TIENDA.ms_pedidos.controller;
 
+import DJ.TIENDA.ms_pedidos.dto.CrearPedidoDTO;
 import DJ.TIENDA.ms_pedidos.dto.PedidoResponseDTO;
 import DJ.TIENDA.ms_pedidos.service.PedidoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PedidoController.class)
 class PedidoControllerTest {
-
-    private static final ObjectMapper om = new ObjectMapper();
 
     @Autowired
     private MockMvc mockMvc;
@@ -28,61 +26,77 @@ class PedidoControllerTest {
     @MockitoBean
     private PedidoService pedidoService;
 
+    private static final String PEDIDO_VALIDO = """
+            {
+              "usuarioId": 3,
+              "cliente": {"nombre": "Camila", "apellidos": "Soto Perez", "email": "camila@gmail.com"},
+              "entrega": {"tipo": "RETIRO"},
+              "medioPago": "DEBITO",
+              "items": [{"productoId": 1, "cantidad": 2}]
+            }
+            """;
+
     @Test
-    void crearPedido_DebeRetornar201() throws Exception {
-        PedidoResponseDTO dto = new PedidoResponseDTO();
-        dto.setPedidoId(100L);
-        dto.setUsuarioId(1L);
+    void crearPedido_whenValid_returns201() throws Exception {
+        PedidoResponseDTO respuesta = new PedidoResponseDTO();
+        respuesta.setPedidoId(1L);
+        respuesta.setEstado("PAGADO");
 
-        when(pedidoService.crearPedido(1L, 100L)).thenReturn(dto);
+        when(pedidoService.crearPedido(any(CrearPedidoDTO.class))).thenReturn(respuesta);
 
-        mockMvc.perform(post("/api/pedidos/crear")
-                        .param("usuarioId", "1")
-                        .param("carritoId", "100"))
+        mockMvc.perform(post("/api/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(PEDIDO_VALIDO))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.pedidoId").value(100L));
+                .andExpect(jsonPath("$.estado").value("PAGADO"));
     }
 
     @Test
-    void crearPedido_DebeRetornar400_CuandoExcepcion() throws Exception {
-        when(pedidoService.crearPedido(anyLong(), anyLong()))
-                .thenThrow(new IllegalArgumentException("El carrito debe estar CONFIRMADO"));
+    void crearPedido_whenCartIsEmpty_returns400() throws Exception {
+        mockMvc.perform(post("/api/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(PEDIDO_VALIDO.replace("[{\"productoId\": 1, \"cantidad\": 2}]", "[]")))
+                .andExpect(status().isBadRequest());
 
-        mockMvc.perform(post("/api/pedidos/crear")
-                        .param("usuarioId", "1")
-                        .param("carritoId", "100"))
+        verify(pedidoService, never()).crearPedido(any());
+    }
+
+    @Test
+    void crearPedido_whenNoUser_returns400() throws Exception {
+        mockMvc.perform(post("/api/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(PEDIDO_VALIDO.replace("\"usuarioId\": 3,", "")))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void obtenerPedidosPorUsuario_DebeRetornar200() throws Exception {
-        PedidoResponseDTO dto = new PedidoResponseDTO();
-        dto.setPedidoId(100L);
+    void crearPedido_whenServiceRejectsData_returns400() throws Exception {
+        when(pedidoService.crearPedido(any(CrearPedidoDTO.class)))
+                .thenThrow(new IllegalArgumentException("Producto no encontrado con ID: 1"));
 
-        when(pedidoService.obtenerPedidosPorUsuario(1L)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/pedidos/usuario/{usuarioId}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].pedidoId").value(100L));
+        mockMvc.perform(post("/api/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(PEDIDO_VALIDO))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void obtenerPorId_DebeRetornar200_CuandoExiste() throws Exception {
-        PedidoResponseDTO dto = new PedidoResponseDTO();
-        dto.setPedidoId(100L);
+    void listarTodos_returnsAllOrders() throws Exception {
+        PedidoResponseDTO pedido = new PedidoResponseDTO();
+        pedido.setPedidoId(1L);
 
-        when(pedidoService.obtenerPorId(100L)).thenReturn(Optional.of(dto));
+        when(pedidoService.obtenerTodos()).thenReturn(List.of(pedido));
 
-        mockMvc.perform(get("/api/pedidos/{pedidoId}", 100L))
+        mockMvc.perform(get("/api/pedidos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pedidoId").value(100L));
+                .andExpect(jsonPath("$[0].pedidoId").value(1));
     }
 
     @Test
-    void obtenerPorId_DebeRetornar404_CuandoNoExiste() throws Exception {
-        when(pedidoService.obtenerPorId(999L)).thenReturn(Optional.empty());
+    void obtenerPorId_whenNotExists_returns404() throws Exception {
+        when(pedidoService.obtenerPorId(99L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/pedidos/{pedidoId}", 999L))
+        mockMvc.perform(get("/api/pedidos/99"))
                 .andExpect(status().isNotFound());
     }
 }

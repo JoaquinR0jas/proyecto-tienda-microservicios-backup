@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Container, Row, Col, Badge, Button, Form, Breadcrumb } from 'react-bootstrap'
-import { KEYS, getColeccion, setColeccion, plata, imgProducto, nombreCategoria } from '../datos.js'
+import { plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
+import { obtenerProductoPorCodigo } from '../api.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
+import { agregarConAviso } from '../alertas.js'
 
 export default function Detalle() {
   const { codigo } = useParams()
-  const [p, setP] = useState(null)
   const [cant, setCant] = useState(1)
+  const carga = useCarga(() => obtenerProductoPorCodigo(codigo), [codigo])
+  const p = carga.datos && carga.datos.estado === "Activo" ? carga.datos : null
 
   useEffect(() => {
-    const prod = getColeccion(KEYS.productos).find(x => x.codigo === codigo)
-    setP(prod || null)
     setCant(1)
   }, [codigo])
+
+  if (carga.cargando || carga.error) {
+    return (
+      <section className="container py-5">
+        <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
+      </section>
+    )
+  }
 
   if (!p) {
     return (
@@ -26,37 +35,29 @@ export default function Detalle() {
   const agotado = p.stock <= 0
 
   function agregar() {
-    const carrito = getColeccion(KEYS.carrito)
-    const item = carrito.find(i => i.codigo === p.codigo)
-    const actual = item ? item.cantidad : 0
-    if (actual + cant > p.stock) {
-      alert("Solo hay " + p.stock + " unidades disponibles")
-      return
-    }
-    if (item) item.cantidad += cant
-    else carrito.push({ codigo: p.codigo, cantidad: cant })
-    setColeccion(KEYS.carrito, carrito)
-    window.dispatchEvent(new Event("carrito-cambio"))
-    alert(p.nombre + " se agrego al carrito")
+    agregarConAviso(p, cant)
   }
 
   return (
-    <Container className="py-5">
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/" }}>Inicio</Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/productos" }}>Tienda</Breadcrumb.Item>
-        <Breadcrumb.Item active>Detalle</Breadcrumb.Item>
-      </Breadcrumb>
-      <Row className="g-4">
-        <Col md={5}>
+    <section className="container py-5">
+      <div className="row g-4">
+        <div className="col-md-5">
           <img src={imgProducto(p)} className="img-fluid rounded bg-ff-panel p-2" alt={p.nombre} />
         </Col>
         <Col md={7}>
           <Badge bg="secondary" className="mb-2">{nombreCategoria(p.categoriaId)}</Badge>
           <h1 className="h3">{p.nombre}</h1>
           <p className="text-muted">{p.descripcion || "Sin descripcion disponible."}</p>
-          <p className="display-6">{plata(p.precio)}</p>
-          <p>{agotado ? <Badge bg="danger">Sin stock</Badge> : <Badge bg="success">Stock disponible: {p.stock}</Badge>}</p>
+          {enOferta(p) ? (
+            <p className="display-6">
+              <span className="precio-tachado fs-4 me-2">{plata(p.precio)}</span>
+              <span className="text-danger">{plata(precioFinal(p))}</span>
+              <span className="badge bg-danger fs-6 ms-2 align-middle">-{p.descuento}%</span>
+            </p>
+          ) : (
+            <p className="display-6">{plata(p.precio)}</p>
+          )}
+          <p>{agotado ? <span className="badge bg-danger">Sin stock</span> : <span className="badge bg-success">Stock disponible: {p.stock}</span>}</p>
           <div className="d-flex align-items-center gap-3 my-3">
             <Form.Label className="mb-0">Cantidad</Form.Label>
             <Form.Control

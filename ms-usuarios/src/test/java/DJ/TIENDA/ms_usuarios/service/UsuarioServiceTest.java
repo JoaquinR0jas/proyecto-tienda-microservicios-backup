@@ -30,10 +30,13 @@ class UsuarioServiceTest {
     void setUp() {
         usuario = new Usuario();
         usuario.setId(1L);
+        usuario.setRun("112223339");
         usuario.setNombre("Test User");
+        usuario.setApellidos("Prueba");
         usuario.setEmail("test@example.com");
-        usuario.setPassword("password123");
-        usuario.setTelefono("123456789");
+        usuario.setPassword("pass123");
+        usuario.setRegionId(1L);
+        usuario.setComunaId(1L);
         usuario.setDireccion("Calle test 123");
         usuario.setRol(Usuario.Rol.CLIENTE);
     }
@@ -110,12 +113,47 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void crear_whenRunAlreadyExists_throwsException() {
+        when(usuarioRepository.existsByRun("112223339")).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.crear(usuario));
+        assertTrue(exception.getMessage().contains("RUN"));
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void crear_normalizesRunWithDotsAndDash() {
+        usuario.setRun("11.222.333-9");
+        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+
+        Usuario resultado = usuarioService.crear(usuario);
+
+        assertEquals("112223339", resultado.getRun());
+    }
+
+    @Test
+    void actualizar_changesRolAndEstado() {
+        Usuario datosActualizados = new Usuario();
+        datosActualizados.setEmail("test@example.com");
+        datosActualizados.setRol(Usuario.Rol.VENDEDOR);
+        datosActualizados.setEstado(Usuario.Estado.INACTIVO);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = usuarioService.actualizar(1L, datosActualizados).orElseThrow();
+
+        assertEquals(Usuario.Rol.VENDEDOR, resultado.getRol());
+        assertEquals(Usuario.Estado.INACTIVO, resultado.getEstado());
+    }
+
+    @Test
     void actualizar_whenUserExistsAndEmailUnchanged_updatesUser() {
         Usuario datosActualizados = new Usuario();
         datosActualizados.setNombre("Updated Name");
         datosActualizados.setEmail("test@example.com");
         datosActualizados.setPassword("newpass");
-        datosActualizados.setTelefono("000");
         datosActualizados.setDireccion("New dir");
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));

@@ -1,37 +1,31 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Table, Button, Badge } from 'react-bootstrap'
-import { KEYS, getColeccion, setColeccion, getSesion } from '../datos.js'
-import { AdminLayout } from '../components/AdminMenu.jsx'
-
-function nombreRol(id) {
-  const r = getColeccion(KEYS.roles).find(x => x.id === id)
-  return r ? r.nombre : ""
-}
-
-function nombreRegion(id) {
-  const r = getColeccion(KEYS.regiones).find(x => x.id === Number(id))
-  return r ? r.nombre : "-"
-}
+import { Link } from 'react-router-dom'
+import { nombreRegion, nombreRol } from '../datos.js'
+import { listarUsuarios, eliminarUsuario } from '../api.js'
+import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'
+import { aviso, confirmar } from '../alertas.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 
 export default function AdminUsuarios() {
-  const nav = useNavigate()
-  const [users, setUsers] = useState([])
+  const sesion = useAdmin(true)
+  const carga = useCarga(listarUsuarios) // usuarios de ms-usuarios
+  if (!sesion) return null
 
-  useEffect(() => {
-    const s = getSesion()
-    if (!s || s.rolId !== 1) {
-      alert("Solo el admin ve los usuarios")
-      nav("/admin")
+  const users = carga.datos || []
+
+  async function eliminar(run) {
+    if (run === sesion.run) {
+      aviso("No permitido", "No puedes eliminar tu propia cuenta.", "error")
       return
     }
-    setUsers(getColeccion(KEYS.usuarios))
-  }, [])
-
-  function eliminar(run) {
-    if (!confirm("Eliminar a este usuario?")) return
-    setColeccion(KEYS.usuarios, getColeccion(KEYS.usuarios).filter(u => u.run !== run))
-    setUsers(getColeccion(KEYS.usuarios))
+    if (!await confirmar("Eliminar usuario?", "Esta accion no se puede deshacer.")) return
+    try {
+      await eliminarUsuario(users.find(u => u.run === run).id)
+    } catch (e) {
+      aviso("No se pudo eliminar", e.message, "error")
+      return
+    }
+    carga.recargar()
+    aviso("Eliminado", "El usuario fue eliminado correctamente.")
   }
 
   return (
@@ -40,6 +34,7 @@ export default function AdminUsuarios() {
         <h1 className="section-title mb-0">Usuarios</h1>
         <Button as={Link} to="/admin/usuarios/nuevo" variant="accent" size="sm">+ Nuevo usuario</Button>
       </div>
+      <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
         <Table striped className="mb-0">
           <thead>
@@ -63,8 +58,9 @@ export default function AdminUsuarios() {
                 <td>{nombreRegion(u.regionId)}</td>
                 <td><Badge bg={u.estado === "Activo" ? "success" : "secondary"}>{u.estado}</Badge></td>
                 <td className="text-nowrap">
-                  <Button as={Link} to={"/admin/usuarios/" + u.run} variant="outline-dark" size="sm" className="me-1"><i className="bi bi-pencil"></i></Button>
-                  <Button variant="outline-danger" size="sm" onClick={() => eliminar(u.run)}><i className="bi bi-trash"></i></Button>
+                  <Link to={"/admin/usuarios/ver/" + u.run} className="btn btn-sm btn-outline-accent me-1"><i className="bi bi-eye"></i></Link>
+                  <Link to={"/admin/usuarios/" + u.run} className="btn btn-sm btn-outline-dark me-1"><i className="bi bi-pencil"></i></Link>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => eliminar(u.run)}><i className="bi bi-trash"></i></button>
                 </td>
               </tr>
             ))}

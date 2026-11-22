@@ -9,4 +9,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmail(String email);
     boolean existsByEmail(String email); // valida email unico antes de guardar
+    boolean existsByRun(String run);     // valida run unico antes de guardar
 }

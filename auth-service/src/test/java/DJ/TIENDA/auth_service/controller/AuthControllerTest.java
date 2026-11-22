@@ -1,6 +1,7 @@
 package DJ.TIENDA.auth_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import DJ.TIENDA.auth_service.dto.LoginResponseDTO;
 import DJ.TIENDA.auth_service.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,9 @@ class AuthControllerTest {
 
     @Test
     void login_whenCredentialsAreValid_returnsToken() throws Exception {
-        when(authService.login("test@example.com", "password123")).thenReturn("jwt-token-value");
+        LoginResponseDTO respuesta = new LoginResponseDTO();
+        respuesta.setToken("jwt-token-value");
+        when(authService.login("test@example.com", "password123")).thenReturn(respuesta);
 
         Map<String, String> credenciales = Map.of("email", "test@example.com", "password", "password123");
 

@@ -14,14 +14,6 @@ FROM eclipse-temurin:21-jre AS ms-catalogo
 COPY ms-catalogo/target/ms-catalogo-1.0.0.jar /app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
-FROM eclipse-temurin:21-jre AS ms-inventario
-COPY ms-inventario/target/ms-inventario-1.0.0.jar /app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-FROM eclipse-temurin:21-jre AS ms-carrito
-COPY ms-carrito/target/ms-carrito-1.0.0.jar /app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
 FROM eclipse-temurin:21-jre AS ms-pedidos
 COPY ms-pedidos/target/ms-pedidos-1.0.0.jar /app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
@@ -30,20 +22,8 @@ FROM eclipse-temurin:21-jre AS ms-pagos
 COPY ms-pagos/target/ms-pagos-1.0.0.jar /app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
-FROM eclipse-temurin:21-jre AS ms-envios
-COPY ms-envios/target/ms-envios-1.0.0.jar /app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-FROM eclipse-temurin:21-jre AS ms-notificaciones
-COPY ms-notificaciones/target/ms-notificaciones-1.0.0.jar /app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-FROM eclipse-temurin:21-jre AS ms-marketing
-COPY ms-marketing/target/ms-marketing-1.0.0.jar /app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-FROM eclipse-temurin:21-jre AS ms-resenas
-COPY ms-resenas/target/ms-resenas-1.0.0.jar /app.jar
+FROM eclipse-temurin:21-jre AS ms-contenido
+COPY ms-contenido/target/ms-contenido-1.0.0.jar /app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 FROM eclipse-temurin:21-jre AS api-gateway

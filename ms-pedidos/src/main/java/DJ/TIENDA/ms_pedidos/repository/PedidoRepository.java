@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    List<Pedido> findByUsuarioId(Long usuarioId);
+    List<Pedido> findByUsuarioIdOrderByFechaCreacionDesc(Long usuarioId); // historial de compras
+
+    List<Pedido> findAllByOrderByFechaCreacionDesc(); // ordenes del panel admin, las mas nuevas primero
 }

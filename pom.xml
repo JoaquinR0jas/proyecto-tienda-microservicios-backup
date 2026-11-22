@@ -25,14 +25,9 @@
         <module>auth-service</module>
         <module>ms-usuarios</module>
         <module>ms-catalogo</module>
-        <module>ms-inventario</module>
-        <module>ms-carrito</module>
         <module>ms-pedidos</module>
         <module>ms-pagos</module>
-        <module>ms-envios</module>
-        <module>ms-notificaciones</module>
-        <module>ms-marketing</module>
-        <module>ms-resenas</module>
+        <module>ms-contenido</module>
     </modules>
 
     <properties>

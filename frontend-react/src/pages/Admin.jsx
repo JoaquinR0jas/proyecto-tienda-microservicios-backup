@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Row, Col, Card, ListGroup } from 'react-bootstrap'
-import { KEYS, getColeccion, getSesion } from '../datos.js'
+import { getSesion } from '../datos.js'
+import { listarProductos, listarUsuarios, listarMensajes } from '../api.js'
+import { aviso } from '../alertas.js'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
 export default function Admin() {
@@ -15,13 +16,19 @@ export default function Admin() {
       nav("/login")
       return
     }
-    setInfo({
-      prods: getColeccion(KEYS.productos),
-      users: getColeccion(KEYS.usuarios),
-      contactos: getColeccion(KEYS.contactos),
-      sesion: s
-    })
-  }, [])
+    // resumen armado con los datos de ms-catalogo, ms-usuarios y ms-contenido
+    // (el vendedor no tiene acceso a la lista de usuarios, no se pide)
+    Promise.all([
+      listarProductos(),
+      s.rolId === 1 ? listarUsuarios() : Promise.resolve([]),
+      listarMensajes()
+    ])
+      .then(([prods, users, contactos]) => setInfo({ prods, users, contactos, sesion: s }))
+      .catch(e => {
+        aviso("No se pudo cargar el panel", e.message, "error")
+        setInfo({ prods: [], users: [], contactos: [], sesion: s })
+      })
+  }, [nav])
 
   if (!info.sesion) return null
 
@@ -33,9 +40,9 @@ export default function Admin() {
       <h1 className="section-title">Panel principal</h1>
       <p className="text-muted">Bienvenido, {info.sesion.nombre} ({rolNombre})</p>
 
-      <Row className="g-4 mt-2">
-        <Col md={4}>
-          <Card className="admin-summary-card p-4">
+      <div className="row g-4 mt-2">
+        <div className="col-md-4">
+          <div className="card admin-summary-card p-4 position-relative">
             <i className="bi bi-handbag fs-2"></i>
             <h3 className="h2 mt-2 mb-0">{info.prods.length}</h3>
             <p className="text-muted mb-0">Productos registrados</p>
@@ -43,8 +50,8 @@ export default function Admin() {
           </Card>
         </Col>
         {info.sesion.rolId === 1 && (
-          <Col md={4}>
-            <Card className="admin-summary-card p-4">
+          <div className="col-md-4">
+            <div className="card admin-summary-card p-4 position-relative">
               <i className="bi bi-people fs-2"></i>
               <h3 className="h2 mt-2 mb-0">{info.users.length}</h3>
               <p className="text-muted mb-0">Usuarios registrados</p>

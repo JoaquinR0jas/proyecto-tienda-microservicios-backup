@@ -1,6 +1,7 @@
 package DJ.TIENDA.auth_service.service;
 
 import DJ.TIENDA.auth_service.client.UsuarioClient;
+import DJ.TIENDA.auth_service.dto.LoginResponseDTO;
 import DJ.TIENDA.auth_service.dto.UsuarioDTO;
 import DJ.TIENDA.auth_service.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,15 +39,29 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_whenCredentialsAreValid_returnsToken() {
+    void login_whenCredentialsAreValid_returnsTokenAndUserData() {
         when(usuarioClient.buscarPorEmail("test@example.com")).thenReturn(usuarioDTO);
         when(jwtUtil.generarToken("test@example.com", "CLIENTE")).thenReturn("jwt-token");
 
-        String token = authService.login("test@example.com", "password123");
+        LoginResponseDTO respuesta = authService.login("test@example.com", "password123");
 
-        assertEquals("jwt-token", token);
+        assertEquals("jwt-token", respuesta.getToken());
+        assertEquals("Bearer", respuesta.getTipo());
+        assertEquals(1L, respuesta.getUsuario().getId());
+        assertEquals("CLIENTE", respuesta.getUsuario().getRol());
         verify(usuarioClient).buscarPorEmail("test@example.com");
         verify(jwtUtil).generarToken("test@example.com", "CLIENTE");
+    }
+
+    @Test
+    void login_whenUserIsInactive_throwsException() {
+        usuarioDTO.setEstado("INACTIVO");
+        when(usuarioClient.buscarPorEmail("test@example.com")).thenReturn(usuarioDTO);
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> authService.login("test@example.com", "password123"));
+        assertTrue(exception.getMessage().contains("deshabilitada"));
+        verify(jwtUtil, never()).generarToken(any(), any());
     }
 
     @Test

@@ -1,17 +1,21 @@
 import { Link } from 'react-router-dom'
-import { Col, Card, Badge, Button } from 'react-bootstrap'
-import { plata, imgProducto, nombreCategoria } from '../datos.js'
+import { plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
 
 function Tarjeta({ p, onAgregar }) {
   const agotado = p.stock <= 0
+  const oferta = enOferta(p)
   return (
-    <Col sm={6} lg={3}>
-      <Card className="h-100 card-ff-hover">
-        <Card.Img variant="top" src={imgProducto(p)} alt={p.nombre} />
-        <Card.Body className="d-flex flex-column">
-          <Badge bg="secondary" className="align-self-start mb-2">{nombreCategoria(p.categoriaId)}</Badge>
-          <Card.Title as="h3" className="h6">{p.nombre}</Card.Title>
-          <p className="fw-bold mb-2">{plata(p.precio)}</p>
+    <div className="col-sm-6 col-lg-3">
+      <div className="card h-100 card-ff-hover position-relative">
+        {oferta && <span className="badge bg-danger badge-oferta">-{p.descuento}%</span>}
+        <img src={imgProducto(p)} className="card-img-top" alt={p.nombre} />
+        <div className="card-body d-flex flex-column">
+          <span className="badge bg-secondary align-self-start mb-2">{nombreCategoria(p.categoriaId)}</span>
+          <h3 className="h6">{p.nombre}</h3>
+          <p className="fw-bold mb-2">
+            {oferta && <span className="precio-tachado me-2">{plata(p.precio)}</span>}
+            <span className={oferta ? "text-danger" : ""}>{plata(precioFinal(p))}</span>
+          </p>
           <p className="small text-muted mb-3">
             {agotado ? <Badge bg="danger">Sin stock</Badge> : "Stock: " + p.stock}
           </p>

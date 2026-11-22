@@ -8,17 +8,17 @@ export default function Footer() {
           <Col md={6}>
             <span className="brand-text fs-5">FRESH FITS</span>
             <p className="mt-2 mb-0">Tu tienda de ropa de confianza. Moda moderna, comoda y estilosa para todos.</p>
-          </Col>
-          <Col md={6}>
-            <h6 className="text-white">Siguenos</h6>
+          </div>
+          <div className="col-md-6">
+            <h6 className="text-black">Siguenos</h6>
             <div className="fs-4">
               <a href="https://www.instagram.com/fresh.fitstore/" target="_blank" rel="noreferrer"><i className="bi bi-instagram"></i></a>
             </div>
           </Col>
         </Row>
         <hr className="border-secondary my-4" />
-        <p className="text-center mb-0 small">&copy; 2026 FreshFits. Proyecto academico - Control 1.</p>
-      </Container>
+        <p className="text-center mb-0 small">&copy; 2026 FreshFits. Proyecto academico - Control 2.</p>
+      </div>
     </footer>
   )
 }

@@ -1,48 +1,49 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
-import { KEYS, getColeccion } from '../datos.js'
-import { correoOk, passOk } from '../validaciones.js'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { iniciarSesion } from '../api.js'
+import { correoOk, passOk, claseCampo } from '../validaciones.js'
+import { aviso } from '../alertas.js'
 
 export default function Login() {
   const [correo, setCorreo] = useState("")
   const [pass, setPass] = useState("")
-  const [error, setError] = useState("")
+  const [errores, setErrores] = useState({})
+  const [validado, setValidado] = useState(false)
   const nav = useNavigate()
+  const destino = useLocation().state?.volverA
 
-  function entrar(e) {
+  async function entrar(e) {
     e.preventDefault()
-    setError("")
+    const err = {}
+    if (!correoOk(correo)) err.correo = true
+    if (!passOk(pass)) err.pass = true
+    setErrores(err)
+    setValidado(true)
 
-    if (!correoOk(correo) || !passOk(pass)) {
-      setError("Revisa el correo o la contrasena")
+    if (Object.keys(err).length > 0) {
+      aviso("Revisa el formulario", "Correo o contrasena con formato invalido.", "error")
       return
     }
 
-    const user = getColeccion(KEYS.usuarios).find(
-      u => u.correo.toLowerCase() === correo.toLowerCase() && u.password === pass
-    )
-
-    if (!user) {
-      setError("El correo o la contrasena no coinciden")
+    // auth-service valida las credenciales y entrega el token
+    let sesion
+    try {
+      sesion = await iniciarSesion(correo.trim(), pass)
+    } catch (e) {
+      if (e.status === 401 && e.message.includes("deshabilitada")) {
+        aviso("Cuenta inactiva", "Tu cuenta se encuentra deshabilitada. Contacta a un administrador.", "warning")
+      } else if (e.status === 401) {
+        aviso("Credenciales incorrectas", "El correo o la contrasena no coinciden.", "error")
+      } else {
+        aviso("No se pudo iniciar sesion", e.message, "error")
+      }
       return
     }
 
-    if (user.estado === "Inactivo") {
-      setError("Tu cuenta esta deshabilitada, habla con un admin")
-      return
-    }
-
-    localStorage.setItem(KEYS.sesion, JSON.stringify({
-      run: user.run,
-      nombre: user.nombre,
-      apellidos: user.apellidos,
-      correo: user.correo,
-      rolId: user.rolId
-    }))
-    window.dispatchEvent(new Event("sesion-cambio"))
-
-    if (user.rolId === 1 || user.rolId === 2) nav("/admin")
+    await aviso("Bienvenido", "Inicio de sesion correcto.")
+    // si venia del carrito, vuelve al checkout para terminar la compra
+    if (destino) nav(destino)
+    else if (sesion.rolId === 1 || sesion.rolId === 2) nav("/admin")
     else nav("/")
   }
 
@@ -53,33 +54,37 @@ export default function Login() {
           <div className="auth-card p-4 p-md-5 text-center">
             <img src="/img/logo.svg" alt="FreshFits" height="70" className="mb-3" />
             <h1 className="h3 mb-4">Iniciar sesion</h1>
-            <Form onSubmit={entrar} className="text-start">
-              <Form.Group className="mb-3">
-                <Form.Label>Correo</Form.Label>
-                <Form.Control
+            <form onSubmit={entrar} className="text-start" noValidate>
+              <div className="mb-3">
+                <label htmlFor="correoLogin" className="form-label">Correo</label>
+                <input
+                  id="correoLogin"
                   type="email"
+                  className={claseCampo(errores, validado, "correo")}
                   maxLength="100"
                   placeholder="usuario@gmail.com"
                   value={correo}
                   onChange={e => setCorreo(e.target.value)}
                 />
-              </Form.Group>
-              <Form.Group className="mb-4">
-                <Form.Label>Contrasena</Form.Label>
-                <Form.Control
+                <div className="invalid-feedback">Ingresa un correo valido (@duoc.cl, @profesor.duoc.cl o @gmail.com).</div>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="passLogin" className="form-label">Contrasena</label>
+                <input
+                  id="passLogin"
                   type="password"
+                  className={claseCampo(errores, validado, "pass")}
                   maxLength="10"
                   value={pass}
                   onChange={e => setPass(e.target.value)}
                 />
-              </Form.Group>
-              {error && <Alert variant="danger" className="py-2">{error}</Alert>}
-              <Button type="submit" variant="accent" className="w-100">Iniciar sesion</Button>
-            </Form>
+                <div className="invalid-feedback">La contrasena debe tener entre 4 y 10 caracteres.</div>
+              </div>
+              <button type="submit" className="btn btn-accent w-100">Iniciar sesion</button>
+            </form>
             <p className="mt-4 mb-0 small text-muted">
               No tienes cuenta? <Link to="/registro">Registrate aqui</Link>
             </p>
-            <p className="mt-2 mb-0 small text-muted">admin@gmail.com / admin123</p>
           </div>
         </Col>
       </Row>

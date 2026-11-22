@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Container, Row, Col, Form, InputGroup } from 'react-bootstrap'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
+import { listarProductos, listarCategorias } from '../api.js'
+import { agregarConAviso } from '../alertas.js'
+import Cargando, { useCarga } from '../components/Cargando.jsx'
 import Tarjeta from '../components/Tarjeta.jsx'
 
 export default function Productos() {
@@ -8,13 +10,15 @@ export default function Productos() {
   const [cat, setCat] = useState("")
   const [cats, setCats] = useState([])
   const [lista, setLista] = useState([])
+  // productos activos traidos de ms-catalogo, se filtran aqui mismo
+  const productos = useCarga(() => listarProductos({ soloActivos: true }))
 
   useEffect(() => {
-    setCats(getColeccion(KEYS.categorias))
+    listarCategorias().then(setCats).catch(() => setCats([]))
   }, [])
 
   useEffect(() => {
-    let prods = getColeccion(KEYS.productos).filter(p => p.estado === "Activo")
+    let prods = productos.datos || []
     if (busqueda) {
       prods = prods.filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     }
@@ -22,22 +26,10 @@ export default function Productos() {
       prods = prods.filter(p => p.categoriaId === Number(cat))
     }
     setLista(prods)
-  }, [busqueda, cat])
+  }, [busqueda, cat, productos.datos])
 
   function agregar(codigo) {
-    const prod = getColeccion(KEYS.productos).find(p => p.codigo === codigo)
-    if (!prod || prod.stock <= 0) return
-    const carrito = getColeccion(KEYS.carrito)
-    const item = carrito.find(i => i.codigo === codigo)
-    const actual = item ? item.cantidad : 0
-    if (actual + 1 > prod.stock) {
-      alert("Solo hay " + prod.stock + " unidades disponibles")
-      return
-    }
-    if (item) item.cantidad += 1
-    else carrito.push({ codigo, cantidad: 1 })
-    setColeccion(KEYS.carrito, carrito)
-    window.dispatchEvent(new Event("carrito-cambio"))
+    agregarConAviso(lista.find(p => p.codigo === codigo))
   }
 
   return (
@@ -52,6 +44,8 @@ export default function Productos() {
               type="text"
               placeholder="Buscar prenda por nombre..."
               value={busqueda}
+              // EVENTO ONCHANGE
+              // Actualizar el estado de busqueda cuando el usuario escribe en el input
               onChange={e => setBusqueda(e.target.value)}
             />
           </InputGroup>
@@ -64,8 +58,9 @@ export default function Productos() {
         </Col>
       </Row>
 
+      <Cargando cargando={productos.cargando} error={productos.error} onReintentar={productos.recargar} />
       <Row className="g-4">
-        {lista.length === 0 && (
+        {!productos.cargando && !productos.error && lista.length === 0 && (
           <Col xs={12}><p className="text-muted text-center py-5">No se encontraron prendas con esos criterios.</p></Col>
         )}
         {lista.map(p => <Tarjeta key={p.codigo} p={p} onAgregar={agregar} />)}

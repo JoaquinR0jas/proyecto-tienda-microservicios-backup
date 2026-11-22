@@ -2,12 +2,13 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { MemoryRouter } from 'react-router-dom'
 import Productos from '../pages/Productos.jsx'
 import Carrito from '../pages/Carrito.jsx'
-import { KEYS, getColeccion, setColeccion, initDatos } from '../datos.js'
+import { getCarrito, setCarrito } from '../datos.js'
+import { mockApi } from './mockApi.js'
 
 describe('Carrito de compras', () => {
   beforeEach(() => {
     localStorage.clear()
-    initDatos()
+    mockApi() // los productos vienen de un backend falso
   })
 
   afterEach(() => {
@@ -26,13 +27,13 @@ describe('Carrito de compras', () => {
     fireEvent.click(botones[0])
     fireEvent.click(botones[0])
 
-    const carrito = getColeccion(KEYS.carrito)
+    const carrito = getCarrito()
     expect(carrito.length).toBe(1)
     expect(carrito[0].cantidad).toBe(2)
   })
 
   it('actualiza el total cuando cambia la cantidad', async () => {
-    setColeccion(KEYS.carrito, [{ codigo: 'FF-001', cantidad: 1 }])
+    setCarrito([{ codigo: 'FF-001', cantidad: 1 }])
 
     const { container } = render(
       <MemoryRouter>

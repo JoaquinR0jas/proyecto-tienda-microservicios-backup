@@ -1,45 +1,52 @@
 import { useState } from 'react'
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
-import { KEYS, getColeccion, setColeccion } from '../datos.js'
-import { correoOk, textoOk } from '../validaciones.js'
+import { enviarMensaje } from '../api.js'
+import { correoOk, textoOk, claseCampo } from '../validaciones.js'
+import { aviso } from '../alertas.js'
+
+const VACIO = { nombre: "", correo: "", comentario: "" }
 
 export default function Contacto() {
-  const [nombre, setNombre] = useState("")
-  const [correo, setCorreo] = useState("")
-  const [comentario, setComentario] = useState("")
-  const [error, setError] = useState("")
+  const [form, setForm] = useState(VACIO)
+  const [errores, setErrores] = useState({})
+  const [validado, setValidado] = useState(false)
 
-  function enviar(e) {
-    e.preventDefault()
-    setError("")
-
-    if (!textoOk(nombre, 100)) {
-      setError("Pon tu nombre")
-      return
-    }
-    if (!correoOk(correo)) {
-      setError("Ese correo no sirve, usa @duoc.cl, @profesor.duoc.cl o @gmail.com")
-      return
-    }
-    if (!textoOk(comentario, 500)) {
-      setError("Escribe un comentario")
-      return
-    }
-
-    const lista = getColeccion(KEYS.contactos)
-    lista.push({
-      nombre: nombre.trim(),
-      correo: correo.trim(),
-      comentario: comentario.trim(),
-      fecha: new Date().toISOString().slice(0, 10)
-    })
-    setColeccion(KEYS.contactos, lista)
-
-    alert("Mensaje enviado, gracias por escribirnos")
-    setNombre("")
-    setCorreo("")
-    setComentario("")
+  function cambiar(e) {
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
+
+  async function enviar(e) {
+    e.preventDefault()
+    const err = {}
+    if (!textoOk(form.nombre, 100)) err.nombre = true
+    if (!correoOk(form.correo)) err.correo = true
+    if (!textoOk(form.comentario, 500)) err.comentario = true
+    setErrores(err)
+    setValidado(true)
+
+    if (Object.keys(err).length > 0) {
+      aviso("Revisa el formulario", "Existen campos obligatorios o invalidos.", "error")
+      return
+    }
+
+    // el mensaje se guarda en ms-contenido y aparece en el panel admin
+    try {
+      await enviarMensaje({
+        nombre: form.nombre.trim(),
+        correo: form.correo.trim(),
+        comentario: form.comentario.trim()
+      })
+    } catch (err) {
+      aviso("No se pudo enviar el mensaje", err.message, "error")
+      return
+    }
+
+    aviso("Mensaje enviado", "Gracias por escribirnos, te responderemos pronto.")
+    setForm(VACIO)
+    setErrores({})
+    setValidado(false)
+  }
+
+  const clase = (campo) => claseCampo(errores, validado, campo)
 
   return (
     <Container className="py-5">
@@ -48,22 +55,24 @@ export default function Contacto() {
           <h1 className="section-title">Contacto</h1>
           <p className="text-muted mb-4">Tienes dudas o comentarios? Escribenos y te responderemos a la brevedad.</p>
           <div className="auth-card p-4 p-md-5">
-            <Form onSubmit={enviar}>
-              <Form.Group className="mb-3">
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control maxLength="100" value={nombre} onChange={e => setNombre(e.target.value)} />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Correo</Form.Label>
-                <Form.Control maxLength="100" placeholder="usuario@gmail.com" value={correo} onChange={e => setCorreo(e.target.value)} />
-              </Form.Group>
-              <Form.Group className="mb-4">
-                <Form.Label>Comentario</Form.Label>
-                <Form.Control as="textarea" rows={5} maxLength="500" value={comentario} onChange={e => setComentario(e.target.value)} />
-              </Form.Group>
-              {error && <Alert variant="danger" className="py-2">{error}</Alert>}
-              <Button type="submit" variant="accent" className="w-100">Enviar</Button>
-            </Form>
+            <form onSubmit={enviar} noValidate>
+              <div className="mb-3">
+                <label htmlFor="nombreContacto" className="form-label">Nombre</label>
+                <input id="nombreContacto" name="nombre" className={clase("nombre")} maxLength="100" value={form.nombre} onChange={cambiar} />
+                <div className="invalid-feedback">El nombre es obligatorio (maximo 100 caracteres).</div>
+              </div>
+              <div className="mb-3">
+                <label htmlFor="correoContacto" className="form-label">Correo</label>
+                <input id="correoContacto" name="correo" type="email" className={clase("correo")} maxLength="100" placeholder="usuario@gmail.com" value={form.correo} onChange={cambiar} />
+                <div className="invalid-feedback">Solo se aceptan correos @duoc.cl, @profesor.duoc.cl o @gmail.com.</div>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="comentarioContacto" className="form-label">Comentario</label>
+                <textarea id="comentarioContacto" name="comentario" className={clase("comentario")} rows="5" maxLength="500" value={form.comentario} onChange={cambiar}></textarea>
+                <div className="invalid-feedback">El comentario es obligatorio (maximo 500 caracteres).</div>
+              </div>
+              <button type="submit" className="btn btn-accent w-100">Enviar</button>
+            </form>
           </div>
         </Col>
       </Row>

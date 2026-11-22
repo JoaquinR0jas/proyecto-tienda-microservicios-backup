@@ -9,7 +9,7 @@ if (!process.env.CHROME_BIN) {
   const encontrada = rutas.find(r => fs.existsSync(r))
   if (encontrada) process.env.CHROME_BIN = encontrada
 }
-
+//
 module.exports = function (config) {
   config.set({
     basePath: '',
