@@ -11,8 +11,8 @@ const SECCIONES_ADMIN = [
   { to: "/admin/categorias", texto: "Categorias", icono: "bi-tags", soloAdmin: true, desc: "Organizar productos en categorias." },
   { to: "/admin/usuarios", texto: "Usuarios", icono: "bi-people", soloAdmin: true, desc: "Gestion de cuentas de usuario y sus roles." },
   { to: "/admin/reportes", texto: "Reportes", icono: "bi-bar-chart", soloAdmin: true, desc: "Informes detallados de las ventas del sistema." },
-  { to: "/admin/mensajes", texto: "Mensajes", icono: "bi-envelope", desc: "Mensajes recibidos desde el formulario de contacto." },
-  { to: "/admin/perfil", texto: "Perfil", icono: "bi-person-circle", desc: "Tu informacion personal y configuracion de cuenta." }
+  { to: "/admin/mensajes", texto: "Mensajes", icono: "bi-envelope", soloAdmin: true, desc: "Mensajes recibidos desde el formulario de contacto." },
+  { to: "/admin/perfil", texto: "Perfil", icono: "bi-person-circle", soloAdmin: true, desc: "Tu informacion personal y configuracion de cuenta." }
 ]
 
 export function seccionesPara(sesion) {

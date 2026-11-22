@@ -33,19 +33,19 @@ export function mockApi() {
     const ruta = new URL(url).pathname
     const metodo = opciones.method || "GET"
 
-    if (ruta === "/api/catalogo/productos") return respuesta(PRODUCTOS)
-    if (ruta === "/api/catalogo/productos/ofertas") return respuesta(PRODUCTOS.filter(x => x.descuento > 0))
-    if (ruta === "/api/catalogo/categorias") return respuesta(CATEGORIAS)
-    if (ruta === "/api/usuarios/regiones" || ruta === "/api/usuarios/comunas") return respuesta([])
-    if (ruta === "/api/contenido/articulos") return respuesta([])
-    if (ruta === "/api/contenido/mensajes" && metodo === "POST") {
+    if (ruta === "/api/v1/catalogo/productos") return respuesta(PRODUCTOS)
+    if (ruta === "/api/v1/catalogo/productos/ofertas") return respuesta(PRODUCTOS.filter(x => x.descuento > 0))
+    if (ruta === "/api/v1/catalogo/categorias") return respuesta(CATEGORIAS)
+    if (ruta === "/api/v1/usuarios/regiones" || ruta === "/api/v1/usuarios/comunas") return respuesta([])
+    if (ruta === "/api/v1/contenido/articulos") return respuesta([])
+    if (ruta === "/api/v1/contenido/mensajes" && metodo === "POST") {
       return respuesta({ id: 1, ...JSON.parse(opciones.body), fecha: new Date().toISOString() }, 201)
     }
     return respuesta("No encontrado", 404)
   })
 }
 
-// Cuantas veces se llamo a una ruta del backend con un metodo (ej: POST /api/contenido/mensajes)
+// Cuantas veces se llamo a una ruta del backend con un metodo (ej: POST /api/v1/contenido/mensajes)
 export function llamadasA(spy, ruta, metodo = "GET") {
   return spy.calls.allArgs().filter(([url, op = {}]) =>
     new URL(url).pathname === ruta && (op.method || "GET") === metodo

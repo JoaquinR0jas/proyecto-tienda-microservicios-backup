@@ -13,9 +13,9 @@ import java.util.List;
 @FeignClient(name = "ms-catalogo")
 public interface CatalogoClient {
 
-    @GetMapping("/api/catalogo/productos/{id}")
+    @GetMapping("/api/v1/catalogo/productos/{id}")
     ProductoDTO obtenerProducto(@PathVariable("id") Long id);
 
-    @PostMapping("/api/catalogo/productos/descontar-stock")
+    @PostMapping("/api/v1/catalogo/productos/descontar-stock")
     String descontarStock(@RequestBody List<StockItemDTO> items);
 }

@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "ms-pagos")
 public interface PagoClient {
 
-    @PostMapping("/api/pagos/procesar")
+    @PostMapping("/api/v1/pagos/procesar")
     PagoDTO procesarPago(@RequestBody PagoDTO solicitud);
 }

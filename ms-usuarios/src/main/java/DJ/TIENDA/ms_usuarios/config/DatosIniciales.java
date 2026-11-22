@@ -7,6 +7,7 @@ import DJ.TIENDA.ms_usuarios.repository.ComunaRepository;
 import DJ.TIENDA.ms_usuarios.repository.RegionRepository;
 import DJ.TIENDA.ms_usuarios.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,12 +20,14 @@ public class DatosIniciales implements CommandLineRunner {
     private final RegionRepository regionRepository;
     private final ComunaRepository comunaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DatosIniciales(RegionRepository regionRepository, ComunaRepository comunaRepository,
-                          UsuarioRepository usuarioRepository) {
+                          UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.regionRepository = regionRepository;
         this.comunaRepository = comunaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -71,7 +74,8 @@ public class DatosIniciales implements CommandLineRunner {
         usuario.setNombre(nombre);
         usuario.setApellidos(apellidos);
         usuario.setEmail(email);
-        usuario.setPassword(password);
+        // Las claves de prueba tambien quedan encriptadas con BCrypt
+        usuario.setPassword(passwordEncoder.encode(password));
         usuario.setFechaNacimiento(LocalDate.parse(fechaNacimiento));
         usuario.setRegionId(regionId);
         usuario.setComunaId(comunaId);

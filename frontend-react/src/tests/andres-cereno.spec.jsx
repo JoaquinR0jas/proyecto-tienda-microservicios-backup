@@ -116,6 +116,6 @@ describe('Seccion de comentarios / formulario de contacto: estado con useState',
     expect(nombre.classList.contains('is-invalid')).toBeTrue()
     expect(correo.classList.contains('is-valid')).toBeTrue()
     // el mensaje nunca se envio al backend
-    expect(llamadasA(api, '/api/contenido/mensajes', 'POST')).toBe(0)
+    expect(llamadasA(api, '/api/v1/contenido/mensajes', 'POST')).toBe(0)
   })
 })

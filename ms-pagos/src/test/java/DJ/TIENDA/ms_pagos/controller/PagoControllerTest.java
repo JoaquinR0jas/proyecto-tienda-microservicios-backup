@@ -38,7 +38,7 @@ class PagoControllerTest {
 
         when(pagoService.procesarPago(any(PagoRequestDTO.class))).thenReturn(respuesta);
 
-        mockMvc.perform(post("/api/pagos/procesar")
+        mockMvc.perform(post("/api/v1/pagos/procesar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"pedidoId\":1,\"usuarioId\":10,\"monto\":11900,\"medio\":\"DEBITO\"}"))
                 .andExpect(status().isCreated())
@@ -48,7 +48,7 @@ class PagoControllerTest {
 
     @Test
     void procesarPago_whenMissingMonto_returns400() throws Exception {
-        mockMvc.perform(post("/api/pagos/procesar")
+        mockMvc.perform(post("/api/v1/pagos/procesar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"pedidoId\":1,\"usuarioId\":10}"))
                 .andExpect(status().isBadRequest());
@@ -61,7 +61,7 @@ class PagoControllerTest {
         when(pagoService.procesarPago(any(PagoRequestDTO.class)))
                 .thenThrow(new IllegalArgumentException("Medio de pago invalido: bitcoin"));
 
-        mockMvc.perform(post("/api/pagos/procesar")
+        mockMvc.perform(post("/api/v1/pagos/procesar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"pedidoId\":1,\"usuarioId\":10,\"monto\":100,\"medio\":\"bitcoin\"}"))
                 .andExpect(status().isBadRequest());
@@ -75,7 +75,7 @@ class PagoControllerTest {
 
         when(pagoService.obtenerPagosPorUsuario(10L)).thenReturn(List.of(pago));
 
-        mockMvc.perform(get("/api/pagos/usuario/10"))
+        mockMvc.perform(get("/api/v1/pagos/usuario/10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].usuarioId").value(10));
     }
@@ -87,7 +87,7 @@ class PagoControllerTest {
 
         when(pagoService.obtenerBoletaPorFolio(7L)).thenReturn(Optional.of(boleta));
 
-        mockMvc.perform(get("/api/pagos/boletas/7"))
+        mockMvc.perform(get("/api/v1/pagos/boletas/7"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.folio").value(7));
     }
@@ -96,7 +96,7 @@ class PagoControllerTest {
     void obtenerBoleta_whenNotExists_returns404() throws Exception {
         when(pagoService.obtenerBoletaPorFolio(99L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/pagos/boletas/99"))
+        mockMvc.perform(get("/api/v1/pagos/boletas/99"))
                 .andExpect(status().isNotFound());
     }
 }

@@ -46,7 +46,7 @@ class CatalogoControllerTest {
 
         when(catalogoService.obtenerTodos()).thenReturn(List.of(producto));
 
-        mockMvc.perform(get("/api/catalogo/productos"))
+        mockMvc.perform(get("/api/v1/catalogo/productos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nombre").value("Producto Test"));
     }
@@ -55,7 +55,7 @@ class CatalogoControllerTest {
     void listar_soloActivos_usesActiveList() throws Exception {
         when(catalogoService.obtenerActivos()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/catalogo/productos").param("soloActivos", "true"))
+        mockMvc.perform(get("/api/v1/catalogo/productos").param("soloActivos", "true"))
                 .andExpect(status().isOk());
 
         verify(catalogoService).obtenerActivos();
@@ -69,7 +69,7 @@ class CatalogoControllerTest {
 
         when(catalogoService.obtenerOfertas()).thenReturn(List.of(producto));
 
-        mockMvc.perform(get("/api/catalogo/productos/ofertas"))
+        mockMvc.perform(get("/api/v1/catalogo/productos/ofertas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].precioFinal").value(15992.0));
     }
@@ -81,7 +81,7 @@ class CatalogoControllerTest {
 
         when(catalogoService.obtenerPorId(1L)).thenReturn(Optional.of(producto));
 
-        mockMvc.perform(get("/api/catalogo/productos/1"))
+        mockMvc.perform(get("/api/v1/catalogo/productos/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.codigo").value("FF-001"));
     }
@@ -90,7 +90,7 @@ class CatalogoControllerTest {
     void obtenerPorId_whenNotExists_returns404() throws Exception {
         when(catalogoService.obtenerPorId(99L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/catalogo/productos/99"))
+        mockMvc.perform(get("/api/v1/catalogo/productos/99"))
                 .andExpect(status().isNotFound());
     }
 
@@ -101,7 +101,7 @@ class CatalogoControllerTest {
 
         when(catalogoService.crear(any(Producto.class))).thenReturn(creado);
 
-        mockMvc.perform(post("/api/catalogo/productos")
+        mockMvc.perform(post("/api/v1/catalogo/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(productoValido())))
                 .andExpect(status().isCreated())
@@ -113,7 +113,7 @@ class CatalogoControllerTest {
         when(catalogoService.crear(any(Producto.class)))
                 .thenThrow(new IllegalArgumentException("Ya existe un producto con el codigo: FF-001"));
 
-        mockMvc.perform(post("/api/catalogo/productos")
+        mockMvc.perform(post("/api/v1/catalogo/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(productoValido())))
                 .andExpect(status().isConflict());
@@ -124,7 +124,7 @@ class CatalogoControllerTest {
         Producto producto = productoValido();
         producto.setStock(-1);
 
-        mockMvc.perform(post("/api/catalogo/productos")
+        mockMvc.perform(post("/api/v1/catalogo/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(producto)))
                 .andExpect(status().isBadRequest());
@@ -134,7 +134,7 @@ class CatalogoControllerTest {
     void actualizar_whenNotExists_returns404() throws Exception {
         when(catalogoService.actualizar(eq(99L), any(Producto.class))).thenReturn(Optional.empty());
 
-        mockMvc.perform(put("/api/catalogo/productos/99")
+        mockMvc.perform(put("/api/v1/catalogo/productos/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(productoValido())))
                 .andExpect(status().isNotFound());
@@ -144,7 +144,7 @@ class CatalogoControllerTest {
     void eliminar_whenExists_returns200() throws Exception {
         when(catalogoService.eliminar(1L)).thenReturn(true);
 
-        mockMvc.perform(delete("/api/catalogo/productos/1"))
+        mockMvc.perform(delete("/api/v1/catalogo/productos/1"))
                 .andExpect(status().isOk());
     }
 
@@ -152,7 +152,7 @@ class CatalogoControllerTest {
     void eliminar_whenNotExists_returns404() throws Exception {
         when(catalogoService.eliminar(99L)).thenReturn(false);
 
-        mockMvc.perform(delete("/api/catalogo/productos/99"))
+        mockMvc.perform(delete("/api/v1/catalogo/productos/99"))
                 .andExpect(status().isNotFound());
     }
 
@@ -161,7 +161,7 @@ class CatalogoControllerTest {
         doThrow(new IllegalArgumentException("No hay stock suficiente de Producto Test"))
                 .when(catalogoService).descontarStock(anyList());
 
-        mockMvc.perform(post("/api/catalogo/productos/descontar-stock")
+        mockMvc.perform(post("/api/v1/catalogo/productos/descontar-stock")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[{\"productoId\":1,\"cantidad\":99}]"))
                 .andExpect(status().isBadRequest());

@@ -31,8 +31,55 @@ function leer(clave, porDefecto) {
 
 /* ---------- Sesion (la guarda el login con el token del auth-service) ---------- */
 
+// El token JWT tiene tres partes separadas por puntos. La del medio trae los
+// datos del usuario (id, correo, rol y vencimiento) en base64url.
+export function decodificarToken(token) {
+  try {
+    const partes = String(token).split(".")
+    if (partes.length !== 3) return null
+    const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/")
+    const texto = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    )
+    return JSON.parse(texto)
+  } catch {
+    return null
+  }
+}
+
+// Sirve para saber si hay que pedir un token nuevo antes de seguir navegando
+export function tokenVencido(token) {
+  const datos = decodificarToken(token)
+  if (!datos || !datos.exp) return true
+  return datos.exp * 1000 <= Date.now()
+}
+
+const ROL_A_ID_TOKEN = { ADMIN: 1, VENDEDOR: 2, CLIENTE: 3 }
+
 export function getSesion() {
-  return leer(KEYS.sesion, null)
+  const sesion = leer(KEYS.sesion, null)
+  if (!sesion || !sesion.token) return sesion
+  // El id y el rol se leen del token y no de localStorage, asi el usuario no
+  // los puede cambiar a mano desde las herramientas del navegador.
+  const datos = decodificarToken(sesion.token)
+  if (!datos) return sesion
+  return {
+    ...sesion,
+    id: datos.id != null ? Number(datos.id) : sesion.id,
+    rolId: ROL_A_ID_TOKEN[datos.rol] || sesion.rolId
+  }
+}
+
+// Reemplaza solo el token cuando el api.js lo renueva
+export function actualizarToken(token) {
+  const sesion = getSesion()
+  if (!sesion) return null
+  const nueva = { ...sesion, token }
+  guardarSesion(nueva)
+  return nueva
 }
 
 export function guardarSesion(sesion) {

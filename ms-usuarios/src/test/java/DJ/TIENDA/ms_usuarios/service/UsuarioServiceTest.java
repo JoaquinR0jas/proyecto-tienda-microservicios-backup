@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -39,6 +43,8 @@ class UsuarioServiceTest {
         usuario.setComunaId(1L);
         usuario.setDireccion("Calle test 123");
         usuario.setRol(Usuario.Rol.CLIENTE);
+        // Simulamos BCrypt: el service tiene que guardar el hash, no la clave escrita
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hash");
     }
 
     @Test
@@ -100,6 +106,17 @@ class UsuarioServiceTest {
         assertEquals("test@example.com", resultado.getEmail());
         verify(usuarioRepository).existsByEmail("test@example.com");
         verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void crear_guardaLaContrasenaEncriptada() {
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = usuarioService.crear(usuario);
+
+        // La clave original "pass123" no debe quedar guardada tal cual
+        assertEquals("$2a$10$hash", resultado.getPassword());
+        assertNotEquals("pass123", resultado.getPassword());
     }
 
     @Test

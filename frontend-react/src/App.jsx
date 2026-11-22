@@ -37,6 +37,7 @@ import AdminUsuarioHistorial from './pages/AdminUsuarioHistorial.jsx'
 import AdminReportes from './pages/AdminReportes.jsx'
 import AdminPerfil from './pages/AdminPerfil.jsx'
 import AdminMensajes from './pages/AdminMensajes.jsx'
+import RutaAdmin from './components/RutaAdmin.jsx'
 
 export default function App() {
   const ruta = useLocation().pathname
@@ -81,26 +82,28 @@ export default function App() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/contacto" element={<Contacto />} />
 
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/ordenes" element={<AdminOrdenes />} />
-          <Route path="/admin/ordenes/:id" element={<AdminBoleta />} />
-          <Route path="/admin/productos" element={<AdminProductos />} />
-          <Route path="/admin/productos/nuevo" element={<AdminProductoForm />} />
-          <Route path="/admin/productos/criticos" element={<AdminProductosCriticos />} />
-          <Route path="/admin/productos/reportes" element={<AdminProductosReportes />} />
-          <Route path="/admin/productos/ver/:codigo" element={<AdminProductoVer />} />
-          <Route path="/admin/productos/:codigo" element={<AdminProductoForm />} />
-          <Route path="/admin/categorias" element={<AdminCategorias />} />
-          <Route path="/admin/categorias/nueva" element={<AdminCategoriaForm />} />
-          <Route path="/admin/categorias/:id" element={<AdminCategoriaForm />} />
-          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-          <Route path="/admin/usuarios/nuevo" element={<AdminUsuarioForm />} />
-          <Route path="/admin/usuarios/ver/:run" element={<AdminUsuarioVer />} />
-          <Route path="/admin/usuarios/:run/historial" element={<AdminUsuarioHistorial />} />
-          <Route path="/admin/usuarios/:run" element={<AdminUsuarioForm />} />
-          <Route path="/admin/reportes" element={<AdminReportes />} />
-          <Route path="/admin/perfil" element={<AdminPerfil />} />
-          <Route path="/admin/mensajes" element={<AdminMensajes />} />
+          {/* Panel de administracion. Cada ruta pasa por RutaAdmin, que revisa
+              la sesion y el rol antes de mostrar la pagina. */}
+          <Route path="/admin" element={<RutaAdmin><Admin /></RutaAdmin>} />
+          <Route path="/admin/ordenes" element={<RutaAdmin><AdminOrdenes /></RutaAdmin>} />
+          <Route path="/admin/ordenes/:id" element={<RutaAdmin><AdminBoleta /></RutaAdmin>} />
+          <Route path="/admin/productos" element={<RutaAdmin><AdminProductos /></RutaAdmin>} />
+          <Route path="/admin/productos/nuevo" element={<RutaAdmin soloAdmin><AdminProductoForm /></RutaAdmin>} />
+          <Route path="/admin/productos/criticos" element={<RutaAdmin soloAdmin><AdminProductosCriticos /></RutaAdmin>} />
+          <Route path="/admin/productos/reportes" element={<RutaAdmin soloAdmin><AdminProductosReportes /></RutaAdmin>} />
+          <Route path="/admin/productos/ver/:codigo" element={<RutaAdmin><AdminProductoVer /></RutaAdmin>} />
+          <Route path="/admin/productos/:codigo" element={<RutaAdmin soloAdmin><AdminProductoForm /></RutaAdmin>} />
+          <Route path="/admin/categorias" element={<RutaAdmin soloAdmin><AdminCategorias /></RutaAdmin>} />
+          <Route path="/admin/categorias/nueva" element={<RutaAdmin soloAdmin><AdminCategoriaForm /></RutaAdmin>} />
+          <Route path="/admin/categorias/:id" element={<RutaAdmin soloAdmin><AdminCategoriaForm /></RutaAdmin>} />
+          <Route path="/admin/usuarios" element={<RutaAdmin soloAdmin><AdminUsuarios /></RutaAdmin>} />
+          <Route path="/admin/usuarios/nuevo" element={<RutaAdmin soloAdmin><AdminUsuarioForm /></RutaAdmin>} />
+          <Route path="/admin/usuarios/ver/:run" element={<RutaAdmin soloAdmin><AdminUsuarioVer /></RutaAdmin>} />
+          <Route path="/admin/usuarios/:run/historial" element={<RutaAdmin soloAdmin><AdminUsuarioHistorial /></RutaAdmin>} />
+          <Route path="/admin/usuarios/:run" element={<RutaAdmin soloAdmin><AdminUsuarioForm /></RutaAdmin>} />
+          <Route path="/admin/reportes" element={<RutaAdmin soloAdmin><AdminReportes /></RutaAdmin>} />
+          <Route path="/admin/perfil" element={<RutaAdmin soloAdmin><AdminPerfil /></RutaAdmin>} />
+          <Route path="/admin/mensajes" element={<RutaAdmin soloAdmin><AdminMensajes /></RutaAdmin>} />
         </Routes>
       </main>
       <Footer />

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "ms-usuarios")
 public interface UsuarioClient {
 
-    // busca por email
-    @GetMapping("/api/usuarios/buscar")
+    // busca los datos de login (incluye el hash de la clave)
+    @GetMapping("/api/v1/usuarios/auth")
     UsuarioDTO buscarPorEmail(@RequestParam("email") String email);
 }

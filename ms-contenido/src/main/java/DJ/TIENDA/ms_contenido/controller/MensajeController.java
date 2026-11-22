@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(name = "Mensajes de contacto", description = "Mensajes enviados desde el formulario de Contacto")
 @RestController
-@RequestMapping("/api/contenido/mensajes")
+@RequestMapping("/api/v1/contenido/mensajes")
 public class MensajeController {
 
     @Autowired

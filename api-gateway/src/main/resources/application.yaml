@@ -11,44 +11,44 @@ spring:
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/auth/**
+            - Path=/api/v1/auth/**
           filters:
-            - RewritePath=/auth/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/auth/v3/api-docs, /v3/api-docs
 
         - id: ms-usuarios
           uri: lb://MS-USUARIOS
           predicates:
-            - Path=/api/usuarios/**
+            - Path=/api/v1/usuarios/**
           filters:
-            - RewritePath=/api/usuarios/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/usuarios/v3/api-docs, /v3/api-docs
 
         - id: ms-catalogo
           uri: lb://MS-CATALOGO
           predicates:
-            - Path=/api/catalogo/**
+            - Path=/api/v1/catalogo/**
           filters:
-            - RewritePath=/api/catalogo/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/catalogo/v3/api-docs, /v3/api-docs
 
         - id: ms-pedidos
           uri: lb://MS-PEDIDOS
           predicates:
-            - Path=/api/pedidos/**
+            - Path=/api/v1/pedidos/**
           filters:
-            - RewritePath=/api/pedidos/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/pedidos/v3/api-docs, /v3/api-docs
 
         - id: ms-pagos
           uri: lb://MS-PAGOS
           predicates:
-            - Path=/api/pagos/**
+            - Path=/api/v1/pagos/**
           filters:
-            - RewritePath=/api/pagos/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/pagos/v3/api-docs, /v3/api-docs
 
         - id: ms-contenido
           uri: lb://MS-CONTENIDO
           predicates:
-            - Path=/api/contenido/**
+            - Path=/api/v1/contenido/**
           filters:
-            - RewritePath=/api/contenido/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/contenido/v3/api-docs, /v3/api-docs
 
       # configuracion CORS para que la pagina web (frontend) pueda
       # conectarse al backend desde el navegador sin problemas
@@ -78,19 +78,25 @@ springdoc:
   swagger-ui:
     urls:
       - name: auth-service
-        url: /auth/v3/api-docs
+        url: /api/v1/auth/v3/api-docs
       - name: ms-usuarios
-        url: /api/usuarios/v3/api-docs
+        url: /api/v1/usuarios/v3/api-docs
       - name: ms-catalogo
-        url: /api/catalogo/v3/api-docs
+        url: /api/v1/catalogo/v3/api-docs
       - name: ms-pedidos
-        url: /api/pedidos/v3/api-docs
+        url: /api/v1/pedidos/v3/api-docs
       - name: ms-pagos
-        url: /api/pagos/v3/api-docs
+        url: /api/v1/pagos/v3/api-docs
       - name: ms-contenido
-        url: /api/contenido/v3/api-docs
+        url: /api/v1/contenido/v3/api-docs
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+# La misma clave secreta que usa auth-service para firmar los tokens.
+# El gateway la necesita para poder verificar la firma.
+jwt:
+  secret: clave-super-secreta-latienda-2024-djtienda-microservicios
+

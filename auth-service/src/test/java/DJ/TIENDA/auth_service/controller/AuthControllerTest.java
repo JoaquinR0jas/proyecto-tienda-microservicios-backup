@@ -37,7 +37,7 @@ class AuthControllerTest {
 
         Map<String, String> credenciales = Map.of("email", "test@example.com", "password", "password123");
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(credenciales)))
                 .andExpect(status().isOk())
@@ -51,7 +51,7 @@ class AuthControllerTest {
 
         Map<String, String> credenciales = Map.of("email", "test@example.com", "password", "wrong");
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(credenciales)))
                 .andExpect(status().isUnauthorized());
@@ -63,7 +63,7 @@ class AuthControllerTest {
         when(authService.obtenerEmail("valid-token")).thenReturn("test@example.com");
         when(authService.obtenerRol("valid-token")).thenReturn("CLIENTE");
 
-        mockMvc.perform(get("/auth/validate").param("token", "valid-token"))
+        mockMvc.perform(get("/api/v1/auth/validate").param("token", "valid-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.rol").value("CLIENTE"))
@@ -74,7 +74,7 @@ class AuthControllerTest {
     void validate_whenTokenIsInvalid_returnsUnauthorized() throws Exception {
         when(authService.validarToken("invalid-token")).thenReturn(false);
 
-        mockMvc.perform(get("/auth/validate").param("token", "invalid-token"))
+        mockMvc.perform(get("/api/v1/auth/validate").param("token", "invalid-token"))
                 .andExpect(status().isUnauthorized());
     }
 }

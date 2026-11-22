@@ -6,6 +6,7 @@ import DJ.TIENDA.ms_pedidos.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "Pedidos", description = "Gestion de pedidos de compra")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/pedidos")
+@RequestMapping("/api/v1/pedidos")
 public class PedidoController {
 
     @Autowired
@@ -45,9 +47,18 @@ public class PedidoController {
     }
 
     @Operation(summary = "Pedidos por usuario", description = "Obtiene el historial de compras de un usuario")
-    @ApiResponse(responseCode = "200", description = "Lista de pedidos obtenida")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de pedidos obtenida"),
+        @ApiResponse(responseCode = "403", description = "Un cliente solo puede ver sus propias compras")
+    })
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorUsuario(@PathVariable Long usuarioId) {
+    public ResponseEntity<?> obtenerPedidosPorUsuario(@PathVariable Long usuarioId,
+                                                      @RequestHeader(value = "X-Usuario-Id", required = false) Long idSesion,
+                                                      @RequestHeader(value = "X-Usuario-Rol", required = false) String rolSesion) {
+        // El cliente solo puede pedir su propio historial; el admin ve cualquiera
+        if (!"ADMIN".equals(rolSesion) && (idSesion == null || !idSesion.equals(usuarioId))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para ver estas compras");
+        }
         return ResponseEntity.ok(pedidoService.obtenerPedidosPorUsuario(usuarioId));
     }
 
@@ -57,9 +68,19 @@ public class PedidoController {
         @ApiResponse(responseCode = "404", description = "Pedido no encontrado")
     })
     @GetMapping("/{pedidoId}")
-    public ResponseEntity<?> obtenerPorId(@PathVariable Long pedidoId) {
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long pedidoId,
+                                          @RequestHeader(value = "X-Usuario-Id", required = false) Long idSesion,
+                                          @RequestHeader(value = "X-Usuario-Rol", required = false) String rolSesion) {
         return pedidoService.obtenerPorId(pedidoId)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .<ResponseEntity<?>>map(pedido -> {
+                    // Si no es admin, el pedido tiene que ser suyo
+                    if (!"ADMIN".equals(rolSesion)
+                            && (idSesion == null || !idSesion.equals(pedido.getUsuarioId()))) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("No tienes permiso para ver este pedido");
+                    }
+                    return ResponseEntity.ok(pedido);
+                })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Pedido no encontrado con ID: " + pedidoId));
     }

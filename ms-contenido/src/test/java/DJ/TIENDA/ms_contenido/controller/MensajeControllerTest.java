@@ -32,7 +32,7 @@ class MensajeControllerTest {
 
         when(mensajeService.crear(any(Mensaje.class))).thenReturn(guardado);
 
-        mockMvc.perform(post("/api/contenido/mensajes")
+        mockMvc.perform(post("/api/v1/contenido/mensajes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nombre\":\"Camila\",\"email\":\"camila@gmail.com\",\"comentario\":\"Hola\"}"))
                 .andExpect(status().isCreated())
@@ -42,7 +42,7 @@ class MensajeControllerTest {
     // caso borde: un nombre con solo espacios no es valido, igual que en el formulario del frontend
     @Test
     void crear_whenNameIsOnlySpaces_returns400() throws Exception {
-        mockMvc.perform(post("/api/contenido/mensajes")
+        mockMvc.perform(post("/api/v1/contenido/mensajes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nombre\":\"     \",\"email\":\"camila@gmail.com\",\"comentario\":\"Hola\"}"))
                 .andExpect(status().isBadRequest());
@@ -52,7 +52,7 @@ class MensajeControllerTest {
 
     @Test
     void crear_whenEmailIsInvalid_returns400() throws Exception {
-        mockMvc.perform(post("/api/contenido/mensajes")
+        mockMvc.perform(post("/api/v1/contenido/mensajes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nombre\":\"Camila\",\"email\":\"no-es-correo\",\"comentario\":\"Hola\"}"))
                 .andExpect(status().isBadRequest());
@@ -66,7 +66,7 @@ class MensajeControllerTest {
 
         when(mensajeService.obtenerTodos()).thenReturn(List.of(mensaje));
 
-        mockMvc.perform(get("/api/contenido/mensajes"))
+        mockMvc.perform(get("/api/v1/contenido/mensajes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nombre").value("Camila"));
     }
@@ -75,7 +75,7 @@ class MensajeControllerTest {
     void eliminar_whenNotExists_returns404() throws Exception {
         when(mensajeService.eliminar(99L)).thenReturn(false);
 
-        mockMvc.perform(delete("/api/contenido/mensajes/99"))
+        mockMvc.perform(delete("/api/v1/contenido/mensajes/99"))
                 .andExpect(status().isNotFound());
     }
 }

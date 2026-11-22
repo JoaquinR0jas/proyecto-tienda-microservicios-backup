@@ -44,7 +44,7 @@ class PedidoControllerTest {
 
         when(pedidoService.crearPedido(any(CrearPedidoDTO.class))).thenReturn(respuesta);
 
-        mockMvc.perform(post("/api/pedidos")
+        mockMvc.perform(post("/api/v1/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(PEDIDO_VALIDO))
                 .andExpect(status().isCreated())
@@ -53,7 +53,7 @@ class PedidoControllerTest {
 
     @Test
     void crearPedido_whenCartIsEmpty_returns400() throws Exception {
-        mockMvc.perform(post("/api/pedidos")
+        mockMvc.perform(post("/api/v1/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(PEDIDO_VALIDO.replace("[{\"productoId\": 1, \"cantidad\": 2}]", "[]")))
                 .andExpect(status().isBadRequest());
@@ -63,7 +63,7 @@ class PedidoControllerTest {
 
     @Test
     void crearPedido_whenNoUser_returns400() throws Exception {
-        mockMvc.perform(post("/api/pedidos")
+        mockMvc.perform(post("/api/v1/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(PEDIDO_VALIDO.replace("\"usuarioId\": 3,", "")))
                 .andExpect(status().isBadRequest());
@@ -74,7 +74,7 @@ class PedidoControllerTest {
         when(pedidoService.crearPedido(any(CrearPedidoDTO.class)))
                 .thenThrow(new IllegalArgumentException("Producto no encontrado con ID: 1"));
 
-        mockMvc.perform(post("/api/pedidos")
+        mockMvc.perform(post("/api/v1/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(PEDIDO_VALIDO))
                 .andExpect(status().isBadRequest());
@@ -87,7 +87,7 @@ class PedidoControllerTest {
 
         when(pedidoService.obtenerTodos()).thenReturn(List.of(pedido));
 
-        mockMvc.perform(get("/api/pedidos"))
+        mockMvc.perform(get("/api/v1/pedidos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].pedidoId").value(1));
     }
@@ -96,7 +96,7 @@ class PedidoControllerTest {
     void obtenerPorId_whenNotExists_returns404() throws Exception {
         when(pedidoService.obtenerPorId(99L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/pedidos/99"))
+        mockMvc.perform(get("/api/v1/pedidos/99"))
                 .andExpect(status().isNotFound());
     }
 }

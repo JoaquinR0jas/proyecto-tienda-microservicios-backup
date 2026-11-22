@@ -2,7 +2,7 @@
 // Cada funcion traduce los datos del backend al formato que ya usaban las paginas,
 // asi las vistas no tienen que saber como se llaman los campos en Java.
 import { API_URL } from './config.js'
-import { getSesion, guardarSesion, setReferencias } from './datos.js'
+import { getSesion, guardarSesion, actualizarToken, cerrarSesion, setReferencias } from './datos.js'
 
 export class ApiError extends Error {
   constructor(status, mensaje) {
@@ -13,7 +13,8 @@ export class ApiError extends Error {
 
 // Hace la peticion y devuelve el JSON (o el texto) de la respuesta.
 // Si el backend responde con error, lanza un ApiError con su mensaje.
-export async function pedir(ruta, { metodo = "GET", cuerpo } = {}) {
+// Si el token vencio, lo renueva una vez y repite la peticion.
+export async function pedir(ruta, { metodo = "GET", cuerpo } = {}, reintentar = true) {
   const headers = {}
   if (cuerpo !== undefined) headers["Content-Type"] = "application/json"
   const sesion = getSesion()
@@ -38,13 +39,49 @@ export async function pedir(ruta, { metodo = "GET", cuerpo } = {}) {
     // la respuesta era texto plano, por ejemplo "Producto eliminado correctamente."
   }
 
+  // 401 = el token no sirve o vencio. Se intenta renovar y se repite la llamada.
+  if (respuesta.status === 401 && reintentar && !ruta.startsWith("/api/v1/auth/")) {
+    const habiaSesion = !!sesion
+    if (habiaSesion && (await renovarToken())) {
+      return pedir(ruta, { metodo, cuerpo }, false)
+    }
+    if (habiaSesion) {
+      cerrarSesion()
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        window.location.href = "/login?expirada=1"
+      }
+      throw new ApiError(401, "Tu sesion expiro. Vuelve a iniciar sesion.")
+    }
+  }
+
   if (!respuesta.ok) {
     let mensaje = typeof datos === "string" && datos ? datos : null
     if (!mensaje && respuesta.status === 400) mensaje = "Hay datos invalidos o incompletos."
+    if (!mensaje && respuesta.status === 403) mensaje = "No tienes permisos para hacer esta accion."
     if (!mensaje) mensaje = "El servidor respondio con un error (" + respuesta.status + ")."
     throw new ApiError(respuesta.status, mensaje)
   }
   return datos
+}
+
+// Pide un token nuevo al auth-service sin tener que volver a escribir la clave
+export async function renovarToken() {
+  const sesion = getSesion()
+  if (!sesion || !sesion.token) return false
+  try {
+    const respuesta = await fetch(API_URL + "/api/v1/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: sesion.token })
+    })
+    if (!respuesta.ok) return false
+    const datos = await respuesta.json()
+    if (!datos.token) return false
+    actualizarToken(datos.token)
+    return true
+  } catch {
+    return false
+  }
 }
 
 /* ==================== Traductores backend <-> frontend ==================== */
@@ -72,20 +109,24 @@ function deProducto(p) {
 function aUsuario(u) {
   return {
     id: u.id, run: u.run, nombre: u.nombre, apellidos: u.apellidos,
-    correo: u.email, password: u.password, fechaNacimiento: u.fechaNacimiento || "",
+    correo: u.email, fechaNacimiento: u.fechaNacimiento || "",
     rolId: ROL_A_ID[u.rol] || 3, regionId: u.regionId, comunaId: u.comunaId,
     direccion: u.direccion, estado: aEstado(u.estado)
   }
 }
 
 function deUsuario(u) {
-  return {
+  const datos = {
     run: u.run, nombre: u.nombre, apellidos: u.apellidos, email: u.correo,
-    password: u.password, fechaNacimiento: u.fechaNacimiento || null,
+    fechaNacimiento: u.fechaNacimiento || null,
     rol: ID_A_ROL[Number(u.rolId)] || "CLIENTE",
     regionId: Number(u.regionId), comunaId: Number(u.comunaId),
     direccion: u.direccion, estado: deEstado(u.estado)
   }
+  // Si el admin no escribio una clave nueva, no se envia nada y el backend
+  // mantiene la que ya estaba guardada.
+  if (u.password) datos.password = u.password
+  return datos
 }
 
 const TIPO_ENTREGA = { DESPACHO: "Despacho a domicilio", RETIRO: "Retiro en tienda" }
@@ -127,7 +168,7 @@ function aMensaje(m) {
 
 // Inicia sesion, guarda el token y los datos del usuario en el navegador
 export async function iniciarSesion(correo, password) {
-  const r = await pedir("/auth/login", { metodo: "POST", cuerpo: { email: correo, password } })
+  const r = await pedir("/api/v1/auth/login", { metodo: "POST", cuerpo: { email: correo, password } })
   const sesion = {
     token: r.token,
     id: r.usuario.id,
@@ -153,22 +194,22 @@ export async function cargarReferencias() {
 /* ==================== ms-catalogo ==================== */
 
 export async function listarProductos({ soloActivos = false } = {}) {
-  const lista = await pedir("/api/catalogo/productos" + (soloActivos ? "?soloActivos=true" : ""))
+  const lista = await pedir("/api/v1/catalogo/productos" + (soloActivos ? "?soloActivos=true" : ""))
   return lista.map(aProducto)
 }
 
 export async function listarOfertas() {
-  return (await pedir("/api/catalogo/productos/ofertas")).map(aProducto)
+  return (await pedir("/api/v1/catalogo/productos/ofertas")).map(aProducto)
 }
 
 export async function listarCriticos() {
-  return (await pedir("/api/catalogo/productos/criticos")).map(aProducto)
+  return (await pedir("/api/v1/catalogo/productos/criticos")).map(aProducto)
 }
 
 // devuelve null si el producto no existe
 export async function obtenerProductoPorCodigo(codigo) {
   try {
-    return aProducto(await pedir("/api/catalogo/productos/codigo/" + encodeURIComponent(codigo)))
+    return aProducto(await pedir("/api/v1/catalogo/productos/codigo/" + encodeURIComponent(codigo)))
   } catch (e) {
     if (e.status === 404) return null
     throw e
@@ -176,42 +217,42 @@ export async function obtenerProductoPorCodigo(codigo) {
 }
 
 export async function crearProducto(producto) {
-  return aProducto(await pedir("/api/catalogo/productos", { metodo: "POST", cuerpo: deProducto(producto) }))
+  return aProducto(await pedir("/api/v1/catalogo/productos", { metodo: "POST", cuerpo: deProducto(producto) }))
 }
 
 export async function actualizarProducto(id, producto) {
-  return aProducto(await pedir("/api/catalogo/productos/" + id, { metodo: "PUT", cuerpo: deProducto(producto) }))
+  return aProducto(await pedir("/api/v1/catalogo/productos/" + id, { metodo: "PUT", cuerpo: deProducto(producto) }))
 }
 
 export function eliminarProducto(id) {
-  return pedir("/api/catalogo/productos/" + id, { metodo: "DELETE" })
+  return pedir("/api/v1/catalogo/productos/" + id, { metodo: "DELETE" })
 }
 
 export function listarCategorias() {
-  return pedir("/api/catalogo/categorias")
+  return pedir("/api/v1/catalogo/categorias")
 }
 
 export function crearCategoria(categoria) {
-  return pedir("/api/catalogo/categorias", { metodo: "POST", cuerpo: categoria })
+  return pedir("/api/v1/catalogo/categorias", { metodo: "POST", cuerpo: categoria })
 }
 
 export function actualizarCategoria(id, categoria) {
-  return pedir("/api/catalogo/categorias/" + id, { metodo: "PUT", cuerpo: categoria })
+  return pedir("/api/v1/catalogo/categorias/" + id, { metodo: "PUT", cuerpo: categoria })
 }
 
 export function eliminarCategoria(id) {
-  return pedir("/api/catalogo/categorias/" + id, { metodo: "DELETE" })
+  return pedir("/api/v1/catalogo/categorias/" + id, { metodo: "DELETE" })
 }
 
 /* ==================== ms-usuarios ==================== */
 
 export async function listarUsuarios() {
-  return (await pedir("/api/usuarios")).map(aUsuario)
+  return (await pedir("/api/v1/usuarios")).map(aUsuario)
 }
 
 export async function obtenerUsuario(id) {
   try {
-    return aUsuario(await pedir("/api/usuarios/" + id))
+    return aUsuario(await pedir("/api/v1/usuarios/" + id))
   } catch (e) {
     if (e.status === 404) return null
     throw e
@@ -224,30 +265,30 @@ export async function obtenerUsuarioPorRun(run) {
 }
 
 export async function crearUsuario(usuario) {
-  return aUsuario(await pedir("/api/usuarios", { metodo: "POST", cuerpo: deUsuario(usuario) }))
+  return aUsuario(await pedir("/api/v1/usuarios", { metodo: "POST", cuerpo: deUsuario(usuario) }))
 }
 
 export async function actualizarUsuario(id, usuario) {
-  return aUsuario(await pedir("/api/usuarios/" + id, { metodo: "PUT", cuerpo: deUsuario(usuario) }))
+  return aUsuario(await pedir("/api/v1/usuarios/" + id, { metodo: "PUT", cuerpo: deUsuario(usuario) }))
 }
 
 export function eliminarUsuario(id) {
-  return pedir("/api/usuarios/" + id, { metodo: "DELETE" })
+  return pedir("/api/v1/usuarios/" + id, { metodo: "DELETE" })
 }
 
 export function listarRegiones() {
-  return pedir("/api/usuarios/regiones")
+  return pedir("/api/v1/usuarios/regiones")
 }
 
 export function listarComunas() {
-  return pedir("/api/usuarios/comunas")
+  return pedir("/api/v1/usuarios/comunas")
 }
 
 /* ==================== ms-pedidos (y ms-pagos a traves de ms-pedidos) ==================== */
 
 // Envia el carrito y los datos del checkout. El backend cobra y responde la orden Pagada o Rechazada.
 export async function comprar({ usuarioId, cliente, envio, items, simularRechazo }) {
-  const pedido = await pedir("/api/pedidos", {
+  const pedido = await pedir("/api/v1/pedidos", {
     metodo: "POST",
     cuerpo: {
       usuarioId,
@@ -267,16 +308,16 @@ export async function comprar({ usuarioId, cliente, envio, items, simularRechazo
 }
 
 export async function listarOrdenes() {
-  return (await pedir("/api/pedidos")).map(aOrden)
+  return (await pedir("/api/v1/pedidos")).map(aOrden)
 }
 
 export async function ordenesDeUsuario(usuarioId) {
-  return (await pedir("/api/pedidos/usuario/" + usuarioId)).map(aOrden)
+  return (await pedir("/api/v1/pedidos/usuario/" + usuarioId)).map(aOrden)
 }
 
 export async function obtenerOrden(id) {
   try {
-    return aOrden(await pedir("/api/pedidos/" + id))
+    return aOrden(await pedir("/api/v1/pedidos/" + id))
   } catch (e) {
     if (e.status === 404) return null
     throw e
@@ -286,12 +327,12 @@ export async function obtenerOrden(id) {
 /* ==================== ms-contenido ==================== */
 
 export function listarArticulos({ incluirBorradores = false } = {}) {
-  return pedir("/api/contenido/articulos" + (incluirBorradores ? "?incluirBorradores=true" : ""))
+  return pedir("/api/v1/contenido/articulos" + (incluirBorradores ? "?incluirBorradores=true" : ""))
 }
 
 export async function obtenerArticulo(slug) {
   try {
-    return await pedir("/api/contenido/articulos/" + encodeURIComponent(slug))
+    return await pedir("/api/v1/contenido/articulos/" + encodeURIComponent(slug))
   } catch (e) {
     if (e.status === 404) return null
     throw e
@@ -299,16 +340,16 @@ export async function obtenerArticulo(slug) {
 }
 
 export async function listarMensajes() {
-  return (await pedir("/api/contenido/mensajes")).map(aMensaje)
+  return (await pedir("/api/v1/contenido/mensajes")).map(aMensaje)
 }
 
 export async function enviarMensaje({ nombre, correo, comentario }) {
-  return aMensaje(await pedir("/api/contenido/mensajes", {
+  return aMensaje(await pedir("/api/v1/contenido/mensajes", {
     metodo: "POST",
     cuerpo: { nombre, email: correo, comentario }
   }))
 }
 
 export function eliminarMensaje(id) {
-  return pedir("/api/contenido/mensajes/" + id, { metodo: "DELETE" })
+  return pedir("/api/v1/contenido/mensajes/" + id, { metodo: "DELETE" })
 }

@@ -17,7 +17,7 @@ import java.util.List;
 
 @Tag(name = "Catalogo", description = "Gestion del catalogo de productos y su stock")
 @RestController
-@RequestMapping("/api/catalogo")
+@RequestMapping("/api/v1/catalogo")
 public class CatalogoController {
 
     @Autowired

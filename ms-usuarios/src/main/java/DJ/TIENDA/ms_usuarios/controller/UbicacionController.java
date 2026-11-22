@@ -14,7 +14,7 @@ import java.util.List;
 
 @Tag(name = "Ubicaciones", description = "Regiones y comunas de Chile")
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping("/api/v1/usuarios")
 public class UbicacionController {
 
     @Autowired

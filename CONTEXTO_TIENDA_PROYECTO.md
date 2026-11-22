@@ -115,21 +115,21 @@
 
 | # | Acción | Endpoint | Body/Params |
 |---|--------|----------|-------------|
-| 1 | Crear usuario | `POST /api/usuarios` | `{nombre, email, password, direccion}` |
-| 2 | Login | `POST /auth/login` | `{email, password}` → devuelve JWT |
-| 3 | Crear producto | `POST /api/catalogo/productos` | `{nombre, precio, descripcion}` |
+| 1 | Crear usuario | `POST /api/v1/usuarios` | `{nombre, email, password, direccion}` |
+| 2 | Login | `POST /api/v1/auth/login` | `{email, password}` → devuelve JWT |
+| 3 | Crear producto | `POST /api/v1/catalogo/productos` | `{nombre, precio, descripcion}` |
 | 4 | Registrar stock | `POST /api/inventario/guardar` | `{productoId, cantidad}` |
 | 5 | Agregar al carrito | `POST /api/carrito/{usuarioId}/agregar` | `{productoId, cantidad}` |
 | 6 | Confirmar carrito | `PATCH /api/carrito/{carritoId}/estado` | — |
-| 7 | Crear pedido | `POST /api/pedidos/crear?usuarioId=&carritoId=` | ⚠️ **Query params, NO body** |
-| 8 | Procesar pago | `POST /api/pagos/procesar` | `{pedidoId, monto, metodoPago}` |
+| 7 | Crear pedido | `POST /api/v1/pedidos/crear?usuarioId=&carritoId=` | ⚠️ **Query params, NO body** |
+| 8 | Procesar pago | `POST /api/v1/pagos/procesar` | `{pedidoId, monto, metodoPago}` |
 | 9 | Crear envío | `POST /api/envios/crear` | `{pedidoId, usuarioId}` (solo Longs) |
 | 10 | Notificar | `POST /api/notificaciones/enviar` | `{usuarioId, mensaje}` |
 
 ### Detalles importantes
 
 - El carrito debe estar en estado **CONFIRMADO** antes de crear el pedido (paso 6 → 7)
-- `POST /api/pedidos/crear` recibe parámetros por **query string**, no en el body
+- `POST /api/v1/pedidos/crear` recibe parámetros por **query string**, no en el body
 - `POST /api/envios/crear` espera un `Map<String, Long>` con `pedidoId` y `usuarioId` (NO acepta `direccionEntrega`)
 - Todos los endpoints pasan por el Gateway (`http://localhost:8080`)
 

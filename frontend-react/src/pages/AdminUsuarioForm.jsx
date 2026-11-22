@@ -31,7 +31,8 @@ export default function AdminUsuarioForm() {
     if (!u) return
     setForm({
       run: u.run, nombre: u.nombre, apellidos: u.apellidos, correo: u.correo,
-      pass: u.password, fecha: u.fechaNacimiento || "", rol: u.rolId,
+      // la clave no viene desde el backend (esta encriptada), se deja en blanco
+      pass: "", fecha: u.fechaNacimiento || "", rol: u.rolId,
       region: u.regionId, comuna: u.comunaId, direccion: u.direccion, estado: u.estado
     })
   }, [carga.datos])
@@ -65,7 +66,8 @@ export default function AdminUsuarioForm() {
     if (!textoOk(form.nombre, 50)) err.nombre = true
     if (!textoOk(form.apellidos, 100)) err.apellidos = true
     if (!correoOk(form.correo)) err.correo = true
-    if (!passOk(form.pass)) err.pass = true
+    // al editar, si la clave queda vacia se mantiene la que ya tenia el usuario
+    if ((!editando || form.pass) && !passOk(form.pass)) err.pass = true
     if (!form.rol) err.rol = true
     if (!form.region) err.region = true
     if (!form.comuna) err.comuna = true
@@ -83,7 +85,7 @@ export default function AdminUsuarioForm() {
       nombre: form.nombre.trim(),
       apellidos: form.apellidos.trim(),
       correo: form.correo.trim(),
-      password: form.pass,
+      ...(form.pass ? { password: form.pass } : {}),
       fechaNacimiento: form.fecha || "",
       rolId: Number(form.rol),
       regionId: Number(form.region),
@@ -136,8 +138,10 @@ export default function AdminUsuarioForm() {
             <div className="invalid-feedback">Solo @duoc.cl, @profesor.duoc.cl o @gmail.com.</div>
           </div>
           <div className="col-md-6">
-            <label htmlFor="passUsuario" className="form-label">Contrasena</label>
-            <input id="passUsuario" name="pass" className={clase("pass")} maxLength="10" value={form.pass} onChange={cambiar} />
+            <label htmlFor="passUsuario" className="form-label">
+              Contrasena {editando && <span className="text-muted">(en blanco = mantener la actual)</span>}
+            </label>
+            <input id="passUsuario" name="pass" type="password" className={clase("pass")} maxLength="10" value={form.pass} onChange={cambiar} />
             <div className="invalid-feedback">Entre 4 y 10 caracteres.</div>
           </div>
           <div className="col-md-4">
@@ -185,7 +189,7 @@ export default function AdminUsuarioForm() {
           <button type="submit" className="btn btn-accent">Guardar</button>
           <Link to="/admin/usuarios" className="btn btn-outline-accent">Cancelar</Link>
         </div>
-      </Form>
+      </form>
     </AdminLayout>
   )
 }

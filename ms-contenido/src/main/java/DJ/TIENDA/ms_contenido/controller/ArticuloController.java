@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(name = "Blog", description = "Articulos del blog de la tienda")
 @RestController
-@RequestMapping("/api/contenido/articulos")
+@RequestMapping("/api/v1/contenido/articulos")
 public class ArticuloController {
 
     @Autowired

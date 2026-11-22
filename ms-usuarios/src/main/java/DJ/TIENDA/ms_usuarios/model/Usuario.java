@@ -39,8 +39,11 @@ public class Usuario {
     private String email;
 
     @NotBlank(message = "La contrasena es obligatoria")
-    @Size(min = 4, max = 10, message = "La contrasena debe tener entre 4 y 10 caracteres")
+    @Size(min = 4, max = 72, message = "La contrasena debe tener entre 4 y 72 caracteres")
     @Column(nullable = false)
+    // WRITE_ONLY significa que la clave se puede enviar al crear/editar,
+    // pero nunca sale en las respuestas JSON de la API
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column

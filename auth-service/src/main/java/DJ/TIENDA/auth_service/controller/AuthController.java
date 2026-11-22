@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Tag(name = "Autenticacion", description = "Autenticacion y validacion de tokens JWT")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     @Autowired
@@ -54,5 +54,19 @@ public class AuthController {
             return ResponseEntity.ok(respuesta);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token invalido o expirado");
+    }
+
+    @Operation(summary = "Renovar token JWT", description = "Recibe el token actual, revisa que siga vigente y devuelve uno nuevo con otra hora de duracion")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Token renovado correctamente"),
+        @ApiResponse(responseCode = "401", description = "El token ya vencio o la cuenta esta deshabilitada")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<?> renovar(@RequestBody Map<String, String> cuerpo) {
+        try {
+            return ResponseEntity.ok(authService.renovarToken(cuerpo.get("token")));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
     }
 }
