@@ -10,6 +10,13 @@ El repositorio tiene dos partes:
 - Los modulos de Spring Boot: `eureka-server`, `api-gateway`, `auth-service` y los
   microservicios `ms-usuarios`, `ms-catalogo`, `ms-pedidos`, `ms-pagos` y `ms-contenido`.
 
+## Equipo
+
+- Joaquin Rojas
+- Andres Cereno
+- Julian Silva
+- Diego Rivera
+
 ## Arquitectura
 
 ```
