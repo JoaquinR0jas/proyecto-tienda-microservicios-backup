@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { Button, Container } from 'react-bootstrap'
 import { imgProducto } from '../datos.js'
 import { obtenerArticulo } from '../api.js'
 import Cargando, { useCarga } from '../components/Cargando.jsx'

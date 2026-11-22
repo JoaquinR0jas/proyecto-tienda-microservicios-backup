@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Badge, Button, Table } from 'react-bootstrap'
 import { nombreRegion, nombreRol } from '../datos.js'
 import { listarUsuarios, eliminarUsuario } from '../api.js'
 import { AdminLayout, useAdmin } from '../components/AdminMenu.jsx'

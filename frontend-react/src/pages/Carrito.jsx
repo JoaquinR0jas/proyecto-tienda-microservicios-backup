@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Button, Col, Container, Row } from 'react-bootstrap'
 import { getCarrito, setCarrito, getSesion, plata, imgProducto, detalleCarrito, COSTO_DESPACHO, DESPACHO_GRATIS_DESDE } from '../datos.js'
 import { listarProductos } from '../api.js'
 import Cargando, { useCarga } from '../components/Cargando.jsx'
@@ -86,7 +87,7 @@ export default function Carrito() {
   return (
     <Container className="py-5">
       <h1 className="section-title">Carrito de compras</h1>
-      <div className="row g-4">
+      <Row className="g-4">
         <div className="col-lg-8">
           {items.map(i => (
             <div className="row align-items-center bg-ff-panel rounded p-3 mb-3 g-3" key={i.codigo}>
@@ -111,7 +112,7 @@ export default function Carrito() {
             </div>
           ))}
         </div>
-        <div className="col-lg-4">
+        <Col lg={4}>
           <div className="bg-ff-panel rounded p-4">
             <h3 className="h5 mb-3">Resumen</h3>
             <div className="d-flex justify-content-between mb-2">

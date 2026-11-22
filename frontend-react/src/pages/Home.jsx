@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button, Card, Col, Container, Row } from 'react-bootstrap'
 import { listarProductos, listarArticulos } from '../api.js'
 import { agregarConAviso } from '../alertas.js'
 import { imgProducto } from '../datos.js'
@@ -97,10 +98,10 @@ export default function Home() {
         </div>
         <Row className="g-4">
           {noticias.map(n => (
-            <div className="col-md-6 col-lg-4" key={n.id}>
-              <article className="card h-100 card-ff-hover">
+            <Col md={6} lg={4} key={n.id}>
+              <Card as="article" className="h-100 card-ff-hover">
                 <img src={imgProducto(n)} className="card-img-top" alt={n.titulo} />
-                <div className="card-body d-flex flex-column">
+                <Card.Body className="d-flex flex-column">
                   <p className="small text-muted mb-1">{n.fecha}</p>
                   <Card.Title as="h3" className="h6">{n.titulo}</Card.Title>
                   <p className="small text-muted flex-grow-1">{n.resumen}</p>

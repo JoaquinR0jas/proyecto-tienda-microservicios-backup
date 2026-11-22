@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import App from './App.jsx'
-import { initDatos } from './datos.js'
 import './estilos.css'
 import { getSesion, cerrarSesion } from './datos.js'
 
@@ -13,8 +12,6 @@ import { getSesion, cerrarSesion } from './datos.js'
 // una sesion sin token es de la version anterior, hay que volver a iniciar sesion
 const sesion = getSesion()
 if (sesion && !sesion.token) cerrarSesion()
-
-initDatos()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>

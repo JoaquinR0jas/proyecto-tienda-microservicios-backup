@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Badge, Button, Col, Container, Form, Row } from 'react-bootstrap'
 import { plata, imgProducto, nombreCategoria, precioFinal, enOferta } from '../datos.js'
 import { obtenerProductoPorCodigo } from '../api.js'
 import Cargando, { useCarga } from '../components/Cargando.jsx'
@@ -17,9 +18,9 @@ export default function Detalle() {
 
   if (carga.cargando || carga.error) {
     return (
-      <section className="container py-5">
+      <Container as="section" className="py-5">
         <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
-      </section>
+      </Container>
     )
   }
 
@@ -39,9 +40,9 @@ export default function Detalle() {
   }
 
   return (
-    <section className="container py-5">
-      <div className="row g-4">
-        <div className="col-md-5">
+    <Container as="section" className="py-5">
+      <Row className="g-4">
+        <Col md={5}>
           <img src={imgProducto(p)} className="img-fluid rounded bg-ff-panel p-2" alt={p.nombre} />
         </Col>
         <Col md={7}>

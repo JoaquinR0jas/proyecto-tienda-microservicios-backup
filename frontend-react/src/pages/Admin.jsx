@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getSesion } from '../datos.js'
 import { listarProductos, listarUsuarios, listarMensajes } from '../api.js'
 import { aviso } from '../alertas.js'
+import { Card, Col, ListGroup, Row } from 'react-bootstrap'
 import { AdminLayout } from '../components/AdminMenu.jsx'
 
 export default function Admin() {
@@ -40,9 +41,9 @@ export default function Admin() {
       <h1 className="section-title">Panel principal</h1>
       <p className="text-muted">Bienvenido, {info.sesion.nombre} ({rolNombre})</p>
 
-      <div className="row g-4 mt-2">
-        <div className="col-md-4">
-          <div className="card admin-summary-card p-4 position-relative">
+      <Row className="g-4 mt-2">
+        <Col md={4}>
+          <Card className="admin-summary-card p-4 position-relative">
             <i className="bi bi-handbag fs-2"></i>
             <h3 className="h2 mt-2 mb-0">{info.prods.length}</h3>
             <p className="text-muted mb-0">Productos registrados</p>
@@ -50,8 +51,8 @@ export default function Admin() {
           </Card>
         </Col>
         {info.sesion.rolId === 1 && (
-          <div className="col-md-4">
-            <div className="card admin-summary-card p-4 position-relative">
+          <Col md={4}>
+            <Card className="admin-summary-card p-4 position-relative">
               <i className="bi bi-people fs-2"></i>
               <h3 className="h2 mt-2 mb-0">{info.users.length}</h3>
               <p className="text-muted mb-0">Usuarios registrados</p>

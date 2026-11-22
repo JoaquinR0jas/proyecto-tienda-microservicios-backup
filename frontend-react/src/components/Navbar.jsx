@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
+import { Navbar as NavbarBootstrap, Nav, Container, Badge } from 'react-bootstrap'
 import { getCarrito, getSesion, cerrarSesion } from '../datos.js'
 
 export default function Navbar() {
@@ -81,11 +82,11 @@ export default function Navbar() {
         <Container>
           <NavbarBootstrap.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
             <span className="brand-text">FRESH FITS</span>
-          </Link>
+          </NavbarBootstrap.Brand>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span className="navbar-toggler-icon"></span>
           </button>
-          <div className="collapse navbar-collapse" id="navMenu">
+          <NavbarBootstrap.Collapse className="collapse navbar-collapse" id="navMenu">
             <ul className="navbar-nav mx-auto mb-2 mb-lg-0" id="navMenuPrincipal" ref={menuRef} onMouseLeave={() => moverLinea(null)}>
               <span className="nav-indicator" style={{ left: linea.left, width: linea.width }}></span>
               {enlace("/", "Inicio", ruta === "/")}
@@ -101,9 +102,9 @@ export default function Navbar() {
               <input className="form-control form-control-sm" type="search" placeholder="Buscar" value={texto} onChange={e => setTexto(e.target.value)} />
               <button className="btn btn-outline-dark btn-sm ms-1" type="submit"><i className="bi bi-search"></i></button>
             </form>
-            <ul className="navbar-nav align-items-lg-center gap-lg-3">
-              <li className="nav-item">
-                <Link className="nav-link position-relative" to="/carrito" title="Carrito">
+            <Nav className="navbar-nav align-items-lg-center gap-lg-3">
+              <Nav.Item>
+                <Nav.Link as={Link} className="nav-link position-relative" to="/carrito" title="Carrito">
                   <i className="bi bi-bag fs-5"></i>
                   {cant > 0 && (
                     <Badge pill bg="danger" className="position-absolute top-0 start-100 translate-middle">{cant}</Badge>
@@ -111,14 +112,14 @@ export default function Navbar() {
                 </Nav.Link>
               </Nav.Item>
               {!sesion ? (
-                <li className="nav-item">
+                <Nav.Item>
                   <div className="d-flex align-items-center gap-2 text-nowrap">
                     <Link className="btn btn-outline-dark btn-sm" to="/login">Iniciar sesion</Link>
                     <Link className="btn btn-dark btn-sm" to="/registro">Registrarse</Link>
                   </div>
                 </Nav.Item>
               ) : (
-                <li className="nav-item dropdown">
+                <Nav.Item className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                     <i className="bi bi-person-circle fs-5"></i> {sesion.nombre}
                   </a>
@@ -128,7 +129,7 @@ export default function Navbar() {
                     )}
                     <li><a className="dropdown-item" href="#" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</a></li>
                   </ul>
-                </li>
+                </Nav.Item>
               )}
             </Nav>
           </NavbarBootstrap.Collapse>

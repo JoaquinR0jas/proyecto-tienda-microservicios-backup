@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Col, Container, Row } from 'react-bootstrap'
 import { enviarMensaje } from '../api.js'
 import { correoOk, textoOk, claseCampo } from '../validaciones.js'
 import { aviso } from '../alertas.js'

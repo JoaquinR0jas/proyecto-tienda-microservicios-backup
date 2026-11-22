@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Col, Container, Row } from 'react-bootstrap'
 import { getReferencias } from '../datos.js'
 import { crearUsuario } from '../api.js'
 import { correoOk, passOk, runOk, textoOk, normalizarRun } from '../validaciones.js'
@@ -138,7 +139,7 @@ export default function Registro() {
               <p className="text-center mt-3 mb-0 small text-muted">
                 Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
               </p>
-            </Form>
+            </form>
           </div>
         </Col>
       </Row>

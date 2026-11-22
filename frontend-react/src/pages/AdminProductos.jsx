@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Badge, Button, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { plata, nombreCategoria, precioFinal, enOferta } from '../datos.js'
 import { listarProductos, eliminarProducto } from '../api.js'

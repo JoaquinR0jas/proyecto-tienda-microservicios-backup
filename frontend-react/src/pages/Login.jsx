@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Col, Container, Row } from 'react-bootstrap'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { iniciarSesion } from '../api.js'
 import { correoOk, passOk, claseCampo } from '../validaciones.js'
