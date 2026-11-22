@@ -185,7 +185,7 @@ export default function AdminUsuarioForm() {
           <button type="submit" className="btn btn-accent">Guardar</button>
           <Link to="/admin/usuarios" className="btn btn-outline-accent">Cancelar</Link>
         </div>
-      </form>
+      </Form>
     </AdminLayout>
   )
 }

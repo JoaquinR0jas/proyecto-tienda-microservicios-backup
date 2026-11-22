@@ -9,7 +9,7 @@ export default function Blog() {
   const noticias = articulos.datos || []
 
   return (
-    <section className="container py-5">
+    <Container className="py-5">
       <h1 className="section-title">Blog de Moda</h1>
       <p className="text-muted mb-4">Novedades, tendencias y consejos de estilo para vestir fresh todos los dias.</p>
       <Cargando cargando={articulos.cargando} error={articulos.error} onReintentar={articulos.recargar} />
@@ -20,14 +20,14 @@ export default function Blog() {
               <img src={imgProducto(n)} className="card-img-top" alt={n.titulo} />
               <div className="card-body d-flex flex-column">
                 <p className="small text-muted mb-1">{n.fecha}</p>
-                <h3 className="h6">{n.titulo}</h3>
+                <Card.Title as="h3" className="h6">{n.titulo}</Card.Title>
                 <p className="small text-muted flex-grow-1">{n.resumen}</p>
-                <Link to={"/blog/" + n.slug} className="btn btn-outline-accent btn-sm align-self-start">Ver noticia</Link>
-              </div>
-            </article>
-          </div>
+                <Button as={Link} to={"/blog/" + n.slug} variant="outline-accent" size="sm" className="align-self-start">Ver noticia</Button>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </div>
-    </section>
+      </Row>
+    </Container>
   )
 }

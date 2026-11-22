@@ -209,7 +209,7 @@ export default function AdminProductoForm() {
           <button type="submit" className="btn btn-accent">Guardar</button>
           <Link to="/admin/productos" className="btn btn-outline-accent">Cancelar</Link>
         </div>
-      </form>
+      </Form>
     </AdminLayout>
   )
 }

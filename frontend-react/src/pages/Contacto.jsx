@@ -49,9 +49,9 @@ export default function Contacto() {
   const clase = (campo) => claseCampo(errores, validado, campo)
 
   return (
-    <section className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-7">
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col lg={7}>
           <h1 className="section-title">Contacto</h1>
           <p className="text-muted mb-4">Tienes dudas o comentarios? Escribenos y te responderemos a la brevedad.</p>
           <div className="auth-card p-4 p-md-5">
@@ -74,8 +74,8 @@ export default function Contacto() {
               <button type="submit" className="btn btn-accent w-100">Enviar</button>
             </form>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }

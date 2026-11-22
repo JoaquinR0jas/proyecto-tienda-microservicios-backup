@@ -48,9 +48,9 @@ export default function Login() {
   }
 
   return (
-    <section className="container py-5 min-vh-70 d-flex align-items-center">
-      <div className="row justify-content-center w-100">
-        <div className="col-md-6 col-lg-5">
+    <Container className="py-5 min-vh-70 d-flex align-items-center">
+      <Row className="justify-content-center w-100">
+        <Col md={6} lg={5}>
           <div className="auth-card p-4 p-md-5 text-center">
             <img src="/img/logo.svg" alt="FreshFits" height="70" className="mb-3" />
             <h1 className="h3 mb-4">Iniciar sesion</h1>
@@ -86,8 +86,8 @@ export default function Login() {
               No tienes cuenta? <Link to="/registro">Registrate aqui</Link>
             </p>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }

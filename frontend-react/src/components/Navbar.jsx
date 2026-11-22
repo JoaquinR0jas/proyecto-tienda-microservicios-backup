@@ -77,9 +77,9 @@ export default function Navbar() {
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light ff-navbar sticky-top">
-        <div className="container">
-          <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
+      <NavbarBootstrap expand="lg" className="navbar-light ff-navbar sticky-top">
+        <Container>
+          <NavbarBootstrap.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
             <span className="brand-text">FRESH FITS</span>
           </Link>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -106,17 +106,17 @@ export default function Navbar() {
                 <Link className="nav-link position-relative" to="/carrito" title="Carrito">
                   <i className="bi bi-bag fs-5"></i>
                   {cant > 0 && (
-                    <span className="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">{cant}</span>
+                    <Badge pill bg="danger" className="position-absolute top-0 start-100 translate-middle">{cant}</Badge>
                   )}
-                </Link>
-              </li>
+                </Nav.Link>
+              </Nav.Item>
               {!sesion ? (
                 <li className="nav-item">
                   <div className="d-flex align-items-center gap-2 text-nowrap">
                     <Link className="btn btn-outline-dark btn-sm" to="/login">Iniciar sesion</Link>
                     <Link className="btn btn-dark btn-sm" to="/registro">Registrarse</Link>
                   </div>
-                </li>
+                </Nav.Item>
               ) : (
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -130,10 +130,10 @@ export default function Navbar() {
                   </ul>
                 </li>
               )}
-            </ul>
-          </div>
-        </div>
-      </nav>
+            </Nav>
+          </NavbarBootstrap.Collapse>
+        </Container>
+      </NavbarBootstrap>
     </header>
   )
 }

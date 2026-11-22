@@ -17,17 +17,17 @@ function Tarjeta({ p, onAgregar }) {
             <span className={oferta ? "text-danger" : ""}>{plata(precioFinal(p))}</span>
           </p>
           <p className="small text-muted mb-3">
-            {agotado ? <span className="badge bg-danger">Sin stock</span> : "Stock: " + p.stock}
+            {agotado ? <Badge bg="danger">Sin stock</Badge> : "Stock: " + p.stock}
           </p>
           <div className="mt-auto d-flex gap-2">
-            <Link to={"/producto/" + p.codigo} className="btn btn-outline-accent btn-sm flex-fill">Ver detalle</Link>
-            <button className="btn btn-accent btn-sm flex-fill" disabled={agotado} onClick={() => onAgregar(p.codigo)}>
+            <Button as={Link} to={"/producto/" + p.codigo} variant="outline-accent" size="sm" className="flex-fill">Ver detalle</Button>
+            <Button variant="accent" size="sm" className="flex-fill" disabled={agotado} onClick={() => onAgregar(p.codigo)}>
               <i className="bi bi-bag-plus"></i>
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
-    </div>
+        </Card.Body>
+      </Card>
+    </Col>
   )
 }
 

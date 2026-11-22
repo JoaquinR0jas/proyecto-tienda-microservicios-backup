@@ -75,16 +75,16 @@ export default function Carrito() {
 
   if (items.length === 0) {
     return (
-      <section className="container py-5 text-center">
+      <Container className="py-5 text-center">
         <i className="bi bi-bag-x display-1 text-muted"></i>
         <p className="text-muted mt-3">Tu carrito esta vacio.</p>
-        <Link to="/productos" className="btn btn-accent">Ver catalogo</Link>
-      </section>
+        <Button as={Link} to="/productos" variant="accent">Ver catalogo</Button>
+      </Container>
     )
   }
 
   return (
-    <section className="container py-5">
+    <Container className="py-5">
       <h1 className="section-title">Carrito de compras</h1>
       <div className="row g-4">
         <div className="col-lg-8">
@@ -127,8 +127,8 @@ export default function Carrito() {
             <button className="btn btn-outline-danger w-100 mb-2" onClick={vaciar}>Vaciar carrito</button>
             <Link to="/productos" className="btn btn-link w-100">Seguir comprando</Link>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }

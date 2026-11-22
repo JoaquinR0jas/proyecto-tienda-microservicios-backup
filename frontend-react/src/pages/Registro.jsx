@@ -82,9 +82,9 @@ export default function Registro() {
   }
 
   return (
-    <section className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col lg={8}>
           <div className="auth-card p-4 p-md-5">
             <h1 className="h3 mb-4 text-center">Crear cuenta en FreshFits</h1>
             <form onSubmit={guardar}>
@@ -138,10 +138,10 @@ export default function Registro() {
               <p className="text-center mt-3 mb-0 small text-muted">
                 Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
               </p>
-            </form>
+            </Form>
           </div>
-        </div>
-      </div>
-    </section>
+        </Col>
+      </Row>
+    </Container>
   )
 }

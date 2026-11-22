@@ -1,8 +1,10 @@
+import { Container, Row, Col, Card } from 'react-bootstrap'
+
 export default function Nosotros() {
   return (
-    <section className="container py-5">
-      <div className="row align-items-center g-5">
-        <div className="col-lg-6">
+    <Container className="py-5">
+      <Row className="align-items-center g-5">
+        <Col lg={6}>
           <h1 className="section-title">Quienes somos</h1>
           <p>
             <strong>FreshFits</strong> es una tienda online dedicada a la venta de ropa moderna,
@@ -18,35 +20,35 @@ export default function Nosotros() {
             y un proceso de compra sin complicaciones, todo dentro de una interfaz moderna y
             atractiva con identidad streetwear.
           </p>
-        </div>
-        <div className="col-lg-6 text-center">
+        </Col>
+        <Col lg={6} className="text-center">
           <img src="/img/quiensomos.jpg" alt="Quienes somos - FreshFits" className="img-fluid rounded" />
-        </div>
-      </div>
+        </Col>
+      </Row>
 
-      <div className="row g-4 mt-5">
-        <div className="col-md-4">
-          <div className="card h-100 text-center p-4">
+      <Row className="g-4 mt-5">
+        <Col md={4}>
+          <Card className="h-100 text-center p-4">
             <i className="bi bi-handbag display-5 mb-3"></i>
             <h3 className="h5">Que vendemos</h3>
             <p className="small text-muted mb-0">Ropa moderna para hombre y mujer, de multiples estilos y categorias.</p>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card h-100 text-center p-4">
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="h-100 text-center p-4">
             <i className="bi bi-bullseye display-5 mb-3"></i>
             <h3 className="h5">Nuestro proposito</h3>
             <p className="small text-muted mb-0">Acercar la moda a mas personas con una plataforma simple y confiable.</p>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card h-100 text-center p-4">
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="h-100 text-center p-4">
             <i className="bi bi-people display-5 mb-3"></i>
             <h3 className="h5">Quienes lo desarrollamos</h3>
             <p className="small text-muted mb-0">Un equipo de estudiantes que construyo este proyecto academico con mucha actitud.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   )
 }

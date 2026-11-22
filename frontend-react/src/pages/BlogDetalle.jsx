@@ -40,10 +40,10 @@ export default function BlogDetalle() {
 
   if (!n || n.estado === "BORRADOR") {
     return (
-      <section className="container py-5 text-center">
+      <Container className="py-5 text-center">
         <p className="text-muted">Noticia no encontrada.</p>
-        <Link to="/blog" className="btn btn-accent">Volver al blog</Link>
-      </section>
+        <Button as={Link} to="/blog" variant="accent">Volver al blog</Button>
+      </Container>
     )
   }
 

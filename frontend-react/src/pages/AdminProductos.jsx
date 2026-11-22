@@ -43,7 +43,7 @@ export default function AdminProductos() {
       <input className="form-control mb-3" placeholder="Buscar por nombre o codigo..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
       <Cargando cargando={carga.cargando} error={carga.error} onReintentar={carga.recargar} />
       <div className="table-responsive bg-ff-panel rounded p-2">
-        <table className="table table-striped mb-0">
+        <Table striped className="mb-0">
           <thead>
             <tr>
               <th>Codigo</th>
@@ -63,20 +63,20 @@ export default function AdminProductos() {
                 <td>{nombreCategoria(p.categoriaId)}</td>
                 <td>{plata(precioFinal(p))}</td>
                 <td className={p.stockCritico != null && p.stock <= p.stockCritico ? "stock-critico" : ""}>{p.stock}</td>
-                <td><span className={"badge " + (p.estado === "Activo" ? "bg-success" : "bg-secondary")}>{p.estado}</span></td>
+                <td><Badge bg={p.estado === "Activo" ? "success" : "secondary"}>{p.estado}</Badge></td>
                 <td className="text-nowrap">
                   <Link to={"/admin/productos/ver/" + p.codigo} className="btn btn-sm btn-outline-accent me-1"><i className="bi bi-eye"></i></Link>
                   {!soloVer && (
                     <>
-                      <Link to={"/admin/productos/" + p.codigo} className="btn btn-sm btn-outline-dark me-1"><i className="bi bi-pencil"></i></Link>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => eliminar(p.codigo)}><i className="bi bi-trash"></i></button>
+                      <Button as={Link} to={"/admin/productos/" + p.codigo} variant="outline-dark" size="sm" className="me-1"><i className="bi bi-pencil"></i></Button>
+                      <Button variant="outline-danger" size="sm" onClick={() => eliminar(p.codigo)}><i className="bi bi-trash"></i></Button>
                     </>
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </div>
     </AdminLayout>
   )
