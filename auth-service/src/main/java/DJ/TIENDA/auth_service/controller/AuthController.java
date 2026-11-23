@@ -1,5 +1,7 @@
 package DJ.TIENDA.auth_service.controller;
 
+import DJ.TIENDA.auth_service.dto.LoginRequestDTO;
+import DJ.TIENDA.auth_service.dto.TokenRequestDTO;
 import DJ.TIENDA.auth_service.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,10 +29,10 @@ public class AuthController {
         @ApiResponse(responseCode = "401", description = "Credenciales invalidas o cuenta deshabilitada")
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO credenciales) {
         try {
-            String email = credenciales.get("email");
-            String password = credenciales.get("password");
+            String email = credenciales.getEmail();
+            String password = credenciales.getPassword();
 
             return ResponseEntity.ok(authService.login(email, password));
 
@@ -62,9 +64,9 @@ public class AuthController {
         @ApiResponse(responseCode = "401", description = "El token ya vencio o la cuenta esta deshabilitada")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<?> renovar(@RequestBody Map<String, String> cuerpo) {
+    public ResponseEntity<?> renovar(@RequestBody TokenRequestDTO cuerpo) {
         try {
-            return ResponseEntity.ok(authService.renovarToken(cuerpo.get("token")));
+            return ResponseEntity.ok(authService.renovarToken(cuerpo.getToken()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
