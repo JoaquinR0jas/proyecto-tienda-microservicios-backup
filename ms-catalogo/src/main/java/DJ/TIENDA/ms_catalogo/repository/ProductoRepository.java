@@ -21,4 +21,12 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     boolean existsByCategoriaId(Long categoriaId);   // no se borra una categoria que tiene productos
     List<Producto> findByEstado(Producto.Estado estado);
     List<Producto> findByEstadoAndDescuentoGreaterThan(Producto.Estado estado, Integer descuento);
+
+    // Borra en una sola consulta los productos de versiones antiguas, que quedaron
+    // sin codigo ni imagen. Se hace asi para que no pasen por las validaciones del modelo.
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query(
+        "delete from Producto p where p.codigo is null or trim(p.codigo) = ''")
+    int borrarProductosSinCodigo();
 }

@@ -31,6 +31,10 @@ public class DatosIniciales implements CommandLineRunner {
             categoria("Accesorios", "Gorras y complementos para tu look.");
         }
 
+        // Si quedaron productos de una version antigua (sin codigo ni imagen),
+        // se borran para que se vuelvan a crear los de prueba completos.
+        productoRepository.borrarProductosSinCodigo();
+
         if (productoRepository.count() == 0) {
             producto("FF-001", "Polera Fresh Basica", "Polera de algodon 100%, corte relajado y comodo para todos los dias.", 14990, 0, 15, 3, 1L, "productos/polera-basica.webp", true);
             producto("FF-002", "Poleron Cloud Hoodie", "Poleron oversized con capucha, bolsillo canguro y tela afelpada.", 29990, 20, 20, 5, 2L, "productos/polerones.png", true);
