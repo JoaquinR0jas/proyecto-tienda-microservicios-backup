@@ -87,12 +87,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Verifica la firma y la fecha de expiracion del token
+    // Verifica la firma y la fecha de expiracion del token.
+    // auth-service firma con HS384 porque la clave secreta tiene 56 bytes
+    // (jjwt elige HS384 sola para ese largo). Tiene que ser el mismo algoritmo aca.
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
         SecretKey clave = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         return NimbusReactiveJwtDecoder.withSecretKey(clave)
-                .macAlgorithm(MacAlgorithm.HS256)
+                .macAlgorithm(MacAlgorithm.HS384)
                 .build();
     }
 
