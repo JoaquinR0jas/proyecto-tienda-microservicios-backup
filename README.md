@@ -53,64 +53,80 @@ revisa el rol antes de derivar la peticion al microservicio correspondiente.
 
 ## Como ejecutar el proyecto
 
-### Arranque rapido en Windows (recomendado)
+### Arranque en 3 pasos (Windows)
 
-Para no abrir una terminal por cada servicio, en la raiz del proyecto estan estos dos archivos:
+**1. Instala lo basico:** Java 21 o superior, Node.js 18 o superior y MySQL (XAMPP es lo mas simple: https://www.apachefriends.org).
 
-- **`iniciar-todo.bat`**: compila el backend si falta, levanta el MySQL de XAMPP en el puerto 3307, abre Eureka, los seis microservicios, el gateway y el frontend, y al final abre `http://localhost:5173`.
-- **`detener-todo.bat`**: cierra los microservicios y el frontend. MySQL queda encendido para que el proximo arranque sea mas rapido.
-
-Se puede hacer doble clic sobre `iniciar-todo.bat` o ejecutarlo desde la carpeta:
+**2. Clona el repositorio y entra a la carpeta:**
 
 ```bat
+git clone https://github.com/JoaquinR0jas/proyecto-tienda-microservicios-backup.git
+cd proyecto-tienda-microservicios-backup
+```
+
+**3. Haz doble clic en `iniciar-todo.bat`.**
+
+El script hace todo solo:
+
+- Busca MySQL y lo inicia si esta apagado (XAMPP en `C:\xampp` o `D:\xampp`, o un MySQL instalado en el PATH).
+- Detecta el puerto de MySQL (3307 o 3306) y se lo pasa a los servicios.
+- Compila el backend la primera vez (necesita internet para bajar las dependencias de Maven).
+- Levanta Eureka, los seis microservicios y el gateway, esperando a que cada uno abra su puerto.
+- Instala las dependencias del frontend si faltan y abre la tienda en `http://localhost:5173`.
+
+Para apagar todo se usa **`detener-todo.bat`**. MySQL queda encendido para que el proximo arranque sea mas rapido.
+
+Las bases de datos y las tablas se crean solas (`createDatabaseIfNotExist=true` y `ddl-auto=update`), y los datos de prueba tambien: las cuentas, los productos y los articulos del blog se cargan la primera vez que arranca cada servicio.
+
+### Si MySQL esta en otro puerto o tiene clave
+
+Los servicios leen estas variables de entorno (con valores por defecto entre parentesis):
+
+- `DB_HOST` (`localhost`)
+- `DB_PORT` (`3307`)
+- `DB_USER` (`root`)
+- `DB_PASSWORD` (vacio)
+
+Por ejemplo, si tu MySQL usa el puerto 3306 con clave `1234`, antes de arrancar ejecuta:
+
+```bat
+set DB_PORT=3306
+set DB_PASSWORD=1234
 iniciar-todo.bat
 ```
 
-El script usa el MySQL de XAMPP que esta en `C:\xampp\mysql\bin`. Si lo tienen en otra ruta, cambien las variables `MYSQL_EXE` y `MYSQL_INI` al inicio del archivo. Si prefieren hacerlo a mano, sigan los pasos de abajo.
+### Arranque manual (si algo falla con el script)
 
-### 1. Base de datos
-
-La forma mas simple es levantar solo el contenedor de MySQL:
+**1. Base de datos.** Con XAMPP basta con darle Start a MySQL. El proyecto usa el puerto **3307** para no chocar con otro MySQL; si tu instalacion usa el 3306, define `DB_PORT=3306` como se explico arriba. Tambien se puede usar Docker:
 
 ```bash
 docker compose up -d mysql
 ```
 
-Eso crea el puerto 3307 y las seis bases (`ms_usuarios`, `ms_catalogo`, `ms_pedidos`,
-`ms_pagos`, `ms_contenido` y la de contenido). Si prefieren un MySQL propio, basta con
-cambiar `spring.datasource.url` en cada `application.properties`. Las tablas se crean solas
-porque `spring.jpa.hibernate.ddl-auto=update`.
-
-Los datos de prueba (regiones, comunas, productos, usuarios) se cargan automaticamente la
-primera vez que parte cada microservicio.
-
-### 2. Backend
-
-Primero Eureka, despues el gateway y los servicios. En terminales separadas:
+**2. Backend.** En terminales separadas, primero Eureka y al final el gateway:
 
 ```bash
 ./mvnw spring-boot:run -pl eureka-server
-./mvnw spring-boot:run -pl api-gateway
-./mvnw spring-boot:run -pl auth-service
 ./mvnw spring-boot:run -pl ms-usuarios
 ./mvnw spring-boot:run -pl ms-catalogo
-./mvnw spring-boot:run -pl ms-pedidos
-./mvnw spring-boot:run -pl ms-pagos
 ./mvnw spring-boot:run -pl ms-contenido
+./mvnw spring-boot:run -pl ms-pagos
+./mvnw spring-boot:run -pl ms-pedidos
+./mvnw spring-boot:run -pl auth-service
+./mvnw spring-boot:run -pl api-gateway
 ```
 
 En Windows usar `mvnw.cmd` en vez de `./mvnw`.
 
-### 3. Frontend
+**3. Frontend.**
 
-```bash
+```bat
 cd frontend-react
 npm install
 npm run dev
 ```
 
-La pagina queda en <http://localhost:5173>. Si el backend corre en otra direccion, se puede
-cambiar con la variable `VITE_API_URL` (por defecto es `http://localhost:8080`).
+La pagina queda en <http://localhost:5173>. Si el backend corre en otra direccion, se puede cambiar con la variable `VITE_API_URL` (por defecto es `http://localhost:8080`).
 
 ## Usuarios de prueba
 

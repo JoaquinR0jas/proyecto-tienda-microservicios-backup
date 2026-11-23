@@ -47,7 +47,9 @@ public class SecurityConfig {
 
                 // Login, refresh y validacion son publicos
                 .pathMatchers("/api/v1/auth/**").permitAll()
-                .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                // Documentacion: la propia y la de cada servicio (Swagger agregado)
+                .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+                        "/api/v1/*/v3/api-docs/**", "/webjars/**").permitAll()
 
                 // La tienda se puede ver sin iniciar sesion
                 .pathMatchers(HttpMethod.GET, "/api/v1/catalogo/**").permitAll()

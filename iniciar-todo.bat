@@ -1,28 +1,24 @@
 @echo off
 chcp 65001 >nul
-setlocal
+setlocal EnableDelayedExpansion
 title FreshFits - iniciar todo
 cd /d "%~dp0"
 set "ROOT=%~dp0"
-set "MYSQL_EXE=C:\xampp\mysql\bin\mysqld.exe"
-set "MYSQL_INI=C:\xampp\mysql\bin\my.ini"
-set "MYSQL_ADMIN=C:\xampp\mysql\bin\mysqladmin.exe"
 
 echo ==========================================
 echo   FreshFits - levantando todo el proyecto
 echo ==========================================
 echo.
 
-rem ---------- 1. Comprobar que los .jar esten compilados ----------
-if not exist "%ROOT%eureka-server\target\eureka-server-1.0.0.jar" goto compilar
-goto mysql
+rem ---------- 1. Compilar si faltan los .jar ----------
+if exist "%ROOT%eureka-server\target\eureka-server-1.0.0.jar" goto mysql
+if exist "%ROOT%api-gateway\target\api-gateway-1.0.0.jar" goto mysql
 
-:compilar
-echo [1/3] Compilando el backend (solo la primera vez, puede tardar)...
+echo [1/4] Compilando el backend (solo la primera vez, puede tardar unos minutos)...
 call mvnw.cmd -q -DskipTests package
 if errorlevel 1 (
     echo.
-    echo ERROR: no se pudo compilar el backend.
+    echo ERROR: no se pudo compilar. Revisa que Java 21 o superior este instalado.
     pause
     exit /b 1
 )
@@ -30,103 +26,162 @@ echo Backend compilado.
 echo.
 
 :mysql
-echo [2/3] Revisando MySQL...
-netstat -ano | findstr ":3307" | findstr "LISTENING" >nul
-if not errorlevel 1 (
-    echo MySQL ya esta corriendo en el puerto 3307.
-    goto arrancar
+set "DB_PORT="
+echo [2/4] Buscando MySQL...
+call :puerto_escuchando 3307
+if not errorlevel 1 set "DB_PORT=3307"
+if not defined DB_PORT (
+    call :puerto_escuchando 3306
+    if not errorlevel 1 set "DB_PORT=3306"
+)
+if defined DB_PORT (
+    echo MySQL ya esta corriendo en el puerto !DB_PORT!.
+    goto datos
 )
 
-if not exist "%MYSQL_EXE%" (
-    echo ERROR: no se encontro XAMPP en C:\xampp\mysql\bin.
-    echo Abre XAMPP y dale Start a MySQL, o corrige la ruta en este archivo.
+rem Buscar el ejecutable de MySQL en las ubicaciones tipicas
+set "MYSQL_EXE="
+set "MYSQL_INI="
+if exist "C:\xampp\mysql\bin\mysqld.exe" (
+    set "MYSQL_EXE=C:\xampp\mysql\bin\mysqld.exe"
+    set "MYSQL_INI=C:\xampp\mysql\bin\my.ini"
+)
+if not defined MYSQL_EXE if exist "D:\xampp\mysql\bin\mysqld.exe" (
+    set "MYSQL_EXE=D:\xampp\mysql\bin\mysqld.exe"
+    set "MYSQL_INI=D:\xampp\mysql\bin\my.ini"
+)
+if not defined MYSQL_EXE for /f "delims=" %%M in ('where mysqld 2^>nul') do if not defined MYSQL_EXE set "MYSQL_EXE=%%M"
+
+if not defined MYSQL_EXE (
+    echo.
+    echo ERROR: no encontre MySQL.
+    echo Instala XAMPP ^(https://www.apachefriends.org^) o MySQL, abre el panel
+    echo y dale Start a MySQL. Despues vuelve a ejecutar este archivo.
     pause
     exit /b 1
 )
 
-echo Iniciando MySQL de XAMPP...
-start "MySQL XAMPP" /min "%MYSQL_EXE%" --defaults-file="%MYSQL_INI%" --console
+echo Iniciando MySQL...
+if defined MYSQL_INI if exist "!MYSQL_INI!" (
+    start "MySQL" /min "!MYSQL_EXE!" --defaults-file="!MYSQL_INI!" --console
+) else (
+    start "MySQL" /min "!MYSQL_EXE!" --console
+)
+
+rem Esperar hasta 90 segundos a que abra el puerto (3307 o 3306)
 set /a INTENTOS=0
 :esperar_mysql
-"%MYSQL_ADMIN%" -u root -h 127.0.0.1 -P 3307 ping >nul 2>&1
-if not errorlevel 1 goto mysql_listo
+if defined DB_PORT goto datos
+call :puerto_escuchando 3307
+if not errorlevel 1 set "DB_PORT=3307"
+call :puerto_escuchando 3306
+if not errorlevel 1 set "DB_PORT=3306"
+if defined DB_PORT goto datos
 set /a INTENTOS+=1
-if %INTENTOS% GEQ 40 goto mysql_error
+if !INTENTOS! GEQ 90 (
+    echo.
+    echo ERROR: MySQL no respondio. Revisalo desde el panel de XAMPP.
+    pause
+    exit /b 1
+)
 ping -n 2 127.0.0.1 >nul
 goto esperar_mysql
 
-:mysql_error
+:datos
+echo Base de datos en el puerto !DB_PORT!.
 echo.
-echo ERROR: MySQL no respondio en el puerto 3307.
-echo Revisalo desde el panel de XAMPP.
+
+rem ---------- 3. Arrancar microservicios ----------
+echo [3/4] Arrancando microservicios...
+
+call :arrancar "Eureka 8761" eureka-server 8761
+call :esperar_puerto 8761
+
+call :arrancar "Usuarios 8090" ms-usuarios 8090
+call :arrancar "Catalogo 8081" ms-catalogo 8081
+call :arrancar "Contenido 8083" ms-contenido 8083
+call :arrancar "Pagos 8086" ms-pagos 8086
+call :arrancar "Pedidos 8087" ms-pedidos 8087
+call :arrancar "Auth 8091" auth-service 8091
+
+rem El gateway va al final: necesita que los servicios esten registrados
+call :arrancar "Gateway 8080" api-gateway 8080
+call :esperar_puerto 8080
+
+echo.
+echo Servicios arriba. Esperando 15 segundos a que Eureka los registre...
+ping -n 16 127.0.0.1 >nul
+
+rem ---------- 4. Frontend ----------
+echo [4/4] Abriendo el frontend...
+where npm >nul 2>&1
+if errorlevel 1 goto sin_node
+
+if exist "%ROOT%frontend-react\node_modules" goto front_listo
+echo Instalando dependencias del frontend, solo la primera vez...
+start "Frontend 5173" /d "%ROOT%frontend-react" cmd /k npm install ^&^& npm run dev
+goto front_arrancado
+
+:front_listo
+start "Frontend 5173" /d "%ROOT%frontend-react" cmd /k npm run dev
+
+:front_arrancado
+call :esperar_puerto 5173
+start "" http://localhost:5173
+goto resumen
+
+:sin_node
+echo.
+echo AVISO: no encontre Node.js. Instalalo desde https://nodejs.org
+echo El backend quedo funcionando, pero la tienda no se puede abrir.
 pause
 exit /b 1
 
-:mysql_listo
-echo MySQL listo.
-echo.
-
-:arrancar
-echo [3/3] Arrancando microservicios...
-echo.
-
-echo  - Eureka (8761)
-start "Eureka 8761" cmd /k "cd /d "%ROOT%" && java -jar eureka-server\target\eureka-server-1.0.0.jar"
-echo    esperando a que Eureka este listo...
-ping -n 19 127.0.0.1 >nul
-
-echo  - Usuarios (8090)
-start "Usuarios 8090" cmd /k "cd /d "%ROOT%" && java -jar ms-usuarios\target\ms-usuarios-1.0.0.jar"
-ping -n 3 127.0.0.1 >nul
-
-echo  - Catalogo (8081)
-start "Catalogo 8081" cmd /k "cd /d "%ROOT%" && java -jar ms-catalogo\target\ms-catalogo-1.0.0.jar"
-ping -n 3 127.0.0.1 >nul
-
-echo  - Contenido (8083)
-start "Contenido 8083" cmd /k "cd /d "%ROOT%" && java -jar ms-contenido\target\ms-contenido-1.0.0.jar"
-ping -n 3 127.0.0.1 >nul
-
-echo  - Pagos (8086)
-start "Pagos 8086" cmd /k "cd /d "%ROOT%" && java -jar ms-pagos\target\ms-pagos-1.0.0.jar"
-ping -n 3 127.0.0.1 >nul
-
-echo  - Pedidos (8087)
-start "Pedidos 8087" cmd /k "cd /d "%ROOT%" && java -jar ms-pedidos\target\ms-pedidos-1.0.0.jar"
-ping -n 3 127.0.0.1 >nul
-
-echo  - Auth (8091)
-start "Auth 8091" cmd /k "cd /d "%ROOT%" && java -jar auth-service\target\auth-service-1.0.0.jar"
-ping -n 5 127.0.0.1 >nul
-
-echo  - Gateway (8080)
-start "Gateway 8080" cmd /k "cd /d "%ROOT%" && java -jar api-gateway\target\api-gateway-1.0.0.jar"
-ping -n 9 127.0.0.1 >nul
-
-echo.
-echo Abriendo el frontend...
-if not exist "%ROOT%frontend-react\node_modules" (
-    start "Frontend 5173" cmd /k "cd /d "%ROOT%frontend-react" && npm install && npm run dev"
-) else (
-    start "Frontend 5173" cmd /k "cd /d "%ROOT%frontend-react" && npm run dev"
-)
-
-ping -n 7 127.0.0.1 >nul
-start "" http://localhost:5173
-
+:resumen
 echo.
 echo ==========================================
-echo   Listo. Se abrieron las ventanas:
-echo   Eureka   http://localhost:8761
-echo   Swagger  http://localhost:8080/swagger-ui.html
+echo   Listo. Ventanas abiertas:
 echo   Tienda   http://localhost:5173
+echo   Swagger  http://localhost:8080/swagger-ui.html
+echo   Eureka   http://localhost:8761
 echo.
 echo   Usuarios de prueba:
 echo   admin@gmail.com     / admin123
 echo   vendedor@gmail.com  / vend1234
 echo   camila@gmail.com    / cliente1
 echo.
-echo   Para apagar todo usa detener-todo.bat
+echo   Para apagar todo: detener-todo.bat
 echo ==========================================
 echo.
 pause
+exit /b 0
+
+rem ---------- subrutinas ----------
+
+:arrancar
+rem %1 = titulo de la ventana, %2 = carpeta del modulo, %3 = puerto
+call :puerto_escuchando %3
+if not errorlevel 1 (
+    echo  - %2 ya estaba corriendo en el puerto %3
+    exit /b 0
+)
+echo  - %2 ^(puerto %3^)
+start "%~1" /d "%ROOT%%2" cmd /k java -jar target\%2-1.0.0.jar
+exit /b 0
+
+:puerto_escuchando
+netstat -ano | findstr ":%~1 " | findstr "LISTENING" >nul 2>&1
+exit /b %errorlevel%
+
+:esperar_puerto
+set /a ESPERA=0
+:esperar_puerto_bucle
+call :puerto_escuchando %~1
+if not errorlevel 1 exit /b 0
+set /a ESPERA+=1
+if !ESPERA! GEQ 90 (
+    echo    AVISO: el puerto %~1 no respondio en 90 segundos.
+    exit /b 1
+)
+ping -n 2 127.0.0.1 >nul
+goto esperar_puerto_bucle
