@@ -46,12 +46,32 @@ public class DatosIniciales implements CommandLineRunner {
             comuna(biobio, "Talcahuano");
         }
 
-        if (usuarioRepository.count() == 0) {
-            usuario("123456785", "Admin", "FreshFits", "admin@gmail.com", "admin123", "1990-01-01", 1L, 1L, "Av. Principal 123", Usuario.Rol.ADMIN);
-            usuario("987654325", "Vendedor", "FreshFits", "vendedor@gmail.com", "vend1234", "1992-05-14", 1L, 2L, "Calle Venta 456", Usuario.Rol.VENDEDOR);
-            usuario("112223339", "Camila", "Soto Perez", "camila@gmail.com", "cliente1", "1998-03-22", 2L, 4L, "Los Aromos 789", Usuario.Rol.CLIENTE);
-            usuario("201113334", "Diego", "Fernandez Rojas", "diego@duoc.cl", "diego123", "2001-11-09", 3L, 6L, "Las Rosas 321", Usuario.Rol.CLIENTE);
+        // Si quedaron usuarios de pruebas antiguas con la clave en texto plano,
+        // la encriptamos ahora para que puedan iniciar sesion igual.
+        // Las filas incompletas (sin run, apellidos o direccion) se borran primero,
+        // porque no cumplen las validaciones del modelo y no dejan arrancar el servicio.
+        usuarioRepository.borrarUsuariosIncompletos();
+        for (Usuario u : usuarioRepository.findAll()) {
+            if (u.getPassword() != null && !u.getPassword().startsWith("$2")) {
+                u.setPassword(passwordEncoder.encode(u.getPassword()));
+                usuarioRepository.save(u);
+            }
         }
+
+        // Las cuentas de prueba se crean solo si todavia no existen.
+        // Asi no se duplican si la base ya tenia datos de una corrida anterior.
+        crearSiFalta("123456785", "Admin", "FreshFits", "admin@gmail.com", "admin123", "1990-01-01", 1L, 1L, "Av. Principal 123", Usuario.Rol.ADMIN);
+        crearSiFalta("987654325", "Vendedor", "FreshFits", "vendedor@gmail.com", "vend1234", "1992-05-14", 1L, 2L, "Calle Venta 456", Usuario.Rol.VENDEDOR);
+        crearSiFalta("112223339", "Camila", "Soto Perez", "camila@gmail.com", "cliente1", "1998-03-22", 2L, 4L, "Los Aromos 789", Usuario.Rol.CLIENTE);
+        crearSiFalta("201113334", "Diego", "Fernandez Rojas", "diego@duoc.cl", "diego123", "2001-11-09", 3L, 6L, "Las Rosas 321", Usuario.Rol.CLIENTE);
+    }
+
+    private void crearSiFalta(String run, String nombre, String apellidos, String email, String password,
+                              String fechaNacimiento, Long regionId, Long comunaId, String direccion, Usuario.Rol rol) {
+        if (usuarioRepository.findByEmail(email).isPresent()) {
+            return;
+        }
+        usuario(run, nombre, apellidos, email, password, fechaNacimiento, regionId, comunaId, direccion, rol);
     }
 
     private Region region(String nombre) {

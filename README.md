@@ -53,6 +53,21 @@ revisa el rol antes de derivar la peticion al microservicio correspondiente.
 
 ## Como ejecutar el proyecto
 
+### Arranque rapido en Windows (recomendado)
+
+Para no abrir una terminal por cada servicio, en la raiz del proyecto estan estos dos archivos:
+
+- **`iniciar-todo.bat`**: compila el backend si falta, levanta el MySQL de XAMPP en el puerto 3307, abre Eureka, los seis microservicios, el gateway y el frontend, y al final abre `http://localhost:5173`.
+- **`detener-todo.bat`**: cierra los microservicios y el frontend. MySQL queda encendido para que el proximo arranque sea mas rapido.
+
+Se puede hacer doble clic sobre `iniciar-todo.bat` o ejecutarlo desde la carpeta:
+
+```bat
+iniciar-todo.bat
+```
+
+El script usa el MySQL de XAMPP que esta en `C:\xampp\mysql\bin`. Si lo tienen en otra ruta, cambien las variables `MYSQL_EXE` y `MYSQL_INI` al inicio del archivo. Si prefieren hacerlo a mano, sigan los pasos de abajo.
+
 ### 1. Base de datos
 
 La forma mas simple es levantar solo el contenedor de MySQL:
