@@ -26,7 +26,6 @@ FULLSTACK/
 # ojo: los arrancadores SI se suben, por eso se exceptuan aqui:
 !iniciar-todo.bat
 !detener-todo.bat
-!frontend/iniciar.bat
 
 # Python (carpetas de cache que solo ensucian el repo)
 __pycache__/
