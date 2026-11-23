@@ -1,5 +1,7 @@
-// Backend falso para las pruebas: reemplaza fetch con un spy de Jasmine que responde
-// como lo haria el API Gateway, asi las pruebas no necesitan los microservicios encendidos.
+// Backend falso para las pruebas: reemplaza el request de axios con un spy de Jasmin
+// que responde como lo haria el API Gateway, asi las pruebas no necesitan
+// los microservicios encendidos.
+import { http } from '../api.js'
 
 const p = (id, codigo, nombre, precio, descuento, stock, categoriaId, imagen, destacado) => ({
   id, codigo, nombre, descripcion: "", precio, descuento, stock, stockCritico: 2,
@@ -23,15 +25,19 @@ export const CATEGORIAS = [
   { id: 4, nombre: "Camisas" }, { id: 5, nombre: "Zapatillas" }, { id: 6, nombre: "Accesorios" }
 ]
 
+// axios resuelve las respuestas buenas y rechaza las malas, igual que el backend real
 function respuesta(datos, status = 200) {
-  return Promise.resolve(new Response(datos === undefined ? "" : JSON.stringify(datos), { status }))
+  if (status >= 200 && status < 300) {
+    return Promise.resolve({ data: datos === undefined ? "" : datos, status })
+  }
+  return Promise.reject({ response: { data: datos, status } })
 }
 
 // Instala el backend falso. Llamar en el beforeEach de cada prueba.
 export function mockApi() {
-  return spyOn(window, "fetch").and.callFake((url, opciones = {}) => {
-    const ruta = new URL(url).pathname
-    const metodo = opciones.method || "GET"
+  return spyOn(http, "request").and.callFake((config) => {
+    const ruta = new URL(config.url, "http://localhost").pathname
+    const metodo = (config.method || "GET").toUpperCase()
 
     if (ruta === "/api/v1/catalogo/productos") return respuesta(PRODUCTOS)
     if (ruta === "/api/v1/catalogo/productos/ofertas") return respuesta(PRODUCTOS.filter(x => x.descuento > 0))
@@ -39,7 +45,7 @@ export function mockApi() {
     if (ruta === "/api/v1/usuarios/regiones" || ruta === "/api/v1/usuarios/comunas") return respuesta([])
     if (ruta === "/api/v1/contenido/articulos") return respuesta([])
     if (ruta === "/api/v1/contenido/mensajes" && metodo === "POST") {
-      return respuesta({ id: 1, ...JSON.parse(opciones.body), fecha: new Date().toISOString() }, 201)
+      return respuesta({ id: 1, ...JSON.parse(config.data), fecha: new Date().toISOString() }, 201)
     }
     return respuesta("No encontrado", 404)
   })
@@ -47,7 +53,8 @@ export function mockApi() {
 
 // Cuantas veces se llamo a una ruta del backend con un metodo (ej: POST /api/v1/contenido/mensajes)
 export function llamadasA(spy, ruta, metodo = "GET") {
-  return spy.calls.allArgs().filter(([url, op = {}]) =>
-    new URL(url).pathname === ruta && (op.method || "GET") === metodo
+  return spy.calls.allArgs().filter(([config]) =>
+    new URL(config.url, "http://localhost").pathname === ruta &&
+    (config.method || "GET").toUpperCase() === metodo.toUpperCase()
   ).length
 }

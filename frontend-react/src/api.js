@@ -1,6 +1,9 @@
 // Conexion con el backend (microservicios) a traves del API Gateway.
+// Usamos axios para no repetir la configuracion en cada llamada: la URL base,
+// el token y el manejo del 401 quedan en un solo lugar.
 // Cada funcion traduce los datos del backend al formato que ya usaban las paginas,
 // asi las vistas no tienen que saber como se llaman los campos en Java.
+import axios from 'axios'
 import { API_URL } from './config.js'
 import { getSesion, guardarSesion, actualizarToken, cerrarSesion, setReferencias } from './datos.js'
 
@@ -11,73 +14,81 @@ export class ApiError extends Error {
   }
 }
 
+// Instancia de axios apuntando al gateway. Se exporta para que las pruebas
+// puedan reemplazar sus respuestas por un backend falso.
+export const http = axios.create({
+  baseURL: API_URL,
+  headers: { "Content-Type": "application/json" }
+})
+
+// Antes de cada peticion se agrega el token de la sesion guardada
+http.interceptors.request.use((config) => {
+  const sesion = getSesion()
+  if (sesion && sesion.token) {
+    config.headers.Authorization = "Bearer " + sesion.token
+  }
+  return config
+})
+
+// Si el backend responde 401 (token vencido), se pide uno nuevo y se repite
+// la peticion una sola vez. Si no se puede renovar, se cierra la sesion.
+http.interceptors.response.use(
+  (respuesta) => respuesta,
+  async (error) => {
+    const original = error.config
+    const status = error.response ? error.response.status : 0
+    const esRutaDeAuth = original && original.url && original.url.startsWith("/api/v1/auth/")
+
+    if (status === 401 && original && !original._reintentado && !esRutaDeAuth) {
+      const habiaSesion = !!getSesion()
+      if (habiaSesion && (await renovarToken())) {
+        original._reintentado = true
+        return http(original)
+      }
+      if (habiaSesion) {
+        cerrarSesion()
+        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+          window.location.href = "/login?expirada=1"
+        }
+        throw new ApiError(401, "Tu sesion expiro. Vuelve a iniciar sesion.")
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 // Hace la peticion y devuelve el JSON (o el texto) de la respuesta.
 // Si el backend responde con error, lanza un ApiError con su mensaje.
-// Si el token vencio, lo renueva una vez y repite la peticion.
-export async function pedir(ruta, { metodo = "GET", cuerpo } = {}, reintentar = true) {
-  const headers = {}
-  if (cuerpo !== undefined) headers["Content-Type"] = "application/json"
-  const sesion = getSesion()
-  if (sesion && sesion.token) headers.Authorization = "Bearer " + sesion.token
-
-  let respuesta
+export async function pedir(ruta, { metodo = "GET", cuerpo } = {}) {
   try {
-    respuesta = await fetch(API_URL + ruta, {
-      method: metodo,
-      headers,
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
-    })
-  } catch {
-    throw new ApiError(0, "No se pudo conectar con el servidor. Revisa que el backend este encendido.")
-  }
-
-  const texto = await respuesta.text()
-  let datos = texto
-  try {
-    datos = texto ? JSON.parse(texto) : null
-  } catch {
-    // la respuesta era texto plano, por ejemplo "Producto eliminado correctamente."
-  }
-
-  // 401 = el token no sirve o vencio. Se intenta renovar y se repite la llamada.
-  if (respuesta.status === 401 && reintentar && !ruta.startsWith("/api/v1/auth/")) {
-    const habiaSesion = !!sesion
-    if (habiaSesion && (await renovarToken())) {
-      return pedir(ruta, { metodo, cuerpo }, false)
+    const respuesta = await http.request({ url: ruta, method: metodo, data: cuerpo })
+    return respuesta.data
+  } catch (error) {
+    // El error puede venir del interceptor (sesion vencida) o de axios
+    if (error instanceof ApiError) throw error
+    if (!error.response) {
+      throw new ApiError(0, "No se pudo conectar con el servidor. Revisa que el backend este encendido.")
     }
-    if (habiaSesion) {
-      cerrarSesion()
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login?expirada=1"
-      }
-      throw new ApiError(401, "Tu sesion expiro. Vuelve a iniciar sesion.")
-    }
-  }
 
-  if (!respuesta.ok) {
+    const status = error.response.status
+    const datos = error.response.data
     let mensaje = typeof datos === "string" && datos ? datos : null
-    if (!mensaje && respuesta.status === 400) mensaje = "Hay datos invalidos o incompletos."
-    if (!mensaje && respuesta.status === 403) mensaje = "No tienes permisos para hacer esta accion."
-    if (!mensaje) mensaje = "El servidor respondio con un error (" + respuesta.status + ")."
-    throw new ApiError(respuesta.status, mensaje)
+    if (!mensaje && status === 400) mensaje = "Hay datos invalidos o incompletos."
+    if (!mensaje && status === 403) mensaje = "No tienes permisos para hacer esta accion."
+    if (!mensaje) mensaje = "El servidor respondio con un error (" + status + ")."
+    throw new ApiError(status, mensaje)
   }
-  return datos
 }
 
-// Pide un token nuevo al auth-service sin tener que volver a escribir la clave
+// Pide un token nuevo al auth-service sin tener que volver a escribir la clave.
+// Se usa axios directo para no entrar de nuevo al interceptor del 401.
 export async function renovarToken() {
   const sesion = getSesion()
   if (!sesion || !sesion.token) return false
   try {
-    const respuesta = await fetch(API_URL + "/api/v1/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: sesion.token })
-    })
-    if (!respuesta.ok) return false
-    const datos = await respuesta.json()
-    if (!datos.token) return false
-    actualizarToken(datos.token)
+    const respuesta = await axios.post(API_URL + "/api/v1/auth/refresh", { token: sesion.token })
+    if (!respuesta.data || !respuesta.data.token) return false
+    actualizarToken(respuesta.data.token)
     return true
   } catch {
     return false

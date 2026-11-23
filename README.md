@@ -37,7 +37,7 @@ revisa el rol antes de derivar la peticion al microservicio correspondiente.
 
 | Parte | Tecnologias |
 |---|---|
-| Frontend | React 18, Vite, React Router, Bootstrap 5, SweetAlert2, fetch |
+| Frontend | React 18, Vite, React Router, Bootstrap 5, SweetAlert2, axios |
 | Backend | Java 21, Spring Boot 3.5, Spring Cloud Gateway, Eureka, OpenFeign |
 | Seguridad | Spring Security, JWT (jjwt), BCrypt |
 | Base de datos | MySQL 8 (JPA / Hibernate) |
