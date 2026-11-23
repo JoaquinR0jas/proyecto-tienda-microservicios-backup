@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Offcanvas } from 'react-bootstrap'
 import { getSesion, cerrarSesion } from '../datos.js'
 import { aviso } from '../alertas.js'
 
@@ -56,14 +57,15 @@ export function AdminMenu() {
           <i className={"bi me-2 " + s.icono}></i>{s.texto}
         </NavLink>
       ))}
-      <hr />
-      <Link to="/" className="btn btn-dark btn-sm mb-2"><i className="bi bi-shop me-1"></i> Tienda</Link>
-      <button className="btn btn-danger btn-sm" onClick={salir}><i className="bi bi-box-arrow-right me-1"></i> Cerrar sesion</button>
     </div>
   )
 }
 
 export function AdminLayout({ children }) {
+  // menu lateral en celular: Offcanvas de react-bootstrap controlado con estado
+  const [menuAbierto, setMenuAbierto] = useState(false)
+  const cerrarMenu = () => setMenuAbierto(false)
+
   return (
     <div className="container-fluid">
       <div className="row">
@@ -74,22 +76,22 @@ export function AdminLayout({ children }) {
         </div>
         <div className="col-lg-9 col-xl-10 p-3 p-md-4 admin-contenido">
           <div className="d-lg-none mb-3">
-            <button className="btn btn-outline-dark btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminOffcanvas">
+            <button className="btn btn-outline-dark btn-sm" type="button" onClick={() => setMenuAbierto(true)}>
               <i className="bi bi-list"></i> Menu administracion
             </button>
           </div>
           {children}
         </div>
       </div>
-      <div className="offcanvas offcanvas-start" tabIndex="-1" id="adminOffcanvas">
-        <div className="offcanvas-header">
-          <h5 className="offcanvas-title">Administracion</h5>
-          <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div className="offcanvas-body" data-bs-dismiss="offcanvas">
+      <Offcanvas show={menuAbierto} onHide={cerrarMenu} placement="start">
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Administracion</Offcanvas.Title>
+        </Offcanvas.Header>
+        {/* al elegir una opcion del menu se cierra el panel */}
+        <Offcanvas.Body onClick={cerrarMenu}>
           <AdminMenu />
-        </div>
-      </div>
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   )
 }

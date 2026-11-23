@@ -99,4 +99,35 @@ class PedidoControllerTest {
         mockMvc.perform(get("/api/v1/pedidos/99"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void obtenerPorId_whenVendor_returns200() throws Exception {
+        PedidoResponseDTO pedido = new PedidoResponseDTO();
+        pedido.setPedidoId(1L);
+        pedido.setUsuarioId(7L);
+
+        when(pedidoService.obtenerPorId(1L)).thenReturn(Optional.of(pedido));
+
+        // El vendedor puede abrir el detalle de cualquier pedido
+        mockMvc.perform(get("/api/v1/pedidos/1")
+                        .header("X-Usuario-Id", 9L)
+                        .header("X-Usuario-Rol", "VENDEDOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pedidoId").value(1));
+    }
+
+    @Test
+    void obtenerPorId_whenOtherClient_returns403() throws Exception {
+        PedidoResponseDTO pedido = new PedidoResponseDTO();
+        pedido.setPedidoId(1L);
+        pedido.setUsuarioId(7L);
+
+        when(pedidoService.obtenerPorId(1L)).thenReturn(Optional.of(pedido));
+
+        // Un cliente no puede ver el pedido de otra persona
+        mockMvc.perform(get("/api/v1/pedidos/1")
+                        .header("X-Usuario-Id", 8L)
+                        .header("X-Usuario-Rol", "CLIENTE"))
+                .andExpect(status().isForbidden());
+    }
 }

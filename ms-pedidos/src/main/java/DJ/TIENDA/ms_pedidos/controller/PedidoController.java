@@ -73,8 +73,10 @@ public class PedidoController {
                                           @RequestHeader(value = "X-Usuario-Rol", required = false) String rolSesion) {
         return pedidoService.obtenerPorId(pedidoId)
                 .<ResponseEntity<?>>map(pedido -> {
-                    // Si no es admin, el pedido tiene que ser suyo
-                    if (!"ADMIN".equals(rolSesion)
+                    // Admin y vendedor ven el detalle de cualquier pedido;
+                    // el cliente solo el de sus propias compras
+                    boolean veTodas = "ADMIN".equals(rolSesion) || "VENDEDOR".equals(rolSesion);
+                    if (!veTodas
                             && (idSesion == null || !idSesion.equals(pedido.getUsuarioId()))) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                                 .body("No tienes permiso para ver este pedido");

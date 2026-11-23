@@ -10,7 +10,7 @@ export default function Registro() {
   const nav = useNavigate()
   const [form, setForm] = useState({
     run: "", nombre: "", apellidos: "", correo: "",
-    pass: "", fecha: "", region: "", comuna: "", direccion: ""
+    pass: "", pass2: "", fecha: "", region: "", comuna: "", direccion: ""
   })
   const [regiones, setRegiones] = useState([])
   const [comunas, setComunas] = useState([])
@@ -52,6 +52,10 @@ export default function Registro() {
     }
     if (!passOk(form.pass)) {
       setError("La contrasena debe tener entre 4 y 10 caracteres")
+      return
+    }
+    if (form.pass !== form.pass2) {
+      setError("Las contrasenas no coinciden")
       return
     }
     if (!form.region || !form.comuna || !textoOk(form.direccion, 300)) {
@@ -107,13 +111,17 @@ export default function Registro() {
                   <label className="form-label">Apellidos</label>
                   <input className="form-control" name="apellidos" maxLength="100" value={form.apellidos} onChange={cambiar} />
                 </div>
-                <div className="col-md-6">
+                <div className="col-12">
                   <label className="form-label">Correo</label>
                   <input className="form-control" name="correo" maxLength="100" placeholder="usuario@gmail.com" value={form.correo} onChange={cambiar} />
                 </div>
                 <div className="col-md-6">
                   <label className="form-label">Contrasena</label>
                   <input className="form-control" name="pass" type="password" maxLength="10" value={form.pass} onChange={cambiar} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">Repetir contrasena</label>
+                  <input className="form-control" name="pass2" type="password" maxLength="10" value={form.pass2} onChange={cambiar} />
                 </div>
                 <div className="col-md-6">
                   <label className="form-label">Region</label>
