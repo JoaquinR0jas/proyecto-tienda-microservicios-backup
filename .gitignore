@@ -23,8 +23,10 @@ FULLSTACK/
 *.mp4
 *.docx
 *.doc
-# ojo: frontend/iniciar.bat SI se sube (es el arrancador del frontend),
-# por eso se fuerza con "git add -f" cuando se actualiza.
+# ojo: los arrancadores SI se suben, por eso se exceptuan aqui:
+!iniciar-todo.bat
+!detener-todo.bat
+!frontend/iniciar.bat
 
 # Python (carpetas de cache que solo ensucian el repo)
 __pycache__/
