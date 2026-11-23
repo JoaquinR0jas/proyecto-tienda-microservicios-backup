@@ -22,7 +22,7 @@ export default function Admin() {
     Promise.all([
       listarProductos(),
       s.rolId === 1 ? listarUsuarios() : Promise.resolve([]),
-      listarMensajes()
+      s.rolId === 1 ? listarMensajes() : Promise.resolve([])
     ])
       .then(([prods, users, contactos]) => setInfo({ prods, users, contactos, sesion: s }))
       .catch(e => {
@@ -60,13 +60,15 @@ export default function Admin() {
             </Card>
           </Col>
         )}
-        <Col md={4}>
-          <Card className="admin-summary-card p-4">
-            <i className="bi bi-envelope fs-2"></i>
-            <h3 className="h2 mt-2 mb-0">{info.contactos.length}</h3>
-            <p className="text-muted mb-0">Mensajes de contacto</p>
-          </Card>
-        </Col>
+        {info.sesion.rolId === 1 && (
+          <Col md={4}>
+            <Card className="admin-summary-card p-4">
+              <i className="bi bi-envelope fs-2"></i>
+              <h3 className="h2 mt-2 mb-0">{info.contactos.length}</h3>
+              <p className="text-muted mb-0">Mensajes de contacto</p>
+            </Card>
+          </Col>
+        )}
       </Row>
 
       <Row className="g-4 mt-1">

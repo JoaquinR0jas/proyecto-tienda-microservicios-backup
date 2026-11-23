@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -21,7 +22,7 @@ public class JwtUtil {
 
     // Convierte el String secret en una clave criptografica valida para HS256
     private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     // Genera un JWT con el id, el email y el rol del usuario.
@@ -33,7 +34,9 @@ public class JwtUtil {
                 .claim("rol", rol)                                     // su rol dentro del token
                 .issuedAt(new Date())                                  // cuando se genero
                 .expiration(new Date(System.currentTimeMillis() + expiration)) // cuando expira
-                .signWith(getKey())                                    // firma con nuestra clave secreta
+                // HS256 fijo: el gateway verifica con HS256. Sin indicarlo, jjwt elige
+                // el algoritmo segun el largo de la clave (57 bytes -> HS384) y el gateway rechaza el token
+                .signWith(getKey(), Jwts.SIG.HS256)                    // firma con nuestra clave secreta
                 .compact();
     }
 

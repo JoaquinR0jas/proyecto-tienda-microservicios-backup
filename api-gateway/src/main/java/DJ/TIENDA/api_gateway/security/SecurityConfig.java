@@ -48,23 +48,38 @@ public class SecurityConfig {
                 // Login, refresh y validacion son publicos
                 .pathMatchers("/api/v1/auth/**").permitAll()
                 .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                // Documentacion de cada microservicio (la descarga Swagger sin token).
+                // Solo describe los endpoints; los endpoints siguen protegidos.
+                .pathMatchers(HttpMethod.GET, "/api/v1/*/v3/api-docs", "/api/v1/*/v3/api-docs/**").permitAll()
+
+                // Los mensajes de contacto traen nombres y correos: leerlos o borrarlos
+                // es solo del ADMIN. Va antes del GET publico de contenido.
+                .pathMatchers(HttpMethod.POST, "/api/v1/contenido/mensajes").permitAll()
+                .pathMatchers("/api/v1/contenido/mensajes/**").hasRole("ADMIN")
 
                 // La tienda se puede ver sin iniciar sesion
                 .pathMatchers(HttpMethod.GET, "/api/v1/catalogo/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/v1/contenido/**").permitAll()
-                .pathMatchers(HttpMethod.POST, "/api/v1/contenido/mensajes").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/v1/usuarios/regiones/**",
                         "/api/v1/usuarios/comunas/**").permitAll()
 
                 // El registro de clientes es publico (lo usa la pagina de registro)
                 .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
 
-                // Los usuarios solo los administra el ADMIN
+                // Cualquier usuario con sesion puede pedir SU perfil (el checkout lo usa
+                // para rellenar el formulario). ms-usuarios revisa que el id sea el suyo.
+                // {id:\d+} solo acepta numeros, asi /auth y /buscar no entran aca.
+                .pathMatchers(HttpMethod.GET, "/api/v1/usuarios/{id:\\d+}").authenticated()
+
+                // El resto de usuarios solo lo administra el ADMIN
                 .pathMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
 
                 // Un cliente ve sus propias compras; admin y vendedor ven todas
                 .pathMatchers(HttpMethod.GET, "/api/v1/pedidos/usuario/**")
                         .hasAnyRole("ADMIN", "CLIENTE")
+                // Detalle de un pedido: el cliente solo el suyo (lo revisa ms-pedidos)
+                .pathMatchers(HttpMethod.GET, "/api/v1/pedidos/{id:\\d+}")
+                        .hasAnyRole("ADMIN", "VENDEDOR", "CLIENTE")
                 .pathMatchers(HttpMethod.GET, "/api/v1/pedidos/**")
                         .hasAnyRole("ADMIN", "VENDEDOR")
                 .pathMatchers(HttpMethod.POST, "/api/v1/pedidos/**")

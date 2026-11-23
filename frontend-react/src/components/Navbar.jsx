@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
-import { Navbar as NavbarBootstrap, Nav, Container, Badge } from 'react-bootstrap'
+import { Navbar as NavbarBootstrap, Nav, NavDropdown, Container, Badge } from 'react-bootstrap'
 import { getCarrito, getSesion, cerrarSesion } from '../datos.js'
 
 export default function Navbar() {
@@ -83,10 +83,9 @@ export default function Navbar() {
           <NavbarBootstrap.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
             <span className="brand-text">FRESH FITS</span>
           </NavbarBootstrap.Brand>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <NavbarBootstrap.Collapse className="collapse navbar-collapse" id="navMenu">
+          {/* react-bootstrap abre y cierra el menu en celular (no usa el JS de Bootstrap) */}
+          <NavbarBootstrap.Toggle aria-controls="navMenu" />
+          <NavbarBootstrap.Collapse id="navMenu">
             <ul className="navbar-nav mx-auto mb-2 mb-lg-0" id="navMenuPrincipal" ref={menuRef} onMouseLeave={() => moverLinea(null)}>
               <span className="nav-indicator" style={{ left: linea.left, width: linea.width }}></span>
               {enlace("/", "Inicio", ruta === "/")}
@@ -95,7 +94,6 @@ export default function Navbar() {
               {enlace("/blog", "Blog", ruta.startsWith("/blog"))}
               {enlace("/nosotros", "Nosotros", ruta === "/nosotros")}
               {enlace("/contacto", "Contacto", ruta === "/contacto")}
-              {sesion && sesion.rolId === 3 && enlace("/mis-compras", "Mis compras", ruta.startsWith("/mis-compras"))}
               {esAdmin && enlace("/admin", <><i className="bi bi-speedometer2"></i> Administracion</>, ruta.startsWith("/admin"))}
             </ul>
             <form className="d-flex my-2 my-lg-0 me-lg-3" role="search" onSubmit={buscar}>
@@ -119,17 +117,17 @@ export default function Navbar() {
                   </div>
                 </Nav.Item>
               ) : (
-                <Nav.Item className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i className="bi bi-person-circle fs-5"></i> {sesion.nombre}
-                  </a>
-                  <ul className="dropdown-menu dropdown-menu-end">
-                    {sesion.rolId === 3 && (
-                      <li><Link className="dropdown-item" to="/mis-compras"><i className="bi bi-bag-check"></i> Mis compras</Link></li>
-                    )}
-                    <li><a className="dropdown-item" href="#" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</a></li>
-                  </ul>
-                </Nav.Item>
+                // NavDropdown de react-bootstrap: abre el menu del usuario sin el JS de Bootstrap
+                <NavDropdown
+                  align="end"
+                  id="menuUsuario"
+                  title={<><i className="bi bi-person-circle fs-5"></i> {sesion.nombre}</>}
+                >
+                  {sesion.rolId === 3 && (
+                    <NavDropdown.Item as={Link} to="/mis-compras"><i className="bi bi-bag-check"></i> Mis compras</NavDropdown.Item>
+                  )}
+                  <NavDropdown.Item href="#" onClick={salir}><i className="bi bi-box-arrow-right"></i> Cerrar sesion</NavDropdown.Item>
+                </NavDropdown>
               )}
             </Nav>
           </NavbarBootstrap.Collapse>
